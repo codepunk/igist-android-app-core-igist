@@ -58,20 +58,22 @@ dependencies {
     implementation "android.arch.navigation:navigation-ui-ktx:${rootProject.versions.navigation}"
     implementation "androidx.appcompat:appcompat:${rootProject.versions.androidx_appcompat}"
     implementation "androidx.constraintlayout:constraintlayout:${rootProject.versions.androidx_constraint}"
-    implementation "com.google.dagger:dagger:${rootProject.versions.dagger}"
-    implementation "com.google.dagger:dagger-android:${rootProject.versions.dagger}"
-    implementation "com.google.dagger:dagger-android-support:${rootProject.versions.dagger}"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.versions.kotlin}"
-    implementation "io.fabric.tools:gradle:${rootProject.versions.fabric}"
     implementation ("com.crashlytics.sdk.android:crashlytics:${rootProject.versions.crashlytics}") {
         transitive = true
     }
+    implementation "com.google.dagger:dagger:${rootProject.versions.dagger}"
+    implementation "com.google.dagger:dagger-android:${rootProject.versions.dagger}"
+    implementation "com.google.dagger:dagger-android-support:${rootProject.versions.dagger}"
+    implementation "io.fabric.tools:gradle:${rootProject.versions.fabric}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.versions.kotlin}"
+    implementation "com.squareup.retrofit2:retrofit:${rootProject.versions.retrofit}"
+    implementation "com.squareup.retrofit2:converter-moshi:${rootProject.versions.retrofit}"
 
     testImplementation "junit:junit:${rootProject.versions.junit}"
 
+    kapt "android.arch.lifecycle:compiler:${rootProject.versions.lifecycle}"
     kapt "com.google.dagger:dagger-android-processor:${rootProject.versions.dagger}"
     kapt "com.google.dagger:dagger-compiler:${rootProject.versions.dagger}"
-    kapt "android.arch.lifecycle:compiler:${rootProject.versions.lifecycle}"
 
     androidTestImplementation "android.arch.navigation:navigation-testing-ktx:${rootProject.versions.navigation_testing}"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:${rootProject.versions.test_espresso_core}"
