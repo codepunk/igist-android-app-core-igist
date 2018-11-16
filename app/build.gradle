@@ -1,0 +1,79 @@
+/*
+ * Copyright (c) 2018 IGIST.io. All rights reserved.
+ * Author(s): Scott Slater
+ */
+
+apply plugin: "com.android.application"
+
+apply plugin: "androidx.navigation.safeargs"
+apply plugin: "io.fabric"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
+apply plugin: "kotlin-kapt"
+apply plugin: 'org.jetbrains.dokka-android'
+
+android {
+    compileSdkVersion rootProject.build_versions.target_sdk
+    buildToolsVersion rootProject.build_versions.build_tools
+
+    defaultConfig {
+        applicationId "io.igist.core"
+        minSdkVersion rootProject.build_versions.min_sdk
+        targetSdkVersion rootProject.build_versions.target_sdk
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    dokka {
+        outputFormat = 'html'
+        outputDirectory = "${rootProject.buildDir}/javadoc"
+        includeNonPublic = true
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "android.arch.lifecycle:extensions:${rootProject.versions.lifecycle}"
+    implementation "android.arch.lifecycle:common-java8:${rootProject.versions.lifecycle}"
+    implementation "android.arch.lifecycle:runtime:${rootProject.versions.lifecycle}"
+    implementation "android.arch.navigation:navigation-fragment-ktx:${rootProject.versions.navigation}"
+    implementation "android.arch.navigation:navigation-ui-ktx:${rootProject.versions.navigation}"
+    implementation "androidx.appcompat:appcompat:${rootProject.versions.androidx_appcompat}"
+    implementation "androidx.constraintlayout:constraintlayout:${rootProject.versions.androidx_constraint}"
+    implementation "com.google.dagger:dagger:${rootProject.versions.dagger}"
+    implementation "com.google.dagger:dagger-android:${rootProject.versions.dagger}"
+    implementation "com.google.dagger:dagger-android-support:${rootProject.versions.dagger}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.versions.kotlin}"
+    implementation "io.fabric.tools:gradle:${rootProject.versions.fabric}"
+    implementation ("com.crashlytics.sdk.android:crashlytics:${rootProject.versions.crashlytics}") {
+        transitive = true
+    }
+
+    testImplementation "junit:junit:${rootProject.versions.junit}"
+
+    kapt "com.google.dagger:dagger-android-processor:${rootProject.versions.dagger}"
+    kapt "com.google.dagger:dagger-compiler:${rootProject.versions.dagger}"
+    kapt "android.arch.lifecycle:compiler:${rootProject.versions.lifecycle}"
+
+    androidTestImplementation "android.arch.navigation:navigation-testing-ktx:${rootProject.versions.navigation_testing}"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:${rootProject.versions.test_espresso_core}"
+    androidTestImplementation "com.android.support.test:runner:${rootProject.versions.test_runner}"
+}

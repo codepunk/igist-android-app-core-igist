@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018 IGIST.io. All rights reserved.
+  -->
+
+<resources>
+
+    <style name="IgistTextView" parent="android:Widget.TextView">
+        <item name="android:shadowColor">@color/colorAccentPink</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">12</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/igist_text_size</item>
+        <item name="fontFamily">@font/electro</item>
+    </style>
+
+    <style name="IgistTextViewSm" parent="IgistTextView">
+        <item name="android:textSize">@dimen/igist_text_size_s</item>
+    </style>
+
+</resources>

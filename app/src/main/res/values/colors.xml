@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018 IGIST.io. All rights reserved.
+  -->
+
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#00FFD8</color>
+
+    <color name="colorBackgroundLight">#2F324C</color>
+    <color name="colorBackgroundDark">#0D0F1B</color>
+
+    <color name="colorAccentPink">#FF00F2</color>
+</resources>

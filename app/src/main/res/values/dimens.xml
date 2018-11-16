@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018 IGIST.io. All rights reserved.
+  -->
+
+<resources>
+    <dimen name="size_small">4dp</dimen>
+    <dimen name="size_standard">8dp</dimen>
+    <dimen name="size_medium">12dp</dimen>
+    <dimen name="size_large">16dp</dimen>
+    <dimen name="size_xlarge">24dp</dimen>
+    <dimen name="size_xxlarge">48dp</dimen>
+
+    <dimen name="igist_text_size">28dp</dimen>
+    <dimen name="igist_text_size_s">18dp</dimen>
+</resources>
