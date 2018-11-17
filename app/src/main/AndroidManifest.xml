@@ -12,20 +12,33 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="7c0efd9c24d1dcde51465d7fb6995a28ca97c7a0" />
+            android:value="7c0efd9c24d1dcde51465d7fb6995a28ca97c7a0"
+            tools:ignore="SpellCheckInspection"/>
 
         <activity
-            android:name=".ui.launch.LaunchActivity"
+            android:name=".ui.loading.SelectBookActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.loading.LoadingActivity"
+            android:theme="@style/AppTheme">
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            -->
         </activity>
 
     </application>

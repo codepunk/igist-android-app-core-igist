@@ -4,6 +4,8 @@
 
     <string name="app_coming_soon">Coming soon</string>
 
+    <string name="fragment_select_book_title">Select book</string>
+
     <string name="fragment_loading_title">Loading</string>
 
 </resources>

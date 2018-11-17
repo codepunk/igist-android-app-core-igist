@@ -7,13 +7,14 @@ package io.igist.core.session
 
 import android.accounts.AccountManager
 import android.content.SharedPreferences
+import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Class that manages any currently-logged in user session.
+ * Class that manages any currently-logged in user userSession.
  */
 @Singleton
-class SessionManager(
+class UserSessionManager @Inject constructor(
 
     /**
      * The account manager.
@@ -32,9 +33,9 @@ class SessionManager(
     // region Properties
 
     /**
-     * A [Session] instance for storing the current session.
+     * A [UserSession] instance for storing the current user session.
      */
-    var session: Session? = null
+    var userSession: UserSession? = null
         private set
 
     // endregion Properties

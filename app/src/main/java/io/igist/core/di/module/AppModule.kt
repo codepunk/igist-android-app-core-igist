@@ -5,6 +5,7 @@
 
 package io.igist.core.di.module
 
+import android.accounts.AccountManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
@@ -40,6 +41,15 @@ object AppModule {
     @Singleton
     fun providesSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context)
+
+    /**
+     * Provides the Android [AccountManager].
+     */
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun providesAccountManager(@ApplicationContext context: Context): AccountManager =
+        AccountManager.get(context)
 
     // endregion Methods
 

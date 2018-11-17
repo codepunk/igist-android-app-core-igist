@@ -5,27 +5,27 @@
 
 package io.igist.core.di.module
 
-import io.igist.core.di.scope.FragmentScope
-import io.igist.core.ui.loading.LoadingActivity
-import io.igist.core.ui.loading.LoadingFragment
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
+import io.igist.core.di.scope.FragmentScope
+import io.igist.core.ui.loading.SelectBookActivity
+import io.igist.core.ui.loading.SelectBookFragment
 
 /**
- * A [Module] for injecting dependencies into [LoadingActivity].
+ * A [Module] for injecting dependencies into [SelectBookActivity].
  */
 @Module
-abstract class LaunchActivityModule {
+abstract class SelectBookActivityModule {
 
     // region Methods
 
     /**
-     * Contributes an AndroidInjector to [LoadingFragment].
+     * Contributes an AndroidInjector to [SelectBookFragment].
      */
     @Suppress("UNUSED")
     @FragmentScope
-    @ContributesAndroidInjector(modules = [LoadingFragmentModule::class])
-    abstract fun contributeLoadingFragmentInjector(): LoadingFragment
+    @ContributesAndroidInjector(modules = [SelectBookFragmentModule::class])
+    abstract fun contributeSelectBookFragmentInjector(): SelectBookFragment
 
     // endregion Methods
 

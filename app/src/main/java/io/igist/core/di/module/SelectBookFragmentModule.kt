@@ -12,7 +12,7 @@ import dagger.Module
  * A [Module] for injecting dependencies into [LoadingFragment].
  */
 @Module
-object LoadingFragmentModule {
+object SelectBookFragmentModule {
 
     // region Methods
 

@@ -8,7 +8,7 @@ package io.igist.core.di.module
 import dagger.Module
 
 /**
- * A [Module] for injecting user session-level dependencies.
+ * A [Module] for injecting user userSession-level dependencies.
  */
 @Module
 class UserModule {

@@ -12,15 +12,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.launch.LaunchActivity">
+        tools:context=".ui.loading.LoadingActivity">
 
         <fragment
-            android:id="@+id/launch_nav_fragment"
+            android:id="@+id/loading_nav_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:defaultNavHost="true"
-            app:navGraph="@navigation/navigation_launch"/>
+            app:navGraph="@navigation/navigation_loading"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

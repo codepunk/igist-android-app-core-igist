@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.ui.launch
+package io.igist.core.ui.loading
 
 import android.app.Activity
 import android.os.Bundle
@@ -16,14 +16,16 @@ import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
 import io.fabric.sdk.android.Fabric
 import io.igist.core.R
-import io.igist.core.databinding.ActivityLaunchBinding
+import io.igist.core.databinding.ActivitySelectBookBinding
+import io.igist.core.session.BookSessionManager
+import io.igist.core.session.UserSessionManager
 import io.igist.core.ui.base.StickyImmersiveActivity
 import javax.inject.Inject
 
 /**
- * An [Activity] that manages launch- and onboarding-related tasks and fragments.
+ * An [Activity] for displaying and selecting from available books.
  */
-class LaunchActivity :
+class SelectBookActivity :
     StickyImmersiveActivity(),
     HasSupportFragmentInjector {
 
@@ -35,7 +37,22 @@ class LaunchActivity :
     @Inject
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
-    private lateinit var binding: ActivityLaunchBinding
+    /**
+     * Singleton that manages the current book session (i.e. which book is being interacted with).
+     */
+    @Inject
+    lateinit var bookSessionManager: BookSessionManager
+
+    /**
+     * Singleton that manages the user session.
+     */
+    @Inject
+    lateinit var userSessionManager: UserSessionManager
+
+    /**
+     * The binding for this activity.
+     */
+    private lateinit var binding: ActivitySelectBookBinding
 
     // endregion Properties
 
@@ -48,7 +65,7 @@ class LaunchActivity :
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         Fabric.with(this, Crashlytics())
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_launch)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_select_book)
     }
 
     // endregion Lifecycle methods

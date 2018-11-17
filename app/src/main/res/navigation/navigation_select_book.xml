@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018 IGIST.io. All rights reserved.
+  ~ Author(s): Scott Slater
+  -->
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/nav_graph"
+            app:startDestination="@id/select_book_fragment">
+
+    <fragment
+        android:id="@+id/select_book_fragment"
+        android:name="io.igist.core.ui.loading.SelectBookFragment"
+        android:label="@string/fragment_select_book_title"
+        tools:layout="@layout/fragment_select_book"/>
+
+</navigation>

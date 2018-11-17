@@ -31,7 +31,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:text="@string/fragment_loading_title"
+            android:text="@string/fragment_select_book_title"
             style="@style/IgistTextView"/>
 
         <androidx.appcompat.widget.AppCompatTextView

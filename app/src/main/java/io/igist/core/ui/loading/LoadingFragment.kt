@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.ui.launch
+package io.igist.core.ui.loading
 
 import android.content.Context
 import android.os.Bundle

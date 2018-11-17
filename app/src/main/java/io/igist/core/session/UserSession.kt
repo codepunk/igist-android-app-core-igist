@@ -19,9 +19,9 @@ private val PENDING_USER = Date(0L).let {
 }
 
 /**
- * A class with information about the current user session.
+ * A class with information about the current user userSession.
  */
-class Session(
+class UserSession(
 
     /**
      * The name of the authenticated account.
@@ -66,14 +66,14 @@ class Session(
      * Copy constructor that optionally replaces the supplied [user].
      */
     @Suppress("UNUSED")
-    constructor(session: Session, user: User? = null) : this(
-        session.accountName,
-        session.accountType,
-        session.authToken,
-        session.refreshToken,
-        session.userComponent,
+    constructor(userSession: UserSession, user: User? = null) : this(
+        userSession.accountName,
+        userSession.accountType,
+        userSession.authToken,
+        userSession.refreshToken,
+        userSession.userComponent,
         when (user) {
-            null -> session.user
+            null -> userSession.user
             else -> user
         }
     )
