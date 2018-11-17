@@ -12,6 +12,8 @@ apply plugin: "kotlin-android-extensions"
 apply plugin: "kotlin-kapt"
 apply plugin: 'org.jetbrains.dokka-android'
 
+import com.android.build.gradle.api.BaseVariant
+
 android {
     compileSdkVersion rootProject.build_versions.target_sdk
     buildToolsVersion rootProject.build_versions.build_tools
@@ -21,12 +23,17 @@ android {
         minSdkVersion rootProject.build_versions.min_sdk
         targetSdkVersion rootProject.build_versions.target_sdk
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-DEBUG"
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -47,6 +54,13 @@ android {
         outputDirectory = "${rootProject.buildDir}/javadoc"
         includeNonPublic = true
     }
+
+    applicationVariants.all { variant ->
+        makePreferenceKeys(
+                variant,
+                "BOOK_ID"
+        )
+    }
 }
 
 dependencies {
@@ -58,6 +72,7 @@ dependencies {
     implementation "android.arch.navigation:navigation-ui-ktx:${rootProject.versions.navigation}"
     implementation "androidx.appcompat:appcompat:${rootProject.versions.androidx_appcompat}"
     implementation "androidx.constraintlayout:constraintlayout:${rootProject.versions.androidx_constraint}"
+    implementation "androidx.preference:preference:${rootProject.versions.androidx_legacy}"
     implementation "com.android.support:multidex:${rootProject.versions.multidex}"
     implementation ("com.crashlytics.sdk.android:crashlytics:${rootProject.versions.crashlytics}") {
         transitive = true
@@ -80,3 +95,19 @@ dependencies {
     androidTestImplementation "com.android.support.test.espresso:espresso-core:${rootProject.versions.test_espresso_core}"
     androidTestImplementation "com.android.support.test:runner:${rootProject.versions.test_runner}"
 }
+
+// region Methods
+
+static def makePreferenceKeys(BaseVariant variant, String... keys) {
+    keys.each { key ->
+        def full_key = "PREF_KEY_$key"
+        def buildConfigValue = "\"${variant.applicationId}.$full_key\""
+        variant.buildConfigField("String", full_key, buildConfigValue)
+
+        def resourceName = full_key.toLowerCase(Locale.US)
+        def resourceValue = "${variant.applicationId}.$full_key"
+        variant.resValue("string", resourceName, resourceValue)
+    }
+}
+
+// endregion Methods

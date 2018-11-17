@@ -7,6 +7,8 @@ package io.igist.core.ui.loading
 
 import android.app.Activity
 import android.os.Bundle
+import android.preference.PreferenceManager
+import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.crashlytics.android.Crashlytics

@@ -8,6 +8,8 @@ package io.igist.core
 import android.app.Activity
 import android.app.Application
 import android.app.Service
+import androidx.preference.PreferenceManager
+import android.util.Log
 import androidx.multidex.MultiDexApplication
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
@@ -52,6 +54,13 @@ class IgistApp :
         DaggerAppComponent.builder()
             .create(this)
             .inject(this)
+
+        // NOTE: This app might one day be able to present several books. If/when that day comes,
+        // SelectBookActivity can be used to choose a book if none are saved to shared preferences.
+        // In the meantime, force book ID "1" to be the selected book. With this value set,
+        // SelectBookActivity will start LoadingActivity immediately and will finish itself so it
+        // is removed from the back stack.
+        PreferenceManager.setDefaultValues(this, R.xml.preferences_defaults, false)
     }
 
     // endregion Lifecycle methods
