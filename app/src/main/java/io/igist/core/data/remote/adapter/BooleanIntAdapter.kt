@@ -13,7 +13,6 @@ import javax.inject.Inject
 /**
  * A JSON adapter that converts between integers and booleans.
  */
-@Suppress("UNUSED")
 class BooleanIntAdapter @Inject constructor() {
 
     // region Methods
@@ -21,6 +20,7 @@ class BooleanIntAdapter @Inject constructor() {
     /**
      * Converts a boolean to a JSON integer.
      */
+    @Suppress("UNUSED")
     @ToJson
     fun toJson(@BooleanInt value: Boolean): Int {
         return when (value) {
@@ -32,6 +32,7 @@ class BooleanIntAdapter @Inject constructor() {
     /**
      * Converts a JSON integer to a boolean.
      */
+    @Suppress("UNUSED")
     @FromJson
     @BooleanInt
     fun fromJson(value: Int): Boolean {

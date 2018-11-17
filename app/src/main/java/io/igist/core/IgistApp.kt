@@ -8,6 +8,7 @@ package io.igist.core
 import android.app.Activity
 import android.app.Application
 import android.app.Service
+import androidx.multidex.MultiDexApplication
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
@@ -15,8 +16,11 @@ import dagger.android.HasServiceInjector
 import io.igist.core.di.component.DaggerAppComponent
 import javax.inject.Inject
 
+/**
+ * The Igist [Application].
+ */
 class IgistApp :
-    Application(),
+    MultiDexApplication(),
     HasActivityInjector,
     HasServiceInjector {
 

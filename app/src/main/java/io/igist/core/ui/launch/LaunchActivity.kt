@@ -5,8 +5,8 @@
 
 package io.igist.core.ui.launch
 
+import android.app.Activity
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.crashlytics.android.Crashlytics
@@ -17,10 +17,14 @@ import dagger.android.support.HasSupportFragmentInjector
 import io.fabric.sdk.android.Fabric
 import io.igist.core.R
 import io.igist.core.databinding.ActivityLaunchBinding
+import io.igist.core.ui.base.StickyImmersiveActivity
 import javax.inject.Inject
 
+/**
+ * An [Activity] that manages launch- and onboarding-related tasks and fragments.
+ */
 class LaunchActivity :
-    AppCompatActivity(),
+    StickyImmersiveActivity(),
     HasSupportFragmentInjector {
 
     // region Properties
@@ -37,6 +41,9 @@ class LaunchActivity :
 
     // region Lifecycle methods
 
+    /**
+     * Sets up [Fabric], performs dependency injection and sets up the content view.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)

@@ -16,15 +16,33 @@ import dagger.android.support.AndroidSupportInjection
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
 
+/**
+ * A [Fragment] that loads application data.
+ */
 class LoadingFragment : Fragment() {
 
+    // region Properties
+
+    /**
+     * Binding for this fragment.
+     */
     private lateinit var binding: FragmentLoadingBinding
 
+    // endregion Properties
+
+    // region Lifecycle methods
+
+    /**
+     * Performs dependency injection.
+     */
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
     }
 
+    /**
+     * Inflates the view.
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,4 +56,7 @@ class LoadingFragment : Fragment() {
         )
         return binding.root
     }
+
+    // endregion Lifecycle methods
+
 }
