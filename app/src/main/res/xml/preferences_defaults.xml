@@ -9,7 +9,7 @@
 
     <!--suppress AndroidDomInspection -->
     <EditTextPreference
-        android:key="@string/pref_key_book_id"
+        android:key="@string/pref_key_current_book_id"
         android:defaultValue="@integer/default_book_id"/>
 
 </PreferenceScreen>

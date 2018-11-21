@@ -8,9 +8,8 @@ package io.igist.core
 import android.app.Activity
 import android.app.Application
 import android.app.Service
-import androidx.preference.PreferenceManager
-import android.util.Log
 import androidx.multidex.MultiDexApplication
+import androidx.preference.PreferenceManager
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
@@ -48,7 +47,6 @@ class IgistApp :
      * Performs dependency injection for the application and establishes the remote environment
      * for API calls.
      */
-    @Suppress("UNRESOLVED")
     override fun onCreate() {
         super.onCreate()
         DaggerAppComponent.builder()
