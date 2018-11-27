@@ -15,21 +15,35 @@ import androidx.fragment.app.Fragment
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
-import io.igist.core.ui.media.MediaFragment
+import io.igist.core.ui.loading.media.MediaHelper
+import javax.inject.Inject
 
 /**
  * A [Fragment] that loads application data.
  */
-class LoadingFragment : Fragment() {
+class LoadingFragment :
+    Fragment() {
 
     // region Properties
+
+    /**
+     * A factory for creating the media helper for this fragment.
+     */
+    @Inject
+    lateinit var mediaHelperFactory: MediaHelper.Factory
 
     /**
      * Binding for this fragment.
      */
     private lateinit var binding: FragmentLoadingBinding
 
-    private lateinit var mediaFragment: MediaFragment
+    /**
+     * The media helper for this fragment, which supplies API-appropriate media player
+     * functionality.
+     */
+    private val mediaHelper by lazy {
+        mediaHelperFactory.newInstance(requireContext(), requireFragmentManager())
+    }
 
     // endregion Properties
 
@@ -41,20 +55,7 @@ class LoadingFragment : Fragment() {
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
-    }
-
-    /**
-     * Creates (or finds) the media fragment.
-     */
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        mediaFragment = requireFragmentManager().let { fm ->
-            fm.findFragmentByTag(MEDIA_FRAGMENT_TAG) as? MediaFragment ?: MediaFragment().apply {
-                fm.beginTransaction()
-                    .add(this, MEDIA_FRAGMENT_TAG)
-                    .commit()
-            }
-        }
+        lifecycle.addObserver(mediaHelper)
     }
 
     /**
@@ -74,16 +75,19 @@ class LoadingFragment : Fragment() {
         return binding.root
     }
 
-    // endregion Lifecycle methods
-
-    // region Companion object
-
-    companion object {
-
-        val MEDIA_FRAGMENT_TAG = "${LoadingFragment::class.java.name}.MEDIA_FRAGMENT"
-
+    /**
+     * Initializes the view.
+     */
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.surfaceView.holder.addCallback(mediaHelper)
     }
 
-    // endregion Companion object
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.surfaceView.holder.removeCallback(mediaHelper)
+    }
+
+    // endregion Lifecycle methods
 
 }

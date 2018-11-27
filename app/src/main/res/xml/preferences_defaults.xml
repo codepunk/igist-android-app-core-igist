@@ -8,8 +8,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--suppress AndroidDomInspection -->
-    <EditTextPreference
+    <!--
+    <ListPreference
         android:key="@string/pref_key_current_book_id"
         android:defaultValue="@integer/default_book_id"/>
+    -->
 
 </PreferenceScreen>

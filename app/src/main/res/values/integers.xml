@@ -4,6 +4,4 @@
   ~ Author(s): Scott Slater
   -->
 
-<resources>
-    <integer name="default_book_id">1</integer>
-</resources>
+<resources/>

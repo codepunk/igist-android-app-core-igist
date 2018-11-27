@@ -5,7 +5,9 @@
 
 package io.igist.core.ui.loading
 
+import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +15,11 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import dagger.android.support.AndroidSupportInjection
+import io.igist.core.BuildConfig.DEFAULT_BOOK_ID
+import io.igist.core.BuildConfig.PREF_KEY_CURRENT_BOOK_ID
 import io.igist.core.R
 import io.igist.core.databinding.FragmentSelectBookBinding
+import javax.inject.Inject
 
 /**
  * A [Fragment] for displaying and selecting available books.
@@ -22,6 +27,12 @@ import io.igist.core.databinding.FragmentSelectBookBinding
 class SelectBookFragment : Fragment() {
 
     // region Properties
+
+    /**
+     * The app [SharedPreferences].
+     */
+    @Inject
+    lateinit var sharedPreferences: SharedPreferences
 
     /**
      * Binding for this fragment.
@@ -57,6 +68,37 @@ class SelectBookFragment : Fragment() {
         return binding.root
     }
 
+
+    /**
+     * Initializes the view.
+     */
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        /*
+         * A temporary way to select a book if none is selected.
+         */
+        binding.igistBtn.setOnClickListener { onBookSelected(DEFAULT_BOOK_ID.toLong()) }
+    }
+
     // endregion Lifecycle methods
+
+    // region Methods
+
+    /**
+     * Processes a book selection.
+     */
+    fun onBookSelected(bookId: Long) {
+        sharedPreferences.edit()
+            .putLong(PREF_KEY_CURRENT_BOOK_ID, bookId)
+            .apply()
+
+        activity?.apply {
+            setResult(Activity.RESULT_OK)
+            finish()
+        }
+    }
+
+    // endregion Methods
 
 }

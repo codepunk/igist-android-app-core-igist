@@ -26,25 +26,24 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/title_txt"
+            style="@style/IgistTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/fragment_select_book_title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:text="@string/fragment_select_book_title"
-            style="@style/IgistTextView"/>
+            app:layout_constraintTop_toTopOf="parent"/>
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/subtitle_txt"
+        <Button
+            android:id="@+id/igist_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/size_standard"
+            android:text="@string/app_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title_txt"
-            android:text="@string/app_coming_soon"
-            style="@style/IgistTextViewSm"/>
+            app:layout_constraintTop_toBottomOf="@id/title_txt"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
