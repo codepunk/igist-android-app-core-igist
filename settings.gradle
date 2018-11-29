@@ -3,4 +3,6 @@
  * Author(s): Scott Slater
  */
 
-include ':app'
+include ':app', ':doofenschmirtz', ':punkubator'
+project(':doofenschmirtz').projectDir = new File('libraries/codepunk/doofenschmirtz/lib')
+project(':punkubator').projectDir = new File('libraries/codepunk/punkubator/lib')

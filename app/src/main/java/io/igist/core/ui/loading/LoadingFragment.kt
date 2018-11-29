@@ -9,16 +9,32 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.SurfaceHolder
+import android.view.View
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import com.codepunk.punkubator.ui.media.MediaFragment
 import com.igist.core.data.task.DataUpdate
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.R
 import io.igist.core.data.model.Api
 import io.igist.core.databinding.FragmentLoadingBinding
 import javax.inject.Inject
+
+// region Constants
+
+private const val MEDIA_FRAGMENT_MAX_POOL_SIZE = 2
+
+private const val MEDIA_FRAGMENT_TAG = "MEDIA_FRAGMENT"
+
+private const val SPLASHY_PLAYER = "SPLASHY_PLAYER"
+
+// endregion Constants
 
 /**
  * A [Fragment] that loads application data.
@@ -73,7 +89,7 @@ class LoadingFragment :
         super.onCreate(savedInstanceState)
         mediaFragment = requireFragmentManager().let { fm ->
             fm.findFragmentByTag(MEDIA_FRAGMENT_TAG) as? MediaFragment
-                ?: MediaFragment().apply {
+                ?: MediaFragment.newInstance(MEDIA_FRAGMENT_MAX_POOL_SIZE).apply {
                     fm.beginTransaction()
                         .add(this, MEDIA_FRAGMENT_TAG)
                         .commit()
@@ -111,11 +127,16 @@ class LoadingFragment :
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         binding.surfaceView.holder.addCallback(this)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // If we're changing configurations and the view is being destroyed, surfaceDestroyed
+        // won't get called if we remove the callback here; call it manually instead.
+        surfaceDestroyed(binding.surfaceView.holder)
         binding.surfaceView.holder.removeCallback(this)
     }
 
@@ -129,15 +150,15 @@ class LoadingFragment :
     // region Implemented methods
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        Log.d(this::class.java.simpleName, "surfaceCreated: holder=$holder")
+        val mediaPlayer: MediaPlayer = mediaFragment.mediaPlayers.obtain(
+            SPLASHY_PLAYER
+        ) { MediaPlayer.create(requireContext(), R.raw.splashy) }
 
-        mediaFragment.mediaPlayer?.setSurface(holder.surface) ?: run {
-            MediaPlayer.create(requireContext(), R.raw.splashy).apply {
-                mediaFragment.mediaPlayer = this
-                setSurface(holder.surface)
-                isLooping = true
-                start()
-            }
+        mediaPlayer.setSurface(holder.surface)
+
+        mediaPlayer.setOnPreparedListener {
+            it.isLooping = true
+            it.start()
         }
     }
 
@@ -145,9 +166,7 @@ class LoadingFragment :
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        Log.d(this::class.java.simpleName, "surfaceDestroyed: holder=$holder")
-
-        // Do not destroy the media player because we want it to live through configuration changes
+        mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null)
     }
 
     // endregion Implemented methods
@@ -159,57 +178,5 @@ class LoadingFragment :
     }
 
     // endregion Methods
-
-    // region Companion object
-
-    companion object {
-
-        @JvmStatic
-        val MEDIA_FRAGMENT_TAG = "${LoadingFragment::class.java.name}.MEDIA_FRAGMENT"
-
-    }
-
-    // endregion Companion object
-
-    // region Nested/inner classes
-
-    class MediaFragment :
-        Fragment(),
-        LifecycleObserver {
-
-        // region Properties
-
-        var mediaPlayer: MediaPlayer? = null
-
-        // endregion Properties
-
-        // region Lifecycle methods
-
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            retainInstance = true
-        }
-
-        // endregion Lifecycle methods
-
-        // region Methods
-
-        @OnLifecycleEvent(Lifecycle.Event.ON_START)
-        fun observedOnStart() {
-            Log.d(LoadingFragment::class.java.simpleName, "observedOnStart")
-            mediaPlayer?.start()
-        }
-
-        @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-        fun observedOnStop() {
-            Log.d(LoadingFragment::class.java.simpleName, "observedOnStop")
-            mediaPlayer?.pause()
-        }
-
-        // endregion Methods
-
-    }
-
-    // endregion Nested/inner classes
 
 }

@@ -97,16 +97,19 @@ dependencies {
     implementation "com.google.dagger:dagger-android:${rootProject.versions.dagger}"
     implementation "com.google.dagger:dagger-android-support:${rootProject.versions.dagger}"
     implementation "io.fabric.tools:gradle:${rootProject.versions.fabric}"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.versions.kotlin}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${rootProject.versions.kotlin}"
     implementation "com.squareup.retrofit2:retrofit:${rootProject.versions.retrofit}"
     implementation "com.squareup.retrofit2:converter-moshi:${rootProject.versions.retrofit}"
 
-    testImplementation "junit:junit:${rootProject.versions.junit}"
+    implementation project(':doofenschmirtz')
+    implementation project(':punkubator')
 
     kapt "android.arch.lifecycle:compiler:${rootProject.versions.lifecycle}"
     kapt "android.arch.persistence.room:compiler:${rootProject.versions.room}"
     kapt "com.google.dagger:dagger-android-processor:${rootProject.versions.dagger}"
     kapt "com.google.dagger:dagger-compiler:${rootProject.versions.dagger}"
+
+    testImplementation "junit:junit:${rootProject.versions.junit}"
 
     androidTestImplementation "android.arch.navigation:navigation-testing-ktx:${rootProject.versions.navigation_testing}"
     androidTestImplementation "android.arch.persistence.room:testing:${rootProject.versions.room}"
@@ -135,6 +138,15 @@ static def makeStringConstantValues(BaseVariant variant, Pair<String, String>...
         variant.resValue("string", resourceName, pair.second)
     }
 }
+
+static def makeKeys(BaseVariant variant, String... keys) {
+    keys.each { key ->
+        def buildConfigName = "KEY_$key"
+        def buildConfigValue = "\"${variant.applicationId}.$key\""
+        variant.buildConfigField("String", buildConfigName, buildConfigValue)
+    }
+}
+
 
 static def makePreferenceKeys(BaseVariant variant, String... keys) {
     keys.each { key ->
