@@ -74,6 +74,7 @@ object ActivityCompat {
          * Implement a "sticky immersive" full screen mode.
          */
         STICKY_IMMERSIVE
+
     }
 
     /**

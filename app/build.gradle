@@ -61,6 +61,7 @@ android {
 
         makeIntConstantValues(
                 variant,
+                Pair.of("API_VERSION", 0),
                 Pair.of("DEFAULT_BOOK_ID", 1)
         )
 
@@ -82,13 +83,13 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:${rootProject.versions.lifecycle}"
     implementation "android.arch.lifecycle:common-java8:${rootProject.versions.lifecycle}"
     implementation "android.arch.lifecycle:runtime:${rootProject.versions.lifecycle}"
+    implementation "android.arch.persistence.room:runtime:${rootProject.versions.room}"
     implementation "android.arch.navigation:navigation-fragment-ktx:${rootProject.versions.navigation}"
     implementation "android.arch.navigation:navigation-ui-ktx:${rootProject.versions.navigation}"
     implementation "androidx.appcompat:appcompat:${rootProject.versions.androidx_appcompat}"
     implementation "androidx.constraintlayout:constraintlayout:${rootProject.versions.androidx_constraint}"
-    implementation "androidx.media2:media2:${versions.androidx_media2}"
     implementation "androidx.preference:preference:${rootProject.versions.androidx_legacy}"
-    implementation "com.android.support:multidex:${rootProject.versions.multidex}"
+    implementation "androidx.multidex:multidex:${rootProject.versions.multidex}"
     implementation ("com.crashlytics.sdk.android:crashlytics:${rootProject.versions.crashlytics}") {
         transitive = true
     }
@@ -103,10 +104,12 @@ dependencies {
     testImplementation "junit:junit:${rootProject.versions.junit}"
 
     kapt "android.arch.lifecycle:compiler:${rootProject.versions.lifecycle}"
+    kapt "android.arch.persistence.room:compiler:${rootProject.versions.room}"
     kapt "com.google.dagger:dagger-android-processor:${rootProject.versions.dagger}"
     kapt "com.google.dagger:dagger-compiler:${rootProject.versions.dagger}"
 
     androidTestImplementation "android.arch.navigation:navigation-testing-ktx:${rootProject.versions.navigation_testing}"
+    androidTestImplementation "android.arch.persistence.room:testing:${rootProject.versions.room}"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:${rootProject.versions.test_espresso_core}"
     androidTestImplementation "com.android.support.test:runner:${rootProject.versions.test_runner}"
 }

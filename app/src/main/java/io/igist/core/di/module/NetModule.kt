@@ -13,6 +13,8 @@ import io.igist.core.data.remote.adapter.BooleanIntAdapter
 import io.igist.core.data.remote.adapter.DateJsonAdapter
 import io.igist.core.data.remote.converter.MoshiEnumConverterFactory
 import io.igist.core.data.remote.interceptor.AuthorizationInterceptor
+import io.igist.core.data.remote.webservice.AppWebservice
+import io.igist.core.data.remote.webservice.AppWebserviceWrapper
 import io.igist.core.di.qualifier.ApplicationContext
 import okhttp3.Cache
 import okhttp3.OkHttpClient
@@ -88,10 +90,19 @@ class NetModule {
         moshiEnumConverterFactory: MoshiEnumConverterFactory
     ): Retrofit = Retrofit.Builder()
         .client(okHttpClient)
-        .baseUrl("https://io.igist.com")
+        .baseUrl("https://igist.io")
         .addConverterFactory(moshiConverterFactory)
         .addConverterFactory(moshiEnumConverterFactory)
         .build()
+
+    /**
+     * Provides an instance of [AppWebservice] for making authorization API calls.
+     */
+    @Provides
+    @Singleton
+    fun providesAuthWebservice(
+        retrofit: Retrofit
+    ): AppWebservice = AppWebserviceWrapper(retrofit.create(AppWebservice::class.java))
 
     // endregion Methods
 
