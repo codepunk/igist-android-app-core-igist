@@ -5,14 +5,14 @@
 
 package io.igist.core.ui.loading
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Matrix
+import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.SurfaceHolder
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -41,7 +41,7 @@ private const val SPLASHY_PLAYER = "SPLASHY_PLAYER"
  */
 class LoadingFragment :
     Fragment(),
-    SurfaceHolder.Callback {
+    TextureView.SurfaceTextureListener {
 
     // region Properties
 
@@ -69,6 +69,8 @@ class LoadingFragment :
      * The retained media fragment.
      */
     lateinit var mediaFragment: MediaFragment
+
+    var surface: Surface? = null
 
     // endregion Properties
 
@@ -127,17 +129,15 @@ class LoadingFragment :
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.surfaceView.holder.addCallback(this)
+        binding.textureView.surfaceTextureListener = this
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-
-        // If we're changing configurations and the view is being destroyed, surfaceDestroyed
-        // won't get called if we remove the callback here; call it manually instead.
-        surfaceDestroyed(binding.surfaceView.holder)
-        binding.surfaceView.holder.removeCallback(this)
+        // Post the below code, or else onSurfaceTextureDestroyed won't get called
+        binding.textureView.post {
+            binding.textureView.surfaceTextureListener = null
+        }
     }
 
     override fun onDestroy() {
@@ -149,24 +149,78 @@ class LoadingFragment :
 
     // region Implemented methods
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
+    @SuppressLint("Recycle")
+    override fun onSurfaceTextureAvailable(
+        texture: SurfaceTexture,
+        width: Int,
+        height: Int
+    ) {
+        surface = Surface(texture)
+
         val mediaPlayer: MediaPlayer = mediaFragment.mediaPlayers.obtain(
             SPLASHY_PLAYER
-        ) { MediaPlayer.create(requireContext(), R.raw.splashy) }
+        ) { MediaPlayer.create(requireContext(), R.raw.splashy).apply { isLooping = true } }
 
-        mediaPlayer.setSurface(holder.surface)
+        mediaPlayer.setSurface(surface)
 
-        mediaPlayer.setOnPreparedListener {
-            it.isLooping = true
-            it.start()
+        mediaPlayer.also { //setOnPreparedListener {
+
+            // TODO TEMP Adjust video
+            // One of them will be 1.0f
+            val vWidth = it.videoWidth
+            val vHeight = it.videoHeight
+            val tWidth = binding.textureView.width
+            val tHeight = binding.textureView.height
+            val xScale = tWidth.toFloat() / vWidth
+            val yScale = tHeight.toFloat() / vHeight
+            val scale = Math.max(xScale, yScale)
+
+            val sx = scale / xScale
+            val sy = scale / yScale
+            val matrix = Matrix()
+            matrix.setScale(sx, sy)
+
+            val tx = (tWidth * (1 - sx)) / 2.0f
+            val ty = (tHeight * (1 - sy)) / 2.0f
+            matrix.postTranslate(tx, ty)
+
+            binding.textureView.setTransform(matrix)
+
+
+            Log.d(
+                "LoadingFragment",
+                "onSurfaceTextureAvailable: video=($vWidth x $vHeight), textureView=($tWidth x $tHeight), xScale=$xScale, yScale=$yScale, scale=$scale"
+            )
+            // END TEMP
+
+            if (!it.isPlaying) {
+                it.start()
+            }
         }
+
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+    override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {
+        // No op
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
+    override fun onSurfaceTextureDestroyed(texture: SurfaceTexture): Boolean {
+        Log.d(
+            "LoadingFragment",
+            "onSurfaceTextureDestroyed"
+        )
         mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null)
+        surface?.release()
+        surface = null
+        return false
+    }
+
+    override fun onSurfaceTextureSizeChanged(
+        texture: SurfaceTexture,
+        width: Int,
+        height: Int
+    ) {
+
     }
 
     // endregion Implemented methods
