@@ -7,8 +7,8 @@ package io.igist.core.ui.loading
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Matrix
 import android.graphics.SurfaceTexture
+import android.view.TextureView
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
@@ -19,6 +19,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.codepunk.punkubator.ui.media.MediaFragment
+import com.codepunk.punkubator.widget.TextureViewPanner
 import com.igist.core.data.task.DataUpdate
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.R
@@ -28,10 +29,20 @@ import javax.inject.Inject
 
 // region Constants
 
+/**
+ * The maximum pool size for creating and storing [MediaPlayer] instances across configuration
+ * changes.
+ */
 private const val MEDIA_FRAGMENT_MAX_POOL_SIZE = 2
 
+/**
+ * A tag to use to identify the [MediaFragment].
+ */
 private const val MEDIA_FRAGMENT_TAG = "MEDIA_FRAGMENT"
 
+/**
+ * A tag used to identify the [MediaPlayer] for playing the "splashy" raw mp4 resource.
+ */
 private const val SPLASHY_PLAYER = "SPLASHY_PLAYER"
 
 // endregion Constants
@@ -61,16 +72,24 @@ class LoadingFragment :
      * The [LoadingViewModel] instance backing this fragment.
      */
     private val loadingViewModel: LoadingViewModel by lazy {
-        ViewModelProviders.of(requireActivity(), viewModelFactory)
-            .get(LoadingViewModel::class.java)
+        ViewModelProviders.of(requireActivity(), viewModelFactory).get(LoadingViewModel::class.java)
     }
 
     /**
      * The retained media fragment.
      */
-    lateinit var mediaFragment: MediaFragment
+    private lateinit var mediaFragment: MediaFragment
 
-    var surface: Surface? = null
+    /**
+     * The [Surface] on which media will be played.
+     */
+    private var surface: Surface? = null
+
+    /**
+     * A [TextureViewPanner] for panning the video when the video doesn't fit nicely into
+     * the TextureView's aspect ratio.
+     */
+    private lateinit var textureViewPanner: TextureViewPanner
 
     // endregion Properties
 
@@ -129,17 +148,26 @@ class LoadingFragment :
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        textureViewPanner = TextureViewPanner.Builder(binding.textureView).build()
         binding.textureView.surfaceTextureListener = this
     }
 
+    /**
+     * Cleans up the loading fragment.
+     */
     override fun onDestroyView() {
         super.onDestroyView()
-        // Post the below code, or else onSurfaceTextureDestroyed won't get called
+        textureViewPanner.release()
+
+        // Post the below code to ensure onSurfaceTextureDestroyed is called
         binding.textureView.post {
             binding.textureView.surfaceTextureListener = null
         }
     }
 
+    /**
+     * Removeas this lifecycle owner from [MediaFragment].
+     */
     override fun onDestroy() {
         super.onDestroy()
         lifecycle.removeObserver(mediaFragment)
@@ -149,84 +177,67 @@ class LoadingFragment :
 
     // region Implemented methods
 
+    /**
+     * Implementation of [TextureView.SurfaceTextureListener]. Plays the appropriate video once
+     * the surface texture is available.
+     */
     @SuppressLint("Recycle")
     override fun onSurfaceTextureAvailable(
         texture: SurfaceTexture,
         width: Int,
         height: Int
     ) {
-        surface = Surface(texture)
-
         val mediaPlayer: MediaPlayer = mediaFragment.mediaPlayers.obtain(
             SPLASHY_PLAYER
         ) { MediaPlayer.create(requireContext(), R.raw.splashy).apply { isLooping = true } }
 
+        surface = Surface(texture)
         mediaPlayer.setSurface(surface)
 
-        mediaPlayer.also { //setOnPreparedListener {
-
-            // TODO TEMP Adjust video
-            // One of them will be 1.0f
-            val vWidth = it.videoWidth
-            val vHeight = it.videoHeight
-            val tWidth = binding.textureView.width
-            val tHeight = binding.textureView.height
-            val xScale = tWidth.toFloat() / vWidth
-            val yScale = tHeight.toFloat() / vHeight
-            val scale = Math.max(xScale, yScale)
-
-            val sx = scale / xScale
-            val sy = scale / yScale
-            val matrix = Matrix()
-            matrix.setScale(sx, sy)
-
-            val tx = (tWidth * (1 - sx)) / 2.0f
-            val ty = (tHeight * (1 - sy)) / 2.0f
-            matrix.postTranslate(tx, ty)
-
-            binding.textureView.setTransform(matrix)
-
-
-            Log.d(
-                "LoadingFragment",
-                "onSurfaceTextureAvailable: video=($vWidth x $vHeight), textureView=($tWidth x $tHeight), xScale=$xScale, yScale=$yScale, scale=$scale"
-            )
-            // END TEMP
-
-            if (!it.isPlaying) {
-                it.start()
-            }
+        mediaPlayer.setOnVideoSizeChangedListener { _, videoWidth, videoHeight ->
+            binding.textureView.setContentSize(videoWidth, videoHeight)
         }
 
+        if (!mediaPlayer.isPlaying) {
+            mediaPlayer.start()
+        }
     }
 
+    /**
+     * Implementation of [TextureView.SurfaceTextureListener]. Updates the texture view panner.
+     */
     override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {
-        // No op
+        textureViewPanner.update()
     }
 
+    /**
+     * Implementation of [TextureView.SurfaceTextureListener]. Detaches from the media player.
+     */
     override fun onSurfaceTextureDestroyed(texture: SurfaceTexture): Boolean {
-        Log.d(
-            "LoadingFragment",
-            "onSurfaceTextureDestroyed"
-        )
         mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null)
         surface?.release()
         surface = null
-        return false
+        return true
     }
 
+    /**
+     * Implementation of [TextureView.SurfaceTextureListener]. Unused.
+     */
     override fun onSurfaceTextureSizeChanged(
         texture: SurfaceTexture,
         width: Int,
         height: Int
     ) {
-
+        // No op
     }
 
     // endregion Implemented methods
 
     // region Methods
 
+    /**
+     * Reacts to API data updates.
+     */
     private fun onApi(update: DataUpdate<Void, Api>) {
         Log.d("LoadingFragment", "onApi: update=$update")
     }
