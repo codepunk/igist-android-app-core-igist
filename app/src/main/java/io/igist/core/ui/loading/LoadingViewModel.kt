@@ -5,50 +5,46 @@
 
 package io.igist.core.ui.loading
 
-import android.annotation.SuppressLint
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.ViewModel
-import com.igist.core.data.task.DataTask
+import androidx.lifecycle.*
 import com.igist.core.data.task.DataUpdate
 import io.igist.core.data.model.Api
-import io.igist.core.data.remote.webservice.AppWebservice
-import io.igist.core.data.task.toDataUpdate
+import io.igist.core.data.repository.LoadingRepository
 import javax.inject.Inject
 
 class LoadingViewModel @Inject constructor(
 
     /**
-     * The app webservice.
+     * The loading repository.
      */
-    private val appWebservice: AppWebservice
+    private val loadingRepository: LoadingRepository
 
 ) : ViewModel() {
 
     // region Properties
 
     /**
-     * A [MediatorLiveData] holding the application [Api] information.
+     * A backing [LiveData] holding the API version. Used to trigger other loading processes.
      */
-    val apiDataUpdate = MediatorLiveData<DataUpdate<Void, Api>>()
+    private val apiVersionData = MutableLiveData<Int>()
 
     /**
-     * A [MediatorLiveData] for tracking the loading process.
+     * A [MediatorLiveData] holding the application [Api] information.
      */
-    val loadingDataUpdate = MediatorLiveData<DataUpdate<Int, Void>>()
-
-    // endregion Properties
-
-    // region Methods
-
-    @SuppressLint("StaticFieldLeak")
-    fun getApi() {
-        val task = object : DataTask<Void, Void, Api>() {
-            override fun generateUpdate(vararg params: Void?): DataUpdate<Void, Api> =
-                appWebservice.api().toDataUpdate()
+    val apiUpdateData: LiveData<DataUpdate<Int, Api>> =
+        Transformations.switchMap(apiVersionData) { apiVersion ->
+            loadingRepository.getApiUpdateData(apiVersion)
         }
-        apiDataUpdate.addSource(task.fetchOnExecutor()) { apiDataUpdate.value = it }
-    }
 
+    /**
+     * The API version. Setting this value will kick off the logic in [apiUpdateData].
+     */
+    var apiVersion: Int = -1
+        set(value) {
+            field = value
+            apiVersionData.value = field
+        }
+
+    @Suppress("UNUSED")
     fun load() {
         // TODO This will be a massive and complicated method that will perform all loading
     }

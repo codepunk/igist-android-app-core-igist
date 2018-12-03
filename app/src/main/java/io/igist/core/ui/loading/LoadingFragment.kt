@@ -22,6 +22,7 @@ import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
 import com.igist.core.data.task.DataUpdate
 import dagger.android.support.AndroidSupportInjection
+import io.igist.core.BuildConfig
 import io.igist.core.R
 import io.igist.core.data.model.Api
 import io.igist.core.databinding.FragmentLoadingBinding
@@ -119,10 +120,10 @@ class LoadingFragment :
             lifecycle.addObserver(this)
         }
 
-        loadingViewModel.apiDataUpdate.observe(this, Observer { onApi(it) })
+        loadingViewModel.apiUpdateData.observe(this, Observer { onApi(it) })
 
         when (savedInstanceState) {
-            null -> loadingViewModel.getApi()
+            null -> loadingViewModel.apiVersion = BuildConfig.API_VERSION
         }
     }
 
@@ -166,7 +167,7 @@ class LoadingFragment :
     }
 
     /**
-     * Removeas this lifecycle owner from [MediaFragment].
+     * Removes this lifecycle owner from [MediaFragment].
      */
     override fun onDestroy() {
         super.onDestroy()
@@ -238,7 +239,7 @@ class LoadingFragment :
     /**
      * Reacts to API data updates.
      */
-    private fun onApi(update: DataUpdate<Void, Api>) {
+    private fun onApi(update: DataUpdate<Int, Api>) {
         Log.d("LoadingFragment", "onApi: update=$update")
     }
 
