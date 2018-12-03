@@ -18,7 +18,7 @@ class AppWebserviceWrapper(private val base: AppWebservice) : AppWebservice {
     /**
      * Gets the app API-level information.
      */
-    override fun api(version: Int): Call<Api> = base.api(version)
+    override fun api(apiVersion: Int): Call<Api> = base.api(apiVersion)
 
     /**
      * Gets the app API-level information using default values.

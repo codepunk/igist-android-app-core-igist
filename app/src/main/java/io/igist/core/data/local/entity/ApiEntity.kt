@@ -21,10 +21,11 @@ data class ApiEntity(
      * The API version.
      */
     @PrimaryKey
+    @ColumnInfo(name = "version")
     override val version: Int,
 
     /**
-     * The "mode" (i.e. behavior) associated with the current version.
+     * The "mode" (i.e. behavior) associated with the current API version.
      */
     @ColumnInfo(name = "igist")
     override val igistMode: IgistMode,

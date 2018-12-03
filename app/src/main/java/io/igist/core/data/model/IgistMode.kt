@@ -9,7 +9,7 @@ import android.util.SparseArray
 import com.squareup.moshi.Json
 
 /**
- * An enum class that describes the "mode" (i.e. behavior) associated with the current version.
+ * An enum class that describes the "mode" (i.e. behavior) associated with the current API version.
  */
 enum class IgistMode(val value: Int) {
 

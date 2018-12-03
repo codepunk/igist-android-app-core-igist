@@ -16,10 +16,11 @@ data class Api(
     /**
      * The API version.
      */
+    @field:Json(name = "version")
     override val version: Int,
 
     /**
-     * The "mode" (i.e. behavior) associated with the current version.
+     * The "mode" (i.e. behavior) associated with the current API version.
      */
     @field:Json(name = "igist")
     override val igistMode: IgistMode,

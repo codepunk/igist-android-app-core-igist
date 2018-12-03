@@ -21,11 +21,11 @@ interface AppWebservice {
     /**
      * Gets the app API-level information.
      */
-    @GET("api/{version}")
+    @GET("api/{apiVersion}")
     @Headers(
         HEADER_ACCEPT_APPLICATION_JSON
     )
-    fun api(@Path(value = "version") version: Int): Call<Api>
+    fun api(@Path(value = "apiVersion") apiVersion: Int): Call<Api>
 
     /**
      * Gets the app API-level information using default values.
