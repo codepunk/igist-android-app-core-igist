@@ -36,10 +36,9 @@ class LoadingRepository @Inject constructor(
     @SuppressLint("StaticFieldLeak")
     fun getApiUpdateData(apiVersion: Int): LiveData<DataUpdate<Api, Api>> {
         val task = object : DataTask<Void, Api, Api>() {
-            override fun generateResult(vararg params: Void?): ResultUpdate<Api, Api> {
+            override fun doInBackground(vararg params: Void): ResultUpdate<Api, Api> {
                 // Step 1: Attempt to get Api from local database
-                val localApiEntity = appDao.retrieve(apiVersion)
-                val localApi: Api? = localApiEntity?.let { Api(it) }
+                val localApi: Api? = appDao.retrieve(apiVersion)?.let { Api(it) }
 
                 // Step 2: If we have a local Api, publish progress
                 if (localApi != null) {

@@ -28,8 +28,7 @@ import java.util.concurrent.Executor
  */
 abstract class DataTask<Params, Progress, Result>(
     data: Bundle? = null
-) :
-    AsyncTask<Params, Progress, ResultUpdate<Progress, Result>>() {
+) : AsyncTask<Params, Progress, ResultUpdate<Progress, Result>>() {
 
     // region Properties
 
@@ -65,12 +64,6 @@ abstract class DataTask<Params, Progress, Result>(
     }
 
     /**
-     * Calls the abstract method [generateResult] to produce the return value for the data task.
-     */
-    override fun doInBackground(vararg params: Params): ResultUpdate<Progress, Result> =
-        generateResult(*params)
-
-    /**
      * Updates [liveData] with a [ProgressUpdate] instance describing this task's progress.
      */
     override fun onProgressUpdate(vararg values: Progress?) {
@@ -94,11 +87,6 @@ abstract class DataTask<Params, Progress, Result>(
     // endregion Inherited methods
 
     // region Methods
-
-    /**
-     * Used to generate a [DataUpdate] using the passed [params] in descendants of this class.
-     */
-    abstract fun generateResult(vararg params: Params?): ResultUpdate<Progress, Result>
 
     /**
      * Convenience method for executing this task and getting the results as [LiveData]. Executes
