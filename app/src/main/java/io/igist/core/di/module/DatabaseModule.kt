@@ -5,12 +5,13 @@
 
 package io.igist.core.di.module
 
-import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import io.igist.core.data.local.IgistDb
 import io.igist.core.data.local.dao.ApiDao
+import io.igist.core.di.qualifier.ApplicationContext
 import javax.inject.Singleton
 
 @Suppress("unused")
@@ -24,9 +25,9 @@ class DatabaseModule {
      */
     @Singleton
     @Provides
-    fun provideDb(app: Application): IgistDb {
+    fun provideDb(@ApplicationContext context: Context): IgistDb {
         return Room
-            .databaseBuilder(app, IgistDb::class.java, "igist.db")
+            .databaseBuilder(context, IgistDb::class.java, "igist.db")
             .fallbackToDestructiveMigration()
             .build()
     }
