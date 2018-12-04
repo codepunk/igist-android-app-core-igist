@@ -20,7 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
-import com.igist.core.data.task.DataUpdate
+import io.igist.core.data.task.DataUpdate
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.BuildConfig
 import io.igist.core.R
@@ -239,7 +239,7 @@ class LoadingFragment :
     /**
      * Reacts to API data updates.
      */
-    private fun onApi(update: DataUpdate<Int, Api>) {
+    private fun onApi(update: DataUpdate<Api, Api>) {
         Log.d("LoadingFragment", "onApi: update=$update")
     }
 

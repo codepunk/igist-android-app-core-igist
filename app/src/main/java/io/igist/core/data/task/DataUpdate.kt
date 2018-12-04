@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.igist.core.data.task
+package io.igist.core.data.task
 
 import android.os.Bundle
-import retrofit2.Response
 import java.lang.Exception
 import java.util.*
 
@@ -106,6 +105,24 @@ class ProgressUpdate<Progress, Result>(
 }
 
 /**
+ * An abstract class that represents a DataUpdate that contains a result (whether success
+ * or failure).
+ */
+abstract class ResultUpdate<Progress, Result>(
+
+    /**
+     * The result of the operation computed by the task.
+     */
+    val result: Result?,
+
+    /**
+     * Optional additional data to send along with the update.
+     */
+    var data: Bundle?
+
+) : DataUpdate<Progress, Result>()
+
+/**
  * A [DataUpdate] representing a finished task (i.e. a task that has finished without being
  * cancelled).
  */
@@ -114,19 +131,14 @@ class SuccessUpdate<Progress, Result>(
     /**
      * The result of the operation computed by the task.
      */
-    val result: Result? = null,
-
-    /**
-     * The [Response] that resulted in this update.
-     */
-    val response: Response<Result>? = null,
+    result: Result? = null,
 
     /**
      * Optional additional data to send along with the update.
      */
-    var data: Bundle? = null
+    data: Bundle? = null
 
-) : DataUpdate<Progress, Result>() {
+) : ResultUpdate<Progress, Result>(result, data) {
 
     // region Inherited methods
 
@@ -137,7 +149,6 @@ class SuccessUpdate<Progress, Result>(
         other as SuccessUpdate<*, *>
 
         if (result != other.result) return false
-        if (response != other.response) return false
         if (data != other.data) return false
 
         return true
@@ -145,13 +156,12 @@ class SuccessUpdate<Progress, Result>(
 
     override fun hashCode(): Int {
         var result1 = result?.hashCode() ?: 0
-        result1 = 31 * result1 + (response?.hashCode() ?: 0)
         result1 = 31 * result1 + (data?.hashCode() ?: 0)
         return result1
     }
 
     override fun toString(): String =
-        "${javaClass.simpleName}(result=$result, response=$response, data=$data)"
+        "${javaClass.simpleName}(result=$result, data=$data)"
 
     // endregion Inherited methods
 
@@ -166,7 +176,7 @@ class FailureUpdate<Progress, Result>(
     /**
      * The result, if any, computed by the task. Can be null.
      */
-    val result: Result? = null,
+    result: Result? = null,
 
     /**
      * The [Exception] associated with this failure.
@@ -174,16 +184,11 @@ class FailureUpdate<Progress, Result>(
     val e: Exception? = null,
 
     /**
-     * The [Response] that resulted in this update.
-     */
-    val response: Response<Result>? = null,
-
-    /**
      * Optional additional data to send along with the update.
      */
-    var data: Bundle? = null
+    data: Bundle? = null
 
-) : DataUpdate<Progress, Result>() {
+) : ResultUpdate<Progress, Result>(result, data) {
 
     // region Inherited methods
 
@@ -195,7 +200,6 @@ class FailureUpdate<Progress, Result>(
 
         if (result != other.result) return false
         if (e != other.e) return false
-        if (response != other.response) return false
         if (data != other.data) return false
 
         return true
@@ -204,13 +208,12 @@ class FailureUpdate<Progress, Result>(
     override fun hashCode(): Int {
         var result1 = result?.hashCode() ?: 0
         result1 = 31 * result1 + (e?.hashCode() ?: 0)
-        result1 = 31 * result1 + (response?.hashCode() ?: 0)
         result1 = 31 * result1 + (data?.hashCode() ?: 0)
         return result1
     }
 
     override fun toString(): String =
-        "${javaClass.simpleName}(result=$result, response=$response, e=$e, data=$data)"
+        "${javaClass.simpleName}(result=$result, e=$e, data=$data)"
 
     // endregion Inherited methods
 

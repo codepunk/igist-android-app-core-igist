@@ -29,6 +29,6 @@ abstract class ApiDao {
      * Retrieves [Api] information the local database based on the supplied [version].
      */
     @Query("SELECT * FROM api WHERE version = :version")
-    abstract fun retrieve(version: Int): ApiEntity
+    abstract fun retrieve(version: Int): ApiEntity?
 
 }

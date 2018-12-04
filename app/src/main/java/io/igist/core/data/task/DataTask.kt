@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.igist.core.data.task
+package io.igist.core.data.task
 
 import android.os.AsyncTask
+import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import java.util.concurrent.Executor
@@ -25,10 +26,22 @@ import java.util.concurrent.Executor
  * An implementation of [AsyncTask] that wraps [Progress] and [Result] in a [DataUpdate]
  * sealed class and sets it to a [MutableLiveData] instance.
  */
-abstract class DataTask<Params, Progress, Result> :
-    AsyncTask<Params, Progress, DataUpdate<Progress, Result>>() {
+abstract class DataTask<Params, Progress, Result>(
+    data: Bundle? = null
+) :
+    AsyncTask<Params, Progress, ResultUpdate<Progress, Result>>() {
 
     // region Properties
+
+    /**
+     * An optional [Bundle] for holding additional data. This allows you, for example, not only
+     * to publish progress using [Progress], but also to supply additional information along with
+     * that progress by putting the desired information into [data] prior to calling
+     * [publishProgress].
+     */
+    private var _data: Bundle? = data
+    val data: Bundle
+        get() = _data ?: Bundle().apply { _data = this }
 
     /**
      * A [LiveData] that will contain progress, results, or exceptions related to this task.
@@ -36,7 +49,7 @@ abstract class DataTask<Params, Progress, Result> :
     @Suppress("WEAKER_ACCESS")
     val liveData = MutableLiveData<DataUpdate<Progress, Result>>()
         .apply {
-            value = PendingUpdate()
+            value = PendingUpdate(_data)
         }
 
     // endregion Properties
@@ -52,29 +65,29 @@ abstract class DataTask<Params, Progress, Result> :
     }
 
     /**
-     * Calls the abstract method [generateUpdate] to produce the return value for the data task.
+     * Calls the abstract method [generateResult] to produce the return value for the data task.
      */
-    override fun doInBackground(vararg params: Params): DataUpdate<Progress, Result> =
-        generateUpdate(*params)
+    override fun doInBackground(vararg params: Params): ResultUpdate<Progress, Result> =
+        generateResult(*params)
 
     /**
      * Updates [liveData] with a [ProgressUpdate] instance describing this task's progress.
      */
     override fun onProgressUpdate(vararg values: Progress?) {
-        liveData.value = ProgressUpdate(values)
+        liveData.value = ProgressUpdate(values, _data)
     }
 
     /**
      * Updates [liveData] with the result from [doInBackground].
      */
-    override fun onPostExecute(result: DataUpdate<Progress, Result>?) {
+    override fun onPostExecute(result: ResultUpdate<Progress, Result>?) {
         liveData.value = result
     }
 
     /**
      * Updates [liveData] with the result from [doInBackground] if the task was cancelled.
      */
-    override fun onCancelled(result: DataUpdate<Progress, Result>?) {
+    override fun onCancelled(result: ResultUpdate<Progress, Result>?) {
         liveData.value = result
     }
 
@@ -85,7 +98,7 @@ abstract class DataTask<Params, Progress, Result> :
     /**
      * Used to generate a [DataUpdate] using the passed [params] in descendants of this class.
      */
-    abstract fun generateUpdate(vararg params: Params?): DataUpdate<Progress, Result>
+    abstract fun generateResult(vararg params: Params?): ResultUpdate<Progress, Result>
 
     /**
      * Convenience method for executing this task and getting the results as [LiveData]. Executes
