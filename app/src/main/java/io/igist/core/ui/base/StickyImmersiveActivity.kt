@@ -7,9 +7,9 @@ package io.igist.core.ui.base
 
 import android.view.View.OnSystemUiVisibilityChangeListener
 import androidx.appcompat.app.AppCompatActivity
-import io.igist.core.util.ActivityCompat
-import io.igist.core.util.ActivityCompat.FullScreenMode
-import io.igist.core.util.ActivityCompat.FullScreenMode.STICKY_IMMERSIVE
+import com.codepunk.doofenschmirtz.util.ActivityCompat
+import com.codepunk.doofenschmirtz.util.ActivityCompat.FullScreenMode
+import com.codepunk.doofenschmirtz.util.ActivityCompat.FullScreenMode.STICKY_IMMERSIVE
 
 /**
  * A base [AppCompatActivity] that keeps the activity in [STICKY_IMMERSIVE] mode.
