@@ -3,28 +3,26 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.data.contract
-
-import io.igist.core.data.model.IgistMode
+package io.igist.core.domain.model
 
 /**
- * A contract representing basic API information.
+ * A data class representing basic API information.
  */
-interface IApi {
+data class Api(
 
     /**
      * The API version.
      */
-    val version: Int
+    val version: Int,
 
     /**
-     * A value that provides certain behavior for the app.
+     * The "mode" (i.e. behavior) associated with the current API version.
      */
-    val igistMode: IgistMode
+    val igistMode: IgistMode,
 
     /**
      * A link used if user agrees to do a survey (prompted when user completes the book).
      */
     val surveyLink: String
 
-}
+)

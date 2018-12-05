@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.data.model
+package io.igist.core.data.remote.entity
 
 import io.igist.core.data.remote.annotation.BooleanInt
 import com.squareup.moshi.Json

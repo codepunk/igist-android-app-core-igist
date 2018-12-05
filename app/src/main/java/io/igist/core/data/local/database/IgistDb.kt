@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.data.local
+package io.igist.core.data.local.database
 
 import androidx.room.Dao
 import androidx.room.Database
@@ -11,11 +11,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import io.igist.core.data.local.converters.IgistModeTypeConverter
 import io.igist.core.data.local.dao.ApiDao
-import io.igist.core.data.local.entity.ApiEntity
+import io.igist.core.data.local.entity.ApiLocal
 
 @Database(
     entities = [
-        ApiEntity::class
+        ApiLocal::class
     ],
     version = 1,
     exportSchema = true
@@ -28,7 +28,7 @@ abstract class IgistDb : RoomDatabase() {
     // region Methods
 
     /**
-     * a [Dao] for the [ApiEntity] class.
+     * a [Dao] for the [ApiLocal] class.
      */
     abstract fun apiDao(): ApiDao
 

@@ -6,16 +6,22 @@
 package io.igist.core.di.module
 
 import android.content.Context
+import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
+import io.igist.core.data.local.database.IgistDb
+import io.igist.core.data.local.dao.ApiDao
+import io.igist.core.data.mapper.ApiLocalToDomainMapper
+import io.igist.core.data.mapper.ApiRemoteToLocalMapper
 import io.igist.core.data.remote.adapter.BooleanIntAdapter
 import io.igist.core.data.remote.adapter.DateJsonAdapter
 import io.igist.core.data.remote.converter.MoshiEnumConverterFactory
 import io.igist.core.data.remote.interceptor.AuthorizationInterceptor
 import io.igist.core.data.remote.webservice.AppWebservice
-import io.igist.core.data.remote.webservice.AppWebserviceWrapper
+import io.igist.core.data.repository.AppRepositoryImpl
 import io.igist.core.di.qualifier.ApplicationContext
+import io.igist.core.domain.contract.AppRepository
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -23,17 +29,18 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
 import javax.inject.Singleton
 
-/*
- * Author(s): Scott Slater
- */
+// region Constants
 
 /**
  * The default cache size for OkHttp client cache.
  */
 private const val CACHE_SIZE: Long = 10 * 1024 * 1024
 
-@Module
-class NetModule {
+// endregion Constants
+
+@Suppress("unused")
+@Module(includes = [AppModule::class])
+class DataModule {
 
     // region Methods
 
@@ -102,7 +109,42 @@ class NetModule {
     @Singleton
     fun providesAuthWebservice(
         retrofit: Retrofit
-    ): AppWebservice = AppWebserviceWrapper(retrofit.create(AppWebservice::class.java))
+    ): AppWebservice = retrofit.create(AppWebservice::class.java)
+
+    /**
+     * Provides an [IgistDb] instance.
+     */
+    @Singleton
+    @Provides
+    fun provideDb(@ApplicationContext context: Context): IgistDb {
+        return Room
+            .databaseBuilder(context, IgistDb::class.java, "igist.db")
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    /**
+     * Creates an [ApiDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesApiDao(db: IgistDb): ApiDao {
+        return db.apiDao()
+    }
+
+    /**
+     * Creates a [AppRepository] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesAppRepository(
+        appDao: ApiDao,
+        appWebservice: AppWebservice,
+        apiLocalToDomainMapper: ApiLocalToDomainMapper,
+        apiRemoteToLocalMapper: ApiRemoteToLocalMapper
+    ): AppRepository = AppRepositoryImpl(
+        appDao, appWebservice, apiLocalToDomainMapper, apiRemoteToLocalMapper
+    )
 
     // endregion Methods
 

@@ -7,8 +7,8 @@ package io.igist.core.ui.loading
 
 import androidx.lifecycle.*
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
-import io.igist.core.data.model.Api
-import io.igist.core.data.repository.LoadingRepository
+import io.igist.core.domain.contract.AppRepository
+import io.igist.core.domain.model.Api
 import javax.inject.Inject
 
 class LoadingViewModel @Inject constructor(
@@ -16,7 +16,7 @@ class LoadingViewModel @Inject constructor(
     /**
      * The loading repository.
      */
-    private val loadingRepository: LoadingRepository
+    private val appRepository: AppRepository
 
 ) : ViewModel() {
 
@@ -32,7 +32,7 @@ class LoadingViewModel @Inject constructor(
      */
     val apiUpdateData: LiveData<DataUpdate<Api, Api>> =
         Transformations.switchMap(apiVersionData) { apiVersion ->
-            loadingRepository.getApiUpdateData(apiVersion)
+            appRepository.getApi(apiVersion)
         }
 
     /**

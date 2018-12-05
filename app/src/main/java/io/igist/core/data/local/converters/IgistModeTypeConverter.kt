@@ -6,7 +6,7 @@
 package io.igist.core.data.local.converters
 
 import androidx.room.TypeConverter
-import io.igist.core.data.model.IgistMode
+import io.igist.core.domain.model.IgistMode
 
 class IgistModeTypeConverter {
 

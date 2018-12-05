@@ -8,7 +8,6 @@ package io.igist.core.ui.loading
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.SurfaceTexture
-import android.view.TextureView
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
@@ -24,8 +23,8 @@ import com.codepunk.punkubator.widget.TextureViewPanner
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.BuildConfig
 import io.igist.core.R
-import io.igist.core.data.model.Api
 import io.igist.core.databinding.FragmentLoadingBinding
+import io.igist.core.domain.model.Api
 import javax.inject.Inject
 
 // region Constants

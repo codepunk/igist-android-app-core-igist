@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.data.model
+package io.igist.core.domain.model
 
 import android.util.SparseArray
 import com.squareup.moshi.Json
