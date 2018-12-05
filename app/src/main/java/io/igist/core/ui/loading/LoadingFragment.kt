@@ -18,9 +18,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
-import io.igist.core.data.task.DataUpdate
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.BuildConfig
 import io.igist.core.R

@@ -7,11 +7,12 @@ package io.igist.core.data.repository
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.LiveData
+import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.data.local.dao.ApiDao
 import io.igist.core.data.local.entity.ApiEntity
 import io.igist.core.data.model.Api
+import io.igist.core.data.remote.toResultUpdate
 import io.igist.core.data.remote.webservice.AppWebservice
-import io.igist.core.data.task.*
 import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,7 +36,7 @@ class LoadingRepository @Inject constructor(
      */
     @SuppressLint("StaticFieldLeak")
     fun getApiUpdateData(apiVersion: Int): LiveData<DataUpdate<Api, Api>> {
-        val task = object : DataTask<Void, Api, Api>() {
+        val task = object : DataTaskinator<Void, Api, Api>() {
             override fun doInBackground(vararg params: Void): ResultUpdate<Api, Api> {
                 // Step 1: Attempt to get Api from local database
                 val localApi: Api? = appDao.retrieve(apiVersion)?.let { Api(it) }

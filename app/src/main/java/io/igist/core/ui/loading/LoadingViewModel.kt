@@ -6,7 +6,7 @@
 package io.igist.core.ui.loading
 
 import androidx.lifecycle.*
-import io.igist.core.data.task.DataUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import io.igist.core.data.model.Api
 import io.igist.core.data.repository.LoadingRepository
 import javax.inject.Inject

@@ -15,10 +15,13 @@
  * limitations under the License.
  */
 
-package io.igist.core.data.task
+package io.igist.core.data.remote
 
 import android.os.Bundle
 import androidx.lifecycle.LiveData
+import com.codepunk.doofenschmirtz.util.taskinator.FailureUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.ResultUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.SuccessUpdate
 import io.igist.core.data.remote.http.HttpStatusException
 import retrofit2.Call
 import retrofit2.Response
@@ -28,7 +31,8 @@ import java.io.IOException
  * Extension function that takes a [Response] from executing a [Call] and converts it into a
  * [ResultUpdate].
  *
- * This allows for ultra-concise code, such as the following example in [DataTask.doInBackground]:
+ * This allows for ultra-concise code, such as the following example in
+ * [DataTaskinator.doInBackground]:
  *
  * ```kotlin
  * override fun doInBackground(vararg params: Void?): DataUpdate<Void, User>? =
@@ -36,8 +40,8 @@ import java.io.IOException
  * ```
  *
  * In the above example, doInBackground will return an appropriate instance of
- * DataUpdate<Void, User>. This value will be stored in the DataTask's [LiveData], which can be
- * observed from an Activity or other observer.
+ * DataUpdate<Void, User>. This value will be stored in the DataTaskinator's [LiveData], which
+ * can be observed from an Activity or other observer.
  */
 fun <Progress, Result> Call<Result>.toResultUpdate(data: Bundle? = null):
         ResultUpdate<Progress, Response<Result>> {
