@@ -5,7 +5,7 @@
 
 package io.igist.core.session
 
-import io.igist.core.data.remote.entity.User
+import io.igist.core.domain.model.User
 import io.igist.core.di.component.UserComponent
 import io.igist.core.di.scope.UserScope
 import java.util.*

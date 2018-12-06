@@ -7,10 +7,10 @@ package io.igist.core.data.remote
 
 import android.os.Bundle
 import androidx.lifecycle.LiveData
+import com.codepunk.doofenschmirtz.util.http.HttpStatusException
 import com.codepunk.doofenschmirtz.util.taskinator.FailureUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.ResultUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.SuccessUpdate
-import io.igist.core.data.remote.http.HttpStatusException
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException

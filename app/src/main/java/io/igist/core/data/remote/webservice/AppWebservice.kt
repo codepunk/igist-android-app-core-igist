@@ -5,7 +5,7 @@
 
 package io.igist.core.data.remote.webservice
 
-import io.igist.core.data.remote.entity.ApiRemote
+import io.igist.core.data.remote.entity.RemoteApi
 import io.igist.core.data.remote.HEADER_ACCEPT_APPLICATION_JSON
 import retrofit2.Call
 import retrofit2.http.GET
@@ -25,6 +25,6 @@ interface AppWebservice {
     @Headers(
         HEADER_ACCEPT_APPLICATION_JSON
     )
-    fun api(@Path(value = "apiVersion") apiVersion: Int): Call<ApiRemote>
+    fun api(@Path(value = "apiVersion") apiVersion: Int): Call<RemoteApi>
 
 }

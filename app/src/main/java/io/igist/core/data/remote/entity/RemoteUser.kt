@@ -5,8 +5,8 @@
 
 package io.igist.core.data.remote.entity
 
-import io.igist.core.data.remote.annotation.BooleanInt
 import com.squareup.moshi.Json
+import io.igist.core.data.remote.annotation.BooleanInt
 import java.util.*
 
 /**

@@ -3,36 +3,32 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.data.local.entity
+package io.igist.core.data.remote.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.squareup.moshi.Json
 import io.igist.core.domain.model.IgistMode
 
 /**
- * A data class representing basic API information to be stored in the local database.
+ * A data class representing basic API information fetched from the network.
  */
-@Entity(tableName = "api")
-data class ApiLocal(
+data class RemoteApi(
 
     /**
      * The API version.
      */
-    @PrimaryKey
-    @ColumnInfo(name = "version")
+    @field:Json(name = "version")
     val version: Int,
 
     /**
      * The "mode" (i.e. behavior) associated with the current API version.
      */
-    @ColumnInfo(name = "igist")
+    @field:Json(name = "igist")
     val igistMode: IgistMode,
 
     /**
      * A link used if user agrees to do a survey (prompted when user completes the book).
      */
-    @ColumnInfo(name = "survey_link")
+    @field:Json(name = "survey_link")
     val surveyLink: String
 
 )

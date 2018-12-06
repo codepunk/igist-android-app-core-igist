@@ -11,11 +11,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import io.igist.core.data.local.converters.IgistModeTypeConverter
 import io.igist.core.data.local.dao.ApiDao
-import io.igist.core.data.local.entity.ApiLocal
+import io.igist.core.data.local.entity.LocalApi
 
 @Database(
     entities = [
-        ApiLocal::class
+        LocalApi::class
     ],
     version = 1,
     exportSchema = true
@@ -28,7 +28,7 @@ abstract class IgistDb : RoomDatabase() {
     // region Methods
 
     /**
-     * a [Dao] for the [ApiLocal] class.
+     * a [Dao] for the [LocalApi] class.
      */
     abstract fun apiDao(): ApiDao
 

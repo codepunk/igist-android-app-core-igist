@@ -10,9 +10,10 @@ import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig
 import io.igist.core.data.local.dao.ApiDao
-import io.igist.core.data.mapper.ApiLocalToDomainMapper
-import io.igist.core.data.mapper.ApiRemoteToLocalMapper
-import io.igist.core.data.remote.entity.ApiRemote
+import io.igist.core.data.mapper.toApi
+import io.igist.core.data.mapper.toApiOrNull
+import io.igist.core.data.mapper.toLocalApi
+import io.igist.core.data.remote.entity.RemoteApi
 import io.igist.core.data.remote.toResultUpdate
 import io.igist.core.data.remote.webservice.AppWebservice
 import io.igist.core.domain.contract.AppRepository
@@ -24,11 +25,7 @@ class AppRepositoryImpl @Inject constructor(
 
     private val appDao: ApiDao,
 
-    private val appWebservice: AppWebservice,
-
-    private val apiLocalToDomainMapper: ApiLocalToDomainMapper,
-
-    private val apiRemoteToLocalMapper: ApiRemoteToLocalMapper
+    private val appWebservice: AppWebservice
 
 ) : AppRepository {
 
@@ -46,8 +43,6 @@ class AppRepositoryImpl @Inject constructor(
     ): LiveData<DataUpdate<Api, Api>> = GetApiTask(
         appDao,
         appWebservice,
-        apiLocalToDomainMapper,
-        apiRemoteToLocalMapper,
         alwaysFetch
     ).apply {
         getApiTask?.cancel(true)
@@ -67,10 +62,6 @@ class AppRepositoryImpl @Inject constructor(
 
         private val appWebservice: AppWebservice,
 
-        private val apiLocalToDomainMapper: ApiLocalToDomainMapper,
-
-        private val apiRemoteToLocalMapper: ApiRemoteToLocalMapper,
-
         private val alwaysFetch: Boolean = true
 
     ) : DataTaskinator<Int, Api, Api>() {
@@ -78,8 +69,8 @@ class AppRepositoryImpl @Inject constructor(
         override fun doInBackground(vararg params: Int?): ResultUpdate<Api, Api> {
             // Try to get Api from local database
             val apiVersion = params.getOrNull(0) ?: BuildConfig.API_VERSION
-            val apiLocal = appDao.retrieve(apiVersion)
-            var api: Api? = apiLocal?.let { apiLocalToDomainMapper.map(apiLocal) }
+            val localApi = appDao.retrieve(apiVersion)
+            var api = localApi.toApiOrNull()
 
             // If we got a local Api, publish it
             if (api != null) {
@@ -87,25 +78,25 @@ class AppRepositoryImpl @Inject constructor(
             }
 
             // Optionally fetch latest Api from the network
-            if (apiLocal == null || alwaysFetch) {
-                val apiRemoteUpdate: ResultUpdate<Void, Response<ApiRemote>> =
+            if (localApi == null || alwaysFetch) {
+                val remoteApiUpdate: ResultUpdate<Void, Response<RemoteApi>> =
                     appWebservice.api(apiVersion).toResultUpdate()
-                val apiRemote = when (apiRemoteUpdate) {
+                val remoteApi = when (remoteApiUpdate) {
                     is FailureUpdate -> return FailureUpdate(
                         api,
-                        apiRemoteUpdate.e,
-                        apiRemoteUpdate.data
+                        remoteApiUpdate.e,
+                        remoteApiUpdate.data
                     )
-                    else -> apiRemoteUpdate.result?.body()
+                    else -> remoteApiUpdate.result?.body()
                 }
 
-                if (apiRemote != null) {
+                remoteApi?.run {
                     // Convert & insert remote Api into the local database
-                    appDao.insert(apiRemoteToLocalMapper.map(apiRemote))
+                    appDao.insert(this.toLocalApi())
 
                     // Re-retrieve the newly-inserted Api from the local database
                     appDao.retrieve(apiVersion)?.let {
-                        api = apiLocalToDomainMapper.map(it)
+                        api = it.toApi()
                     }
                 }
             }

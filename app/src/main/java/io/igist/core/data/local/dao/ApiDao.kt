@@ -9,7 +9,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import io.igist.core.data.local.entity.ApiLocal
+import io.igist.core.data.local.entity.LocalApi
 import io.igist.core.domain.model.Api
 
 /**
@@ -23,12 +23,12 @@ abstract class ApiDao {
      * book id.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(api: ApiLocal): Long
+    abstract fun insert(api: LocalApi): Long
 
     /**
      * Retrieves [Api] information the local database based on the supplied [version].
      */
     @Query("SELECT * FROM api WHERE version = :version")
-    abstract fun retrieve(version: Int): ApiLocal?
+    abstract fun retrieve(version: Int): LocalApi?
 
 }
