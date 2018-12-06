@@ -21,7 +21,6 @@ import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
 import dagger.android.support.AndroidSupportInjection
-import io.igist.core.BuildConfig
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
 import io.igist.core.domain.model.Api
@@ -119,11 +118,7 @@ class LoadingFragment :
             lifecycle.addObserver(this)
         }
 
-        loadingViewModel.apiUpdateData.observe(this, Observer { onApi(it) })
-
-        when (savedInstanceState) {
-            null -> loadingViewModel.apiVersion = BuildConfig.API_VERSION
-        }
+        loadingViewModel.liveApi.observe(this, Observer { onApi(it) })
     }
 
     /**
@@ -189,7 +184,11 @@ class LoadingFragment :
     ) {
         val mediaPlayer: MediaPlayer = mediaFragment.mediaPlayers.obtain(
             SPLASHY_PLAYER
-        ) { MediaPlayer.create(requireContext(), R.raw.splashy).apply { isLooping = true } }
+        ) {
+            MediaPlayer.create(requireContext(), R.raw.splashy).apply {
+                isLooping = true
+            }
+        }
 
         surface = Surface(texture)
         mediaPlayer.setSurface(surface)

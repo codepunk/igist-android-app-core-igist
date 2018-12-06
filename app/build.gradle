@@ -63,7 +63,7 @@ android {
     }
 
     applicationVariants.all { variant ->
-        variant.buildConfigField("boolean", "SET_DEFAULT_BOOK_ID", "true")
+        variant.buildConfigField("boolean", "SET_DEFAULT_BOOK_ID", "false")
 
         makeIntConstantValues(
                 variant,
@@ -80,6 +80,11 @@ android {
                 variant,
                 IntentEntityType.ACTION,
                 "SELECT_BOOK"
+        )
+
+        makeKeys(
+                variant,
+                "BOOK_ID"
         )
     }
 }

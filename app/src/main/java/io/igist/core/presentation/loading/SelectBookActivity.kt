@@ -17,8 +17,6 @@ import dagger.android.support.HasSupportFragmentInjector
 import io.fabric.sdk.android.Fabric
 import io.igist.core.R
 import io.igist.core.databinding.ActivitySelectBookBinding
-import io.igist.core.domain.session.BookSessionManager
-import io.igist.core.domain.session.UserSessionManager
 import io.igist.core.presentation.base.StickyImmersiveActivity
 import javax.inject.Inject
 
@@ -36,18 +34,6 @@ class SelectBookActivity :
      */
     @Inject
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
-
-    /**
-     * Singleton that manages the current book session (i.e. which book is being interacted with).
-     */
-    @Inject
-    lateinit var bookSessionManager: BookSessionManager
-
-    /**
-     * Singleton that manages the user session.
-     */
-    @Inject
-    lateinit var userSessionManager: UserSessionManager
 
     /**
      * The binding for this activity.
