@@ -3,11 +3,9 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.ui.loading
+package io.igist.core.presentation.loading
 
 import android.app.Activity
-import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -17,19 +15,17 @@ import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
 import io.fabric.sdk.android.Fabric
-import io.igist.core.BuildConfig.ACTION_SELECT_BOOK
-import io.igist.core.BuildConfig.PREF_KEY_CURRENT_BOOK_ID
 import io.igist.core.R
-import io.igist.core.databinding.ActivityLoadingBinding
-import io.igist.core.ui.base.StickyImmersiveActivity
+import io.igist.core.databinding.ActivitySelectBookBinding
+import io.igist.core.domain.session.BookSessionManager
+import io.igist.core.domain.session.UserSessionManager
+import io.igist.core.presentation.base.StickyImmersiveActivity
 import javax.inject.Inject
 
-private const val SELECT_BOOK_REQUEST_CODE = 1
-
 /**
- * An [Activity] that manages launch- and onboarding-related tasks and fragments.
+ * An [Activity] for displaying and selecting from available books.
  */
-class LoadingActivity :
+class SelectBookActivity :
     StickyImmersiveActivity(),
     HasSupportFragmentInjector {
 
@@ -42,15 +38,21 @@ class LoadingActivity :
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
     /**
-     * The application [SharedPreferences].
+     * Singleton that manages the current book session (i.e. which book is being interacted with).
      */
     @Inject
-    lateinit var sharedPreferences: SharedPreferences
+    lateinit var bookSessionManager: BookSessionManager
+
+    /**
+     * Singleton that manages the user session.
+     */
+    @Inject
+    lateinit var userSessionManager: UserSessionManager
 
     /**
      * The binding for this activity.
      */
-    private lateinit var binding: ActivityLoadingBinding
+    private lateinit var binding: ActivitySelectBookBinding
 
     // endregion Properties
 
@@ -63,38 +65,10 @@ class LoadingActivity :
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         Fabric.with(this, Crashlytics())
-
-        val bookId =
-            sharedPreferences.getLong(PREF_KEY_CURRENT_BOOK_ID, -1L)
-        if (bookId < 0L) {
-            startActivityForResult(Intent(ACTION_SELECT_BOOK), SELECT_BOOK_REQUEST_CODE)
-        }
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_loading)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_select_book)
     }
 
     // endregion Lifecycle methods
-
-    // region Inherited methods
-
-    /**
-     * Processes the result of SelectBookActivity.
-     */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            SELECT_BOOK_REQUEST_CODE -> {
-                when (resultCode) {
-                    Activity.RESULT_OK -> {
-
-                    }
-                    else -> finish()
-                }
-            }
-            else -> super.onActivityResult(requestCode, resultCode, data)
-        }
-    }
-
-    // endregion Inherited methods
 
     // region Implemented methods
 

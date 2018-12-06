@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.session
+package io.igist.core.domain.session
 
 import io.igist.core.domain.model.User
 import io.igist.core.di.component.UserComponent

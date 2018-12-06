@@ -12,7 +12,7 @@
 
     <fragment
         android:id="@+id/loading_fragment"
-        android:name="io.igist.core.ui.loading.LoadingFragment"
+        android:name="io.igist.core.presentation.loading.LoadingFragment"
         android:label="@string/fragment_loading_title"
         tools:layout="@layout/fragment_loading"/>
 

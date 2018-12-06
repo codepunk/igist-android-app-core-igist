@@ -7,7 +7,7 @@ package io.igist.core.data.remote.interceptor
 
 import io.igist.core.data.remote.HEADER_NAME_AUTHORIZATION
 import io.igist.core.data.remote.HEADER_VALUE_AUTH_TOKEN_PLACEHOLDER
-import io.igist.core.session.UserSessionManager
+import io.igist.core.domain.session.UserSessionManager
 import dagger.Lazy
 import okhttp3.Interceptor
 import okhttp3.Response

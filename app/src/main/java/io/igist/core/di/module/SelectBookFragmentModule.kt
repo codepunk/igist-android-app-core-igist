@@ -5,7 +5,7 @@
 
 package io.igist.core.di.module
 
-import io.igist.core.ui.loading.LoadingFragment
+import io.igist.core.presentation.loading.LoadingFragment
 import dagger.Module
 
 /**

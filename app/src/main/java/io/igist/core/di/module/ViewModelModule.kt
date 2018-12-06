@@ -12,7 +12,7 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import io.igist.core.di.key.ViewModelKey
 import io.igist.core.di.provider.InjectingViewModelFactory
-import io.igist.core.ui.loading.LoadingViewModel
+import io.igist.core.presentation.loading.LoadingViewModel
 
 /**
  * A [Module] for injecting [ViewModel] instances and the [ViewModelProvider.Factory] that will

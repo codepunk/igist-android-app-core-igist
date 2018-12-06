@@ -6,8 +6,8 @@
 package io.igist.core.di.module
 
 import io.igist.core.di.scope.FragmentScope
-import io.igist.core.ui.loading.LoadingActivity
-import io.igist.core.ui.loading.LoadingFragment
+import io.igist.core.presentation.loading.LoadingActivity
+import io.igist.core.presentation.loading.LoadingFragment
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 

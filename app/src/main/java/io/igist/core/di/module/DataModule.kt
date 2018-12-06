@@ -12,8 +12,6 @@ import dagger.Module
 import dagger.Provides
 import io.igist.core.data.local.database.IgistDb
 import io.igist.core.data.local.dao.ApiDao
-import io.igist.core.data.mapper.ApiLocalToDomainMapper
-import io.igist.core.data.mapper.ApiRemoteToLocalMapper
 import io.igist.core.data.remote.adapter.BooleanIntAdapter
 import io.igist.core.data.remote.adapter.DateJsonAdapter
 import io.igist.core.data.remote.converter.MoshiEnumConverterFactory
@@ -139,12 +137,8 @@ class DataModule {
     @Provides
     fun providesAppRepository(
         appDao: ApiDao,
-        appWebservice: AppWebservice,
-        apiLocalToDomainMapper: ApiLocalToDomainMapper,
-        apiRemoteToLocalMapper: ApiRemoteToLocalMapper
-    ): AppRepository = AppRepositoryImpl(
-        appDao, appWebservice, apiLocalToDomainMapper, apiRemoteToLocalMapper
-    )
+        appWebservice: AppWebservice
+    ): AppRepository = AppRepositoryImpl(appDao, appWebservice)
 
     // endregion Methods
 

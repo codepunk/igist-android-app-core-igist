@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.ui.loading
+package io.igist.core.presentation.loading
 
 import androidx.lifecycle.*
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate

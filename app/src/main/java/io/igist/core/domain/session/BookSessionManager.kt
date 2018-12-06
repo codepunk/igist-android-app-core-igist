@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.session
+package io.igist.core.domain.session
 
 import javax.inject.Inject
 import javax.inject.Singleton

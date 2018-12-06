@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.ui.base
+package io.igist.core.presentation.base
 
 import android.view.View.OnSystemUiVisibilityChangeListener
 import androidx.appcompat.app.AppCompatActivity

@@ -6,10 +6,10 @@
 package io.igist.core.di.module
 
 import io.igist.core.di.scope.ActivityScope
-import io.igist.core.ui.loading.LoadingActivity
+import io.igist.core.presentation.loading.LoadingActivity
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import io.igist.core.ui.loading.SelectBookActivity
+import io.igist.core.presentation.loading.SelectBookActivity
 
 /**
  * The [Module] used for dependency injection into all activities in the app.

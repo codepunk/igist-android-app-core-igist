@@ -20,7 +20,7 @@
             tools:ignore="SpellCheckInspection"/>
 
         <activity
-            android:name=".ui.loading.SelectBookActivity"
+            android:name=".presentation.loading.SelectBookActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="${applicationId}.intent.action.SELECT_BOOK"/>
@@ -30,7 +30,7 @@
         </activity>
 
         <activity
-            android:name=".ui.loading.LoadingActivity"
+            android:name=".presentation.loading.LoadingActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

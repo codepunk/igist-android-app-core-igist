@@ -12,7 +12,7 @@
 
     <fragment
         android:id="@+id/select_book_fragment"
-        android:name="io.igist.core.ui.loading.SelectBookFragment"
+        android:name="io.igist.core.presentation.loading.SelectBookFragment"
         android:label="@string/fragment_select_book_title"
         tools:layout="@layout/fragment_select_book"/>
 

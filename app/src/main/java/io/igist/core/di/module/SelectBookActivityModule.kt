@@ -8,8 +8,8 @@ package io.igist.core.di.module
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import io.igist.core.di.scope.FragmentScope
-import io.igist.core.ui.loading.SelectBookActivity
-import io.igist.core.ui.loading.SelectBookFragment
+import io.igist.core.presentation.loading.SelectBookActivity
+import io.igist.core.presentation.loading.SelectBookFragment
 
 /**
  * A [Module] for injecting dependencies into [SelectBookActivity].

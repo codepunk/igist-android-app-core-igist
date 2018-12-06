@@ -3,7 +3,7 @@
  * Author(s): Scott Slater
  */
 
-package io.igist.core.session
+package io.igist.core.domain.session
 
 class BookSession {
 }

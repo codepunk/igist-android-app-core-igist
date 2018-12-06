@@ -12,7 +12,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.loading.SelectBookActivity">
+        tools:context=".presentation.loading.SelectBookActivity">
 
         <fragment
             android:id="@+id/select_book_nav_fragment"
