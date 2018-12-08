@@ -6,6 +6,7 @@
 package io.igist.core.di.module
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -20,6 +21,7 @@ import io.igist.core.data.remote.webservice.AppWebservice
 import io.igist.core.data.repository.AppRepositoryImpl
 import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
+import io.igist.core.domain.session.AppSessionManager
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -136,9 +138,18 @@ class DataModule {
     @Singleton
     @Provides
     fun providesAppRepository(
+        @ApplicationContext context: Context,
+        sharedPreferences: SharedPreferences,
         appDao: ApiDao,
-        appWebservice: AppWebservice
-    ): AppRepository = AppRepositoryImpl(appDao, appWebservice)
+        appWebservice: AppWebservice,
+        appSessionManager: AppSessionManager
+    ): AppRepository = AppRepositoryImpl(
+        context,
+        sharedPreferences,
+        appDao,
+        appWebservice,
+        appSessionManager
+    )
 
     // endregion Methods
 

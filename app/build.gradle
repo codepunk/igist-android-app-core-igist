@@ -68,11 +68,13 @@ android {
         makeIntConstantValues(
                 variant,
                 Pair.of("API_VERSION", 0),
+                Pair.of("APP_VERSION", 4),
                 Pair.of("DEFAULT_BOOK_ID", 1)
         )
 
         makePreferenceKeys(
                 variant,
+                "VALIDATED_BETA_KEY",
                 "CURRENT_BOOK_ID"
         )
 
@@ -84,7 +86,8 @@ android {
 
         makeKeys(
                 variant,
-                "BOOK_ID"
+                "BOOK_ID",
+                "DESCRIPTION"
         )
     }
 }

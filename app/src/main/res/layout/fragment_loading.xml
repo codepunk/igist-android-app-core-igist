@@ -28,8 +28,40 @@
             android:id="@+id/texture_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:gravity="center_horizontal|bottom"/>
+            android:gravity="center_horizontal|bottom"
+            android:scaleType="centerCrop"/>
+
+        <Space
+            android:id="@+id/square_guide"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/offset_large"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/loading_progress"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/offset_large"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/square_guide"
+            app:layout_constraintStart_toStartOf="@id/square_guide"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/progress_description_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/offset_small"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
+            app:layout_constraintBottom_toTopOf="@id/loading_progress"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="@string/loading_api"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

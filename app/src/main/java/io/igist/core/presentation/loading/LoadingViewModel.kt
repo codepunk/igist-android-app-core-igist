@@ -38,16 +38,27 @@ class LoadingViewModel @Inject constructor(
     /**
      * A backing [LiveData] holding the API version. Used to trigger other loading processes.
      */
-    private val liveApiVersion = MutableLiveData<Int>().apply {
+    @Suppress("WEAKER_ACCESS")
+    val liveApiVersion: MutableLiveData<Int> = MutableLiveData<Int>().apply {
         value = BuildConfig.API_VERSION
     }
 
     /**
      * A [MediatorLiveData] holding the application [Api] information.
      */
-    val liveApi: LiveData<DataUpdate<Api, Api>> =
+    val liveApi: LiveData<DataUpdate<Api, Api>> = MutableLiveData()
+    /* TODO TEMP
         Transformations.switchMap(liveApiVersion) { apiVersion ->
-            appRepository.getApi(apiVersion)
+            appRepository.load(apiVersion)
+        }
+    */
+
+    /**
+     * A [MediatorLiveData] holding loading information.
+     */
+    val liveLoading: LiveData<DataUpdate<Int, Boolean>> =
+        Transformations.switchMap(liveApiVersion) { apiVersion ->
+            appRepository.load(apiVersion)
         }
 
     /**
@@ -61,6 +72,9 @@ class LoadingViewModel @Inject constructor(
 
     init {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+
+        /* TODO TEMP */
+        appRepository.load() // TODO apiVersion? appVersion?
     }
 
     // endregion Constructors
@@ -101,11 +115,6 @@ class LoadingViewModel @Inject constructor(
         sharedPreferences.edit()
             .putLong(PREF_KEY_CURRENT_BOOK_ID, bookId)
             .apply()
-    }
-
-    @Suppress("UNUSED")
-    fun load() {
-        // TODO This will be a massive and complicated method that will perform all loading
     }
 
     // endregion Methods

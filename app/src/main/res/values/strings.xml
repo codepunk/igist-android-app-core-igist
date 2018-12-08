@@ -8,4 +8,32 @@
 
     <string name="fragment_loading_title">Loading</string>
 
+    <!-- region Loading -->
+
+    <string name="loading_api">Loading App defaults…</string>
+
+    <string name="loading_api_finished">Loading App defaults finished</string>
+
+    <string name="loading_cancelled">Loading cancelled</string>
+
+    <string name="loading_finished">Loading finished</string>
+
+    <!-- endregion Loading -->
+
+    <!-- region Result messages -->
+
+    <string name="result_message_already_exists">A user already exists with that username and/or email.</string>
+
+    <string name="result_message_bad_key">The beta key you entered is invalid.</string>
+
+    <string name="result_message_null_message">(Null message)</string>
+
+    <string name="result_message_registration_error">There was an error during registration.</string>
+
+    <string name="result_message_success">Success!</string>
+
+    <string name="result_message_unrecognized">An unrecognized message was returned from the network (%1$s).</string>
+
+    <!-- endregion Result messages -->
+
 </resources>

@@ -4,6 +4,13 @@
   -->
 
 <resources>
+    <dimen name="offset_small">4dp</dimen>
+    <dimen name="offset_standard">8dp</dimen>
+    <dimen name="offset_medium">12dp</dimen>
+    <dimen name="offset_large">16dp</dimen>
+    <dimen name="offset_xlarge">24dp</dimen>
+    <dimen name="offset_xxlarge">48dp</dimen>
+
     <dimen name="size_small">4dp</dimen>
     <dimen name="size_standard">8dp</dimen>
     <dimen name="size_medium">12dp</dimen>

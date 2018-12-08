@@ -17,10 +17,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.*
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
 import dagger.android.support.AndroidSupportInjection
+import io.igist.core.BuildConfig.DEBUG
+import io.igist.core.BuildConfig.KEY_DESCRIPTION
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
 import io.igist.core.domain.model.Api
@@ -90,12 +92,18 @@ class LoadingFragment :
      */
     private lateinit var textureViewPanner: TextureViewPanner
 
+    /**
+     * The default visibility for [FragmentLoadingBinding.progressDescriptionTxt].
+     */
+    // TODO Set this based on a developer options setting
+    private val defaultProgressDescriptionVisibility: Int = View.VISIBLE
+
     // endregion Properties
 
     // region Lifecycle methods
 
     /**
-     * Performs dependency injection.
+     * Injects dependencies into this fragment.
      */
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
@@ -119,6 +127,7 @@ class LoadingFragment :
         }
 
         loadingViewModel.liveApi.observe(this, Observer { onApi(it) })
+        loadingViewModel.liveLoading.observe(this, Observer { onLoadingUpdate(it) })
     }
 
     /**
@@ -145,6 +154,10 @@ class LoadingFragment :
         super.onViewCreated(view, savedInstanceState)
         textureViewPanner = TextureViewPanner.Builder(binding.textureView).build()
         binding.textureView.surfaceTextureListener = this
+        binding.progressDescriptionTxt.visibility = when (DEBUG) {
+            true -> View.VISIBLE
+            false -> View.INVISIBLE
+        }
     }
 
     /**
@@ -239,6 +252,37 @@ class LoadingFragment :
      */
     private fun onApi(update: DataUpdate<Api, Api>) {
         Log.d("LoadingFragment", "onApi: update=$update")
+    }
+
+    /**
+     * Reacts to loading data updates.
+     */
+    private fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) {
+        Log.d("LoadingFragment", "onLoadingUpdate: update=$update")
+        when (update) {
+            is PendingUpdate -> {
+                binding.progressDescriptionTxt.visibility = View.INVISIBLE
+                binding.loadingProgress.visibility = View.INVISIBLE
+            }
+            is ProgressUpdate -> {
+                binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
+                binding.loadingProgress.visibility = View.VISIBLE
+                val loadStep: Int = update.progress.getOrElse(0) { 0 } ?: 0
+                val loadTotalSteps: Int = update.progress.getOrElse(1) { 0 } ?: 0
+                val description = update.data?.getString(KEY_DESCRIPTION) ?: ""
+                binding.loadingProgress.progress = loadStep
+                binding.loadingProgress.isIndeterminate = (loadTotalSteps == 0)
+                binding.progressDescriptionTxt.text = description
+            }
+            is SuccessUpdate -> {
+                binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
+                binding.loadingProgress.visibility = View.VISIBLE
+            }
+            is FailureUpdate -> {
+                binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
+                binding.loadingProgress.visibility = View.VISIBLE
+            }
+        }
     }
 
     // endregion Methods

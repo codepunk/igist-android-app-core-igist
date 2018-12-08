@@ -23,7 +23,7 @@ enum class IgistMode(val value: Int) {
      * A mode that indicates that a beta key is required to use the app.
      */
     @field:Json(name = "1")
-    SHOW_BETA_PAGE(1);
+    REQUIRE_BETA_KEY(1);
 
     companion object {
 

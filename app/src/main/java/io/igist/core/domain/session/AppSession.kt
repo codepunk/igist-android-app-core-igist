@@ -5,5 +5,5 @@
 
 package io.igist.core.domain.session
 
-class BookSession {
+class AppSession {
 }
