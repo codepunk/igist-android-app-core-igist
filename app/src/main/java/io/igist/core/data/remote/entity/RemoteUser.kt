@@ -10,7 +10,7 @@ import io.igist.core.data.remote.annotation.BooleanInt
 import java.util.*
 
 /**
- * A data class representing a user.
+ * Remote implementation of a data class representing a user.
  */
 data class User(
 

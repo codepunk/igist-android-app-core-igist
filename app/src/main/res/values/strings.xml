@@ -10,9 +10,27 @@
 
     <!-- region Loading -->
 
+    <string name="loading_step_indeterminate">Step %1$d: %2$s</string>
+
+    <string name="loading_step">Step %1$d of %2$d: %3$s</string>
+
     <string name="loading_api">Loading App defaults…</string>
 
-    <string name="loading_api_finished">Loading App defaults finished</string>
+    <string name="api_loaded">App defaults loaded</string>
+
+    <string name="loading_validating_beta_key">Validating beta key…</string>
+
+    <string name="loading_beta_key_validated">Beta key validated</string>
+
+    <string name="loading_beta_key_required">Beta key required</string>
+
+    <string name="loading_beta_key_invalid">An invalid beta key was entered</string>
+
+    <string name="loading_content_metadata">Loading content metadata…</string>
+
+    <string name="content_metadata_loaded">Content metadata loaded</string>
+
+    <string name="loading_unknown_error">An unknown error occurred</string>
 
     <string name="loading_cancelled">Loading cancelled</string>
 

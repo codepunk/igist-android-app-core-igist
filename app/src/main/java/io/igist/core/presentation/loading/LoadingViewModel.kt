@@ -72,9 +72,6 @@ class LoadingViewModel @Inject constructor(
 
     init {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-
-        /* TODO TEMP */
-        appRepository.load() // TODO apiVersion? appVersion?
     }
 
     // endregion Constructors

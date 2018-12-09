@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
 import io.igist.core.domain.model.IgistMode
 
 /**
- * A data class representing basic API information to be stored in the local database.
+ * Locally-cached implementation of a data class representing basic API information.
  */
 @Entity(tableName = "api")
 data class LocalApi(

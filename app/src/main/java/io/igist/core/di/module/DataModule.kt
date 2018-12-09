@@ -18,6 +18,7 @@ import io.igist.core.data.remote.adapter.DateJsonAdapter
 import io.igist.core.data.remote.converter.MoshiEnumConverterFactory
 import io.igist.core.data.remote.interceptor.AuthorizationInterceptor
 import io.igist.core.data.remote.webservice.AppWebservice
+import io.igist.core.data.remote.webservice.AppWebserviceWrapper
 import io.igist.core.data.repository.AppRepositoryImpl
 import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
@@ -107,9 +108,9 @@ class DataModule {
      */
     @Provides
     @Singleton
-    fun providesAuthWebservice(
+    fun providesAppWebservice(
         retrofit: Retrofit
-    ): AppWebservice = retrofit.create(AppWebservice::class.java)
+    ): AppWebservice = AppWebserviceWrapper(retrofit.create(AppWebservice::class.java))
 
     /**
      * Provides an [IgistDb] instance.

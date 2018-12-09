@@ -9,7 +9,7 @@ import com.squareup.moshi.Json
 import io.igist.core.domain.model.ResultMessage
 
 /**
- * Remote data class representing a message returned from the server.
+ * Remote implementation of a data class representing a message returned from the server.
  */
 class RemoteMessage(
 

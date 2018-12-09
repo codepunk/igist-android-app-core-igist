@@ -272,7 +272,10 @@ class LoadingFragment :
                 val description = update.data?.getString(KEY_DESCRIPTION) ?: ""
                 binding.loadingProgress.progress = loadStep
                 binding.loadingProgress.isIndeterminate = (loadTotalSteps == 0)
-                binding.progressDescriptionTxt.text = description
+                binding.progressDescriptionTxt.text = when (loadTotalSteps) {
+                    0 -> getString(R.string.loading_step_indeterminate, loadStep, description)
+                    else -> getString(R.string.loading_step, loadStep, loadTotalSteps, description)
+                }
             }
             is SuccessUpdate -> {
                 binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility

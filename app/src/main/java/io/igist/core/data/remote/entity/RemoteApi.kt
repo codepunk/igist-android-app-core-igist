@@ -9,7 +9,7 @@ import com.squareup.moshi.Json
 import io.igist.core.domain.model.IgistMode
 
 /**
- * A data class representing basic API information fetched from the network.
+ * Remote implementation of a data class representing basic API information.
  */
 data class RemoteApi(
 

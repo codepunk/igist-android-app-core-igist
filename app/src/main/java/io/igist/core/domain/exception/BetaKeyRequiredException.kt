@@ -7,7 +7,7 @@ package io.igist.core.domain.exception
 
 import java.lang.IllegalStateException
 
-class BetaKeyMissingException : BetaKeyException {
+class BetaKeyRequiredException : BetaKeyException {
 
     // region Constructors
 
