@@ -35,7 +35,6 @@ import io.igist.core.BuildConfig.KEY_BOOK_ID
 import io.igist.core.R
 import io.igist.core.databinding.FragmentSelectBookBinding
 import io.igist.core.domain.model.Book
-import kotlinx.android.synthetic.main.listitem_book.view.*
 import java.util.*
 import javax.inject.Inject
 
@@ -198,6 +197,7 @@ class SelectBookFragment : Fragment() {
             val bitmap: Bitmap = BitmapFactory.decodeResource(resources, resId)
             val drawable: RoundedBitmapDrawable =
                 RoundedBitmapDrawableFactory.create(resources, bitmap)
+            drawable.isCircular = true
             previewImage.setImageDrawable(drawable)
             descriptionText.text = book.description
         }
