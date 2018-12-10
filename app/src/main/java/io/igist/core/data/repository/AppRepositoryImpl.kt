@@ -14,6 +14,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig
+import io.igist.core.BuildConfig.DEFAULT_BOOK_ID
 import io.igist.core.BuildConfig.KEY_DESCRIPTION
 import io.igist.core.BuildConfig.PREF_KEY_VALIDATED_BETA_KEY
 import io.igist.core.R
@@ -30,10 +31,7 @@ import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
 import io.igist.core.domain.exception.BadBetaKeyException
 import io.igist.core.domain.exception.BetaKeyRequiredException
-import io.igist.core.domain.model.Api
-import io.igist.core.domain.model.ContentList
-import io.igist.core.domain.model.IgistMode
-import io.igist.core.domain.model.ResultMessage
+import io.igist.core.domain.model.*
 import io.igist.core.domain.session.AppSessionManager
 import retrofit2.Response
 import java.util.concurrent.CancellationException
@@ -119,6 +117,7 @@ class AppRepositoryImpl @Inject constructor(
      * Kicks off the entire loading/onboarding process.
      */
     override fun load(
+        bookId: Long,
         apiVersion: Int,
         appVersion: Int,
         alwaysFetchApi: Boolean,
@@ -219,7 +218,7 @@ class AppRepositoryImpl @Inject constructor(
 
         override fun doInBackground(vararg params: Void?): ResultUpdate<Api, Api> {
             // Retrieve any cached Api
-            val localApi = apiDao.retrieve(apiVersion)
+            val localApi = apiDao.retrieve(DEFAULT_BOOK_ID, apiVersion)
             var api: Api? = localApi.toApiOrNull()
 
             // Check if cancelled
@@ -244,10 +243,10 @@ class AppRepositoryImpl @Inject constructor(
 
                 remoteApiUpdate.result?.body()?.apply {
                     // Convert & insert remote Api into the local database
-                    apiDao.insert(this.toLocalApi())
+                    apiDao.insert(this.toLocalApi(DEFAULT_BOOK_ID))
 
                     // Re-retrieve the newly-inserted Api from the local database
-                    apiDao.retrieve(apiVersion)?.let {
+                    apiDao.retrieve(DEFAULT_BOOK_ID, apiVersion)?.let {
                         api = it.toApi()
                     }
                 }
@@ -363,7 +362,7 @@ class AppRepositoryImpl @Inject constructor(
             // Optionally fetch latest ContentList from the network
             if (contentLists == null || alwaysFetch) {
                 val remoteContentListUpdate: ResultUpdate<Void, Response<List<RemoteContentList>>> =
-                    appWebservice.content(BuildConfig.DEFAULT_BOOK_ID.toLong(), appVersion)
+                    appWebservice.content(BuildConfig.DEFAULT_BOOK_ID, appVersion)
                         .toResultUpdate(data)
 
                 // Check if cancelled or failure

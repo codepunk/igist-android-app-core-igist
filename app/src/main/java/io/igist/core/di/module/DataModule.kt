@@ -13,15 +13,18 @@ import dagger.Module
 import dagger.Provides
 import io.igist.core.data.local.database.IgistDb
 import io.igist.core.data.local.dao.ApiDao
+import io.igist.core.data.local.dao.BookDao
 import io.igist.core.data.remote.adapter.BooleanIntAdapter
 import io.igist.core.data.remote.adapter.DateJsonAdapter
 import io.igist.core.data.remote.converter.MoshiEnumConverterFactory
 import io.igist.core.data.remote.interceptor.AuthorizationInterceptor
 import io.igist.core.data.remote.webservice.AppWebservice
 import io.igist.core.data.remote.webservice.AppWebserviceWrapper
-import io.igist.core.data.repository.AppRepositoryImpl
+import io.igist.core.data.repository.AppRepositoryImpl2
+import io.igist.core.data.repository.BookRepositoryImpl
 import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
+import io.igist.core.domain.contract.BookRepository
 import io.igist.core.domain.session.AppSessionManager
 import okhttp3.Cache
 import okhttp3.OkHttpClient
@@ -39,6 +42,10 @@ private const val CACHE_SIZE: Long = 10 * 1024 * 1024
 
 // endregion Constants
 
+/**
+ * A dependency injection module that provides all data access-related dependencies for both
+ * remote and local data retrieval and storage.
+ */
 @Suppress("unused")
 @Module(includes = [AppModule::class])
 class DataModule {
@@ -117,24 +124,27 @@ class DataModule {
      */
     @Singleton
     @Provides
-    fun provideDb(@ApplicationContext context: Context): IgistDb {
-        return Room
-            .databaseBuilder(context, IgistDb::class.java, "igist.db")
-            .fallbackToDestructiveMigration()
-            .build()
-    }
+    fun provideDb(@ApplicationContext context: Context): IgistDb = Room
+        .databaseBuilder(context, IgistDb::class.java, "igist.db")
+        .fallbackToDestructiveMigration()
+        .build()
 
     /**
      * Creates an [ApiDao] instance.
      */
     @Singleton
     @Provides
-    fun providesApiDao(db: IgistDb): ApiDao {
-        return db.apiDao()
-    }
+    fun providesApiDao(db: IgistDb): ApiDao = db.apiDao()
 
     /**
-     * Creates a [AppRepository] instance.
+     * Creates a [BookDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesBookDao(db: IgistDb): BookDao = db.bookDao()
+
+    /**
+     * Creates an [AppRepository] instance.
      */
     @Singleton
     @Provides
@@ -144,13 +154,25 @@ class DataModule {
         appDao: ApiDao,
         appWebservice: AppWebservice,
         appSessionManager: AppSessionManager
-    ): AppRepository = AppRepositoryImpl(
+    ): AppRepository = AppRepositoryImpl2(
         context,
         sharedPreferences,
         appDao,
         appWebservice,
         appSessionManager
     )
+
+    /**
+     * Creates a [BookRepository] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesBookRepository(
+        @ApplicationContext context: Context,
+        sharedPreferences: SharedPreferences,
+        bookDao: BookDao,
+        moshi: Moshi
+    ): BookRepository = BookRepositoryImpl(context, sharedPreferences, bookDao, moshi)
 
     // endregion Methods
 

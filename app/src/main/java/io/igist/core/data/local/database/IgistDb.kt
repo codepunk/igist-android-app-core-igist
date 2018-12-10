@@ -11,10 +11,13 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import io.igist.core.data.local.converters.IgistModeTypeConverter
 import io.igist.core.data.local.dao.ApiDao
+import io.igist.core.data.local.dao.BookDao
 import io.igist.core.data.local.entity.LocalApi
+import io.igist.core.data.local.entity.LocalBook
 
 @Database(
     entities = [
+        LocalBook::class,
         LocalApi::class
     ],
     version = 1,
@@ -28,9 +31,14 @@ abstract class IgistDb : RoomDatabase() {
     // region Methods
 
     /**
-     * a [Dao] for the [LocalApi] class.
+     * A [Dao] for the [LocalApi] class.
      */
     abstract fun apiDao(): ApiDao
+
+    /**
+     * A [Dao] for the [LocalBook] class.
+     */
+    abstract fun bookDao(): BookDao
 
     // endregion Methods
 

@@ -126,7 +126,7 @@ class LoadingFragment :
             lifecycle.addObserver(this)
         }
 
-        loadingViewModel.liveApi.observe(this, Observer { onApi(it) })
+        // loadingViewModel.liveApi.observe(this, Observer { onApi(it) })
         loadingViewModel.liveLoading.observe(this, Observer { onLoadingUpdate(it) })
     }
 

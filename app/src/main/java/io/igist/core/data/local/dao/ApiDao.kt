@@ -10,25 +10,25 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.igist.core.data.local.entity.LocalApi
-import io.igist.core.domain.model.Api
 
 /**
  * [Dao] class for performing API-related operations on the local database.
  */
 @Dao
-abstract class ApiDao {
+interface ApiDao {
 
     /**
      * Inserts a single book (minus the chapter info) into the local database and returns the
      * book id.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(api: LocalApi): Long
+    fun insert(api: LocalApi): Long
 
     /**
-     * Retrieves [Api] information the local database based on the supplied [version].
+     * Retrieves [LocalApi] information from the local database based on the supplied [bookId]
+     * and [apiVersion].
      */
-    @Query("SELECT * FROM api WHERE version = :version")
-    abstract fun retrieve(version: Int): LocalApi?
+    @Query("SELECT * FROM api WHERE book_id = :bookId AND api_version = :apiVersion")
+    fun retrieve(bookId: Long, apiVersion: Int): LocalApi?
 
 }

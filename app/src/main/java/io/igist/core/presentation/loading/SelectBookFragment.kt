@@ -9,6 +9,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +18,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.BuildConfig.DEFAULT_BOOK_ID
 import io.igist.core.BuildConfig.KEY_BOOK_ID
 import io.igist.core.R
 import io.igist.core.databinding.FragmentSelectBookBinding
+import io.igist.core.domain.model.Book
 import javax.inject.Inject
 
 /**
@@ -48,9 +51,9 @@ class SelectBookFragment : Fragment() {
     /**
      * The [SelectBookViewModel] instance backing this fragment.
      */
-    private val loadingViewModel: LoadingViewModel by lazy {
+    private val selectBookViewModel: SelectBookViewModel by lazy {
         ViewModelProviders.of(requireActivity(), viewModelFactory)
-            .get(LoadingViewModel::class.java)
+            .get(SelectBookViewModel::class.java)
     }
 
     // region Lifecycle methods
@@ -62,7 +65,12 @@ class SelectBookFragment : Fragment() {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
 
-        loadingViewModel.bookIdData.observe(
+        selectBookViewModel.books.observe(
+            this,
+            Observer { books -> onBooks(books) }
+        )
+
+        selectBookViewModel.bookIdData.observe(
             this,
             Observer { bookId -> onBookSelected(bookId) }
         )
@@ -98,13 +106,17 @@ class SelectBookFragment : Fragment() {
          * robust in the future with a RecyclerView of books, for example.
          */
         binding.igistBtn.setOnClickListener {
-            loadingViewModel.selectBook(DEFAULT_BOOK_ID.toLong())
+            selectBookViewModel.selectBook(DEFAULT_BOOK_ID)
         }
     }
 
     // endregion Lifecycle methods
 
     // region Methods
+
+    private fun onBooks(books: DataUpdate<List<Book>, List<Book>>) {
+        Log.d("SelectBookFragment", "onBooks: books=$books")
+    }
 
     /**
      * Processes a book selection.

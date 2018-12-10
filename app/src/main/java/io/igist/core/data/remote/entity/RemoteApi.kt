@@ -17,7 +17,7 @@ data class RemoteApi(
      * The API version.
      */
     @field:Json(name = "version")
-    val version: Int,
+    val apiVersion: Int,
 
     /**
      * The "mode" (i.e. behavior) associated with the current API version.

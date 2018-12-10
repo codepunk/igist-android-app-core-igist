@@ -5,6 +5,7 @@
 
 package io.igist.core.data.remote.webservice
 
+import io.igist.core.BuildConfig
 import io.igist.core.data.remote.HEADER_ACCEPT_APPLICATION_JSON
 import io.igist.core.data.remote.entity.RemoteApi
 import io.igist.core.data.remote.entity.RemoteContentList
@@ -28,6 +29,11 @@ interface AppWebservice {
     fun api(@Path(value = "apiVersion") apiVersion: Int): Call<RemoteApi>
 
     /**
+     * Gets the app API-level information using the default API version stored in [BuildConfig].
+     */
+    fun api(): Call<RemoteApi>
+
+    /**
      * Checks a beta key against the server.
      */
     @GET("api/beta_key/{betaKey}")
@@ -35,7 +41,7 @@ interface AppWebservice {
     fun betaKey(@Path(value = "betaKey") betaKey: String): Call<RemoteMessage>
 
     /**
-     * Gets the book content for the given [bookId] and [appVersion].
+     * Gets the book content for the given [appVersion].
      */
     @GET("api/statusnew/{appVersion}")
     @Headers(HEADER_ACCEPT_APPLICATION_JSON)
@@ -47,4 +53,11 @@ interface AppWebservice {
      * drop the book ID and call the appVersion-only implementation.
      */
     fun content(bookId: Long, appVersion: Int): Call<List<RemoteContentList>>
+
+    /**
+     * A version of [content] that allows for possible multiple book IDs. Gets the book content
+     * for the given [bookId]. For now, this method's implementation will just
+     * drop the book ID and call the appVersion-only implementation.
+     */
+    fun content(bookId: Long): Call<List<RemoteContentList>>
 }

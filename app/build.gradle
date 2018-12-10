@@ -65,12 +65,9 @@ android {
     applicationVariants.all { variant ->
         variant.buildConfigField("boolean", "SET_DEFAULT_BOOK_ID", "false")
 
-        makeIntConstantValues(
-                variant,
-                Pair.of("API_VERSION", 0),
-                Pair.of("APP_VERSION", 4),
-                Pair.of("DEFAULT_BOOK_ID", 1)
-        )
+        makeConstantValue(variant, ConstantType.INTEGER, "API_VERSION", "0")
+        makeConstantValue(variant, ConstantType.INTEGER, "APP_VERSION", "4")
+        makeConstantValue(variant, ConstantType.LONG, "DEFAULT_BOOK_ID", "1")
 
         makePreferenceKeys(
                 variant,
@@ -86,6 +83,8 @@ android {
 
         makeKeys(
                 variant,
+                "API_VERSION",
+                "APP_VERSION",
                 "BOOK_ID",
                 "DESCRIPTION"
         )
@@ -133,24 +132,17 @@ dependencies {
 
 // region Methods
 
-static def makeIntConstantValues(BaseVariant variant, Pair<String, Integer>... pairs) {
-    pairs.each { pair ->
-        def buildConfigValue = "${pair.second}"
-        variant.buildConfigField("int", pair.first, buildConfigValue)
+static def makeConstantValue(
+        BaseVariant variant,
+        ConstantType type,
+        String name,
+        String value
+) {
+    def buildConfigValue = String.format(type.configFieldFormat, value)
+    variant.buildConfigField(type.configFieldType, name, buildConfigValue)
 
-        def resourceName = pair.first.toLowerCase(Locale.US)
-        variant.resValue("integer", resourceName, pair.second.toString())
-    }
-}
-
-static def makeStringConstantValues(BaseVariant variant, Pair<String, String>... pairs) {
-    pairs.each { pair ->
-        def buildConfigValue = "\"${pair.second}\""
-        variant.buildConfigField("String", pair.first, buildConfigValue)
-
-        def resourceName = pair.first.toLowerCase(Locale.US)
-        variant.resValue("string", resourceName, pair.second)
-    }
+    def resourceName = name.toLowerCase(Locale.US)
+    variant.resValue(type.resourceType, resourceName, value)
 }
 
 static def makeKeys(BaseVariant variant, String... keys) {
@@ -161,7 +153,6 @@ static def makeKeys(BaseVariant variant, String... keys) {
     }
 }
 
-
 static def makePreferenceKeys(BaseVariant variant, String... keys) {
     keys.each { key ->
         def fullKey = "PREF_KEY_$key"
@@ -171,6 +162,22 @@ static def makePreferenceKeys(BaseVariant variant, String... keys) {
         def resourceName = fullKey.toLowerCase(Locale.US)
         def resourceValue = "${variant.applicationId}.$fullKey"
         variant.resValue("string", resourceName, resourceValue)
+    }
+}
+
+def enum ConstantType {
+    INTEGER("int", "integer", "%s"),
+    LONG("long", "integer", "%sL"),
+    STRING("String", "string", "\"%s\"")
+
+    public final String configFieldType
+    public final String resourceType
+    public final String configFieldFormat
+
+    ConstantType(String configFieldType, String resourceType, String configFieldFormat) {
+        this.configFieldType = configFieldType
+        this.resourceType = resourceType
+        this.configFieldFormat = configFieldFormat
     }
 }
 

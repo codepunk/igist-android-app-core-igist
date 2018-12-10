@@ -72,7 +72,7 @@ class IgistApp :
         // is removed from the back stack.
         if (SET_DEFAULT_BOOK_ID && !sharedPreferences.contains(PREF_KEY_CURRENT_BOOK_ID)) {
             sharedPreferences.edit()
-                .putLong(PREF_KEY_CURRENT_BOOK_ID, DEFAULT_BOOK_ID.toLong())
+                .putLong(PREF_KEY_CURRENT_BOOK_ID, DEFAULT_BOOK_ID)
                 .apply()
         }
     }

@@ -6,13 +6,11 @@
 package io.igist.core.presentation.loading
 
 import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.lifecycle.*
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
-import io.igist.core.BuildConfig
+import io.igist.core.BuildConfig.DEFAULT_BOOK_ID
 import io.igist.core.BuildConfig.PREF_KEY_CURRENT_BOOK_ID
 import io.igist.core.domain.contract.AppRepository
-import io.igist.core.domain.model.Api
 import javax.inject.Inject
 
 /**
@@ -30,90 +28,32 @@ class LoadingViewModel @Inject constructor(
      */
     private val appRepository: AppRepository
 
-) : ViewModel(),
-    OnSharedPreferenceChangeListener {
+) : ViewModel() {
 
     // region Properties
 
     /**
-     * A backing [LiveData] holding the API version. Used to trigger other loading processes.
+     * A [LiveData] holding the currently-selected book ID.
      */
-    @Suppress("WEAKER_ACCESS")
-    val liveApiVersion: MutableLiveData<Int> = MutableLiveData<Int>().apply {
-        value = BuildConfig.API_VERSION
-    }
-
-    /**
-     * A [MediatorLiveData] holding the application [Api] information.
-     */
-    val liveApi: LiveData<DataUpdate<Api, Api>> = MutableLiveData()
-    /* TODO TEMP
-        Transformations.switchMap(liveApiVersion) { apiVersion ->
-            appRepository.load(apiVersion)
-        }
-    */
+    val bookIdData: MutableLiveData<Long> = MutableLiveData()
 
     /**
      * A [MediatorLiveData] holding loading information.
      */
     val liveLoading: LiveData<DataUpdate<Int, Boolean>> =
-        Transformations.switchMap(liveApiVersion) { apiVersion ->
-            appRepository.load(apiVersion)
+        Transformations.switchMap(bookIdData) { bookId ->
+            appRepository.load(bookId)
         }
-
-    /**
-     * A [LiveData] holding the selected book ID.
-     */
-    val bookIdData: MutableLiveData<Long> = MutableLiveData()
 
     // endregion Properties
 
     // region Constructors
 
     init {
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        val bookId: Long = sharedPreferences.getLong(PREF_KEY_CURRENT_BOOK_ID, DEFAULT_BOOK_ID)
+        bookIdData.postValue(bookId)
     }
 
     // endregion Constructors
-
-    // region Inherited methods
-
-    /**
-     * Unregisters as a shared preference change listener.
-     */
-    override fun onCleared() {
-        super.onCleared()
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    // endregion Inherited methods
-
-    // region Implemented methods
-
-    /**
-     * Sets the new value in [bookIdData].
-     */
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
-        when (key) {
-            PREF_KEY_CURRENT_BOOK_ID -> {
-                bookIdData.value = sharedPreferences.getLong(key, -1)
-            }
-        }
-    }
-
-    // endregion Implemented methods
-
-    // region Methods
-
-    /**
-     * Called when the user selects a book.
-     */
-    fun selectBook(bookId: Long) {
-        sharedPreferences.edit()
-            .putLong(PREF_KEY_CURRENT_BOOK_ID, bookId)
-            .apply()
-    }
-
-    // endregion Methods
 
 }

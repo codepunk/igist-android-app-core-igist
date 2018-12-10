@@ -2,15 +2,71 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d66b84baa3d5fdd1eb28da6576db1453",
+    "identityHash": "87cbf8a5246b7b488707a308f5a986a9",
     "entities": [
       {
-        "tableName": "api",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`version` INTEGER NOT NULL, `igist` INTEGER NOT NULL, `survey_link` TEXT NOT NULL, PRIMARY KEY(`version`))",
+        "tableName": "book",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `image_name` TEXT NOT NULL, `apiVersion` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
-            "fieldPath": "version",
-            "columnName": "version",
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageName",
+            "columnName": "image_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apiVersion",
+            "columnName": "apiVersion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appVersion",
+            "columnName": "app_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "api",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`book_id` INTEGER NOT NULL, `api_version` INTEGER NOT NULL, `igist` INTEGER NOT NULL, `survey_link` TEXT NOT NULL, PRIMARY KEY(`book_id`, `api_version`))",
+        "fields": [
+          {
+            "fieldPath": "bookId",
+            "columnName": "book_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apiVersion",
+            "columnName": "api_version",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -29,7 +85,8 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "version"
+            "book_id",
+            "api_version"
           ],
           "autoGenerate": false
         },
@@ -39,7 +96,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"d66b84baa3d5fdd1eb28da6576db1453\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"87cbf8a5246b7b488707a308f5a986a9\")"
     ]
   }
 }

@@ -7,21 +7,28 @@ package io.igist.core.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import io.igist.core.domain.model.IgistMode
 
 /**
  * Locally-cached implementation of a data class representing basic API information.
  */
-@Entity(tableName = "api")
+@Entity(
+    tableName = "api",
+    primaryKeys = ["book_id", "api_version"]
+)
 data class LocalApi(
+
+    /**
+     * The book ID.
+     */
+    @ColumnInfo(name = "book_id")
+    val bookId: Long,
 
     /**
      * The API version.
      */
-    @PrimaryKey
-    @ColumnInfo(name = "version")
-    val version: Int,
+    @ColumnInfo(name = "api_version")
+    val apiVersion: Int,
 
     /**
      * The "mode" (i.e. behavior) associated with the current API version.

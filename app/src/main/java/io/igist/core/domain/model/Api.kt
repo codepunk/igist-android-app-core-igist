@@ -11,9 +11,14 @@ package io.igist.core.domain.model
 data class Api(
 
     /**
+     * The book ID.
+     */
+    val bookId: Long,
+
+    /**
      * The API version.
      */
-    val version: Int,
+    val apiVersion: Int,
 
     /**
      * The "mode" (i.e. behavior) associated with the current API version.
