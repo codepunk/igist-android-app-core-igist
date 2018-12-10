@@ -28,6 +28,10 @@ import java.lang.reflect.Type
 import java.util.*
 import java.util.concurrent.CancellationException
 
+/**
+ * Implementation of [BookRepository] that parses R.raw.books to get the current book list.
+ */
+@Suppress("UNUSED")
 class BookRepositoryImpl(
 
     @ApplicationContext
@@ -41,10 +45,19 @@ class BookRepositoryImpl(
 
 ) : BookRepository {
 
+    /**
+     * The current [BookTask].
+     */
     private var bookTask: BookTask? = null
 
-    val bookData: MediatorLiveData<DataUpdate<List<Book>, List<Book>>> = MediatorLiveData()
+    /**
+     * A [LiveData] containing book list updates.
+     */
+    private val bookData: MediatorLiveData<DataUpdate<List<Book>, List<Book>>> = MediatorLiveData()
 
+    /**
+     * Returns a [LiveData] containing book list updates.
+     */
     override fun getBooks(): LiveData<DataUpdate<List<Book>, List<Book>>> {
 
         bookTask?.cancel(true)

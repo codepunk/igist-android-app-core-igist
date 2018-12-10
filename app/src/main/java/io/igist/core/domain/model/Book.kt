@@ -26,9 +26,9 @@ data class Book(
     val description: String,
 
     /**
-     * An image name associated with this book.
+     * The name of a preview image associated with this book.
      */
-    val imageName: String,
+    val previewImageName: String,
 
     /**
      * The book API version. This specifies the "mode" (i.e. beta key required), survey link

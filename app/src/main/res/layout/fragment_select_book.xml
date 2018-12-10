@@ -33,33 +33,51 @@
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="invisible"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/title_txt"
+            style="@style/IgistTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/offset_xlarge"
+            android:text="@string/fragment_select_book_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/book_recycler"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:layout_marginTop="@dimen/offset_standard"
+            android:paddingBottom="@dimen/offset_xlarge"
+            android:paddingStart="@dimen/offset_xlarge"
+            android:paddingEnd="@dimen/offset_xlarge"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/square_guide"
+            app:layout_constraintStart_toStartOf="@id/square_guide"
+            app:layout_constraintTop_toBottomOf="@id/title_txt"/>
 
         <ScrollView
             android:id="@+id/content_scroll"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:clipToPadding="false"
-            android:paddingTop="@dimen/offset_xlarge"
+            android:paddingTop="@dimen/offset_standard"
             android:paddingBottom="@dimen/offset_xlarge"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/square_guide"
             app:layout_constraintStart_toStartOf="@id/square_guide"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/title_txt"
+            android:visibility="gone">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/title_txt"
-                    style="@style/IgistTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/fragment_select_book_title"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
 
                 <Button
                     android:id="@+id/igist_btn"
@@ -67,9 +85,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/size_standard"
                     android:text="@string/app_name"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/title_txt"/>
+                    app:layout_constraintTop_toTopOf="parent"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

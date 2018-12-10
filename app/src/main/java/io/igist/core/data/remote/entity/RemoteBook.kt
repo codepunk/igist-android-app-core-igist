@@ -28,10 +28,10 @@ class RemoteBook(
     val description: String,
 
     /**
-     * An image name associated with this book.
+     * The name of a preview image associated with this book.
      */
-    @field:Json(name = "image_name")
-    val imageName: String,
+    @field:Json(name = "preview_image_name")
+    val previewImageName: String,
 
     /**
      * The book API version. This specifies the "mode" (i.e. beta key required), survey link

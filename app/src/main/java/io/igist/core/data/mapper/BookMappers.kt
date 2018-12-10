@@ -12,13 +12,13 @@ import io.igist.core.domain.model.Book
 /**
  * Converts a [LocalBook] to a domain [Book].
  */
-fun LocalBook.toBook(): Book = Book(id, title, description, imageName, apiVersion, appVersion)
+fun LocalBook.toBook(): Book = Book(id, title, description, previewImageName, apiVersion, appVersion)
 
 /**
  * Converts a nullable [LocalBook] to a nullable domain [Book].
  */
 fun LocalBook?.toBookOrNull(): Book? = this?.let {
-    Book(id, title, description, imageName, apiVersion, appVersion)
+    Book(id, title, description, previewImageName, apiVersion, appVersion)
 }
 
 /**
@@ -30,14 +30,14 @@ fun List<LocalBook>.toBooks(): List<Book> = map { it.toBook() }
  * Converts a [RemoteBook] to a [LocalBook].
  */
 fun RemoteBook.toLocalBook(): LocalBook =
-    LocalBook(id, title, description, imageName, apiVersion, appVersion)
+    LocalBook(id, title, description, previewImageName, apiVersion, appVersion)
 
 /**
  * Converts a nullable [RemoteBook] to a nullable [LocalBook].
  */
 @Suppress("UNUSED")
 fun RemoteBook?.toLocalBookOrNull(): LocalBook? = this?.let {
-    LocalBook(id, title, description, imageName, apiVersion, appVersion)
+    LocalBook(id, title, description, previewImageName, apiVersion, appVersion)
 }
 
 /**

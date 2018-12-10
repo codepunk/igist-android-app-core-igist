@@ -3,7 +3,7 @@
     "id": 1,
     "title": "Igist",
     "description": "In the not so distant future orbiting the Moon is the most prestigious science academy in the universe known as the Intergalactic Institute of Science and Technology (IGIST).",
-    "image_name": "thumb_igist",
+    "preview_image_name": "thumb_igist",
     "api_version": 0,
     "app_version": 4
   },
@@ -11,7 +11,7 @@
     "id": 2,
     "title": "Dummy Book",
     "description": "You'd have to be a dummy to select this book.",
-    "image_name": "thumb_dummy",
+    "preview_image_name": "thumb_dummy",
     "api_version": 0,
     "app_version": 4
   }

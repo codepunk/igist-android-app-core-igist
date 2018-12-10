@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018 IGIST.io. All rights reserved.
+  ~ Author(s): Scott Slater
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    tools:background="@android:color/black">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title_txt"
+        style="@style/Base.TextAppearance.AppCompat.Large.Inverse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Igist"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/preview_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/offset_standard"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_txt"
+        tools:src="@drawable/thumb_igist"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/description_txt"
+        style="@style/Base.TextAppearance.AppCompat.Medium.Inverse"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/offset_standard"
+        android:gravity="center_horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/preview_image"
+        tools:text="In the not so distant future orbiting the Moon is the most prestigious science academy in the universe known as the Intergalactic Institute of Science and Technology (IGIST)."/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
