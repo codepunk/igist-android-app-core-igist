@@ -30,6 +30,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.OnAlertDialogBuildListener
 import com.codepunk.doofenschmirtz.util.CustomDividerItemDecoration
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
@@ -40,8 +42,6 @@ import io.igist.core.BuildConfig.KEY_BOOK_TITLE
 import io.igist.core.R
 import io.igist.core.databinding.FragmentSelectBookBinding
 import io.igist.core.domain.model.Book
-import io.igist.core.presentation.base.AlertDialogFragment
-import io.igist.core.presentation.base.AlertDialogFragment.OnAlertDialogBuildListener
 import java.util.*
 import javax.inject.Inject
 
