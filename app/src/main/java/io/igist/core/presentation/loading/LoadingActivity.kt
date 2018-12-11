@@ -64,8 +64,13 @@ class LoadingActivity :
         super.onCreate(savedInstanceState)
         Fabric.with(this, Crashlytics())
 
-        if (!sharedPreferences.contains(PREF_KEY_CURRENT_BOOK_ID)) {
-            startActivityForResult(Intent(ACTION_SELECT_BOOK), SELECT_BOOK_REQUEST_CODE)
+        if (savedInstanceState == null) {
+            if (sharedPreferences.contains(PREF_KEY_CURRENT_BOOK_ID)) {
+                // Save selected book in SessionManager
+
+            } else {
+                startActivityForResult(Intent(ACTION_SELECT_BOOK), SELECT_BOOK_REQUEST_CODE)
+            }
         }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_loading)

@@ -10,7 +10,7 @@ import com.squareup.moshi.Json
 /**
  * Remote implementation of a data class representing a book.
  */
-class RemoteBook(
+data class RemoteBook(
 
     /**
      * The book ID.

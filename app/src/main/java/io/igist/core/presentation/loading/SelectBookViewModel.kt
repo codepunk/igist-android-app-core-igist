@@ -29,7 +29,7 @@ class SelectBookViewModel @Inject constructor(
     /**
      * The book repository.
      */
-    private val bookRepository: BookRepository
+    bookRepository: BookRepository
 
 ) : ViewModel(),
     OnSharedPreferenceChangeListener {

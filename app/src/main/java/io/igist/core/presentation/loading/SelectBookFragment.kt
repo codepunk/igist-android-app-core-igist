@@ -168,14 +168,7 @@ class SelectBookFragment :
             is Book -> {
                 when {
                     tag.id > 0 -> selectBookViewModel.selectBook(tag.id)
-                    else -> AlertDialogFragment.show(
-                        DUMMY_BOOK_DIALOG_FRAGMENT_TAG,
-                        this,
-                        DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE,
-                        Bundle().apply {
-                            putString(KEY_BOOK_TITLE, tag.title)
-                        }
-                    )
+                    else -> showDummyBookDialogFragment(tag)
                 }
             }
         }
@@ -220,7 +213,22 @@ class SelectBookFragment :
     }
 
     /**
-     * Processes a book selection change. This is triggered via the bookIdData live data variable
+     * Shows a dialog informing the user that they selected a "dummy book". Should only be
+     * encountered while testing/debugging.
+     */
+    private fun showDummyBookDialogFragment(book: Book) {
+        AlertDialogFragment.show(
+            DUMMY_BOOK_DIALOG_FRAGMENT_TAG,
+            this,
+            DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE,
+            Bundle().apply {
+                putString(KEY_BOOK_TITLE, book.title)
+            }
+        )
+    }
+
+    /**
+     * Processes a book selection change. This is triggered via the selectedBookIdData live data variable
      * in [SelectBookViewModel].
      */
     private fun onBookSelectionChange(bookId: Long) {

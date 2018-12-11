@@ -6,11 +6,16 @@
 package io.igist.core.presentation.loading
 
 import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.lifecycle.*
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
-import io.igist.core.BuildConfig.DEFAULT_BOOK_ID
+import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.SuccessUpdate
 import io.igist.core.BuildConfig.PREF_KEY_CURRENT_BOOK_ID
 import io.igist.core.domain.contract.AppRepository
+import io.igist.core.domain.contract.BookRepository
+import io.igist.core.domain.model.Book
+import io.igist.core.domain.session.AppSessionManager
 import javax.inject.Inject
 
 /**
@@ -24,24 +29,41 @@ class LoadingViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
 
     /**
-     * The loading repository.
+     * The book repository.
      */
-    private val appRepository: AppRepository
+    private val bookRepository: BookRepository,
 
-) : ViewModel() {
+    /**
+     * The application repository.
+     */
+    private val appRepository: AppRepository,
+
+    /**
+     * The application [AppSessionManager].
+     */
+    private val appSessionManager: AppSessionManager
+
+) : ViewModel(),
+    OnSharedPreferenceChangeListener {
 
     // region Properties
 
     /**
      * A [LiveData] holding the currently-selected book ID.
      */
-    val bookIdData: MutableLiveData<Long> = MutableLiveData()
+    private val selectedBookIdData: MutableLiveData<Long> = MutableLiveData()
+
+    /**
+     * A [LiveData] holding [Book] updates.
+     */
+    private val selectedBookUpdateData: LiveData<DataUpdate<Book, Book>> =
+        Transformations.switchMap(selectedBookIdData) { bookId -> bookRepository.getBook(bookId) }
 
     /**
      * A [MediatorLiveData] holding loading information.
      */
     val liveLoading: LiveData<DataUpdate<Int, Boolean>> =
-        Transformations.switchMap(bookIdData) { bookId ->
+        Transformations.switchMap(selectedBookIdData) { bookId ->
             appRepository.load(bookId)
         }
 
@@ -50,10 +72,48 @@ class LoadingViewModel @Inject constructor(
     // region Constructors
 
     init {
-        val bookId: Long = sharedPreferences.getLong(PREF_KEY_CURRENT_BOOK_ID, DEFAULT_BOOK_ID)
-        bookIdData.postValue(bookId)
+        // Store the selected book in AppSessionManager
+        selectedBookUpdateData.observeForever { update ->
+            appSessionManager.book = when (update) {
+                is ProgressUpdate -> update.progress.getOrNull(0)
+                is SuccessUpdate -> update.result
+                else -> null
+            }
+        }
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        if (sharedPreferences.contains(PREF_KEY_CURRENT_BOOK_ID)) {
+            onSharedPreferenceChanged(sharedPreferences, PREF_KEY_CURRENT_BOOK_ID)
+        }
     }
 
     // endregion Constructors
+
+    // region Inherited methods
+
+    /**
+     * Unregisters as a shared preference change listener.
+     */
+    override fun onCleared() {
+        super.onCleared()
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    // endregion Inherited methods
+
+    // region Implemented methods
+
+    /**
+     * Sets the new value in [selectedBookIdData].
+     */
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
+        when (key) {
+            PREF_KEY_CURRENT_BOOK_ID -> {
+                selectedBookIdData.value = sharedPreferences.getLong(key, -1)
+            }
+        }
+    }
+
+    // endregion Implemented methods
 
 }

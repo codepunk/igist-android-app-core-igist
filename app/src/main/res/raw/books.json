@@ -10,7 +10,7 @@
   {
     "id": -1,
     "title": "Dummy Book",
-    "description": "You'd have to be a dummy to select this book.",
+    "description": "You'd have to be a real dummy to select this book.",
     "preview_image_name": "thumb_dummy",
     "api_version": 0,
     "app_version": 4
