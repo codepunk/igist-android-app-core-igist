@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
 /**
  * Locally-cached implementation of a data class representing a book.
  */
-@Entity(tableName = "book")
+@Entity(tableName = "books")
 data class LocalBook(
 
     /**

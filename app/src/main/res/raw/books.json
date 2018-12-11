@@ -8,7 +8,7 @@
     "app_version": 4
   },
   {
-    "id": 2,
+    "id": -1,
     "title": "Dummy Book",
     "description": "You'd have to be a dummy to select this book.",
     "preview_image_name": "thumb_dummy",

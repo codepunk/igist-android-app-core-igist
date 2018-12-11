@@ -134,6 +134,7 @@ class BookRepositoryImpl(
             if (isCancelled) return FailureUpdate(books, CancellationException())
 
             // Convert & insert remote books into the local database
+            bookDao.deleteAll()
             bookDao.insertAll(remoteBooks.toLocalBooks())
 
             // Re-retrieve the newly-inserted Api from the local database

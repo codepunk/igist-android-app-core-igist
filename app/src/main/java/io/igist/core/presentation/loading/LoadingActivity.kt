@@ -64,9 +64,7 @@ class LoadingActivity :
         super.onCreate(savedInstanceState)
         Fabric.with(this, Crashlytics())
 
-        val bookId =
-            sharedPreferences.getLong(PREF_KEY_CURRENT_BOOK_ID, -1L)
-        if (bookId < 0L) {
+        if (!sharedPreferences.contains(PREF_KEY_CURRENT_BOOK_ID)) {
             startActivityForResult(Intent(ACTION_SELECT_BOOK), SELECT_BOOK_REQUEST_CODE)
         }
 

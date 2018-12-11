@@ -13,7 +13,7 @@ import io.igist.core.domain.model.IgistMode
  * Locally-cached implementation of a data class representing basic API information.
  */
 @Entity(
-    tableName = "api",
+    tableName = "apis",
     primaryKeys = ["book_id", "api_version"]
 )
 data class LocalApi(

@@ -28,7 +28,7 @@ interface ApiDao {
      * Retrieves [LocalApi] information from the local database based on the supplied [bookId]
      * and [apiVersion].
      */
-    @Query("SELECT * FROM api WHERE book_id = :bookId AND api_version = :apiVersion")
+    @Query("SELECT * FROM apis WHERE book_id = :bookId AND api_version = :apiVersion")
     fun retrieve(bookId: Long, apiVersion: Int): LocalApi?
 
 }

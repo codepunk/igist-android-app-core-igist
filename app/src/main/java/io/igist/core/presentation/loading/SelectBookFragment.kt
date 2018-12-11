@@ -6,6 +6,7 @@
 package io.igist.core.presentation.loading
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -14,9 +15,11 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.databinding.DataBindingUtil
@@ -26,22 +29,38 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.VERTICAL
+import com.codepunk.doofenschmirtz.util.CustomDividerItemDecoration
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.SuccessUpdate
 import dagger.android.support.AndroidSupportInjection
-import io.igist.core.BuildConfig.DEFAULT_BOOK_ID
 import io.igist.core.BuildConfig.KEY_BOOK_ID
+import io.igist.core.BuildConfig.KEY_BOOK_TITLE
 import io.igist.core.R
 import io.igist.core.databinding.FragmentSelectBookBinding
 import io.igist.core.domain.model.Book
+import io.igist.core.presentation.base.AlertDialogFragment
+import io.igist.core.presentation.base.AlertDialogFragment.OnAlertDialogBuildListener
 import java.util.*
 import javax.inject.Inject
+
+// region Constants
+
+/**
+ * A request code for the dummy book dialog fragment.
+ */
+private const val DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE: Int = 1
+
+// endregion Constants
 
 /**
  * A [Fragment] for displaying and selecting available books.
  */
-class SelectBookFragment : Fragment() {
+class SelectBookFragment :
+    Fragment(),
+    OnClickListener,
+    OnAlertDialogBuildListener {
 
     // region Properties
 
@@ -57,8 +76,6 @@ class SelectBookFragment : Fragment() {
      */
     private lateinit var binding: FragmentSelectBookBinding
 
-    // endregion Properties
-
     /**
      * The [SelectBookViewModel] instance backing this fragment.
      */
@@ -70,7 +87,9 @@ class SelectBookFragment : Fragment() {
     /**
      * The recycle view adapter.
      */
-    private val adapter: BookAdapter = BookAdapter()
+    private val adapter: BookAdapter = BookAdapter(this)
+
+    // endregion Properties
 
     // region Lifecycle methods
 
@@ -88,7 +107,7 @@ class SelectBookFragment : Fragment() {
 
         selectBookViewModel.bookIdData.observe(
             this,
-            Observer { bookId -> onBookSelected(bookId) }
+            Observer { bookId -> onBookSelectionChange(bookId) }
         )
     }
 
@@ -109,33 +128,84 @@ class SelectBookFragment : Fragment() {
         return binding.root
     }
 
-
     /**
      * Initializes the view.
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /*
-         * NOTE Since we're not currently populating a list of books, clicking
-         * the button will just "select" the default book. We can make this more
-         * robust in the future with a RecyclerView of books, for example.
-         */
-        binding.igistBtn.setOnClickListener {
-            selectBookViewModel.selectBook(DEFAULT_BOOK_ID)
-        }
-
         val spanCount = resources.getInteger(R.integer.select_book_span_count)
         val layoutManager: RecyclerView.LayoutManager =
-            GridLayoutManager(requireContext(), spanCount)
+            GridLayoutManager(requireContext(), spanCount, VERTICAL, false)
         binding.bookRecycler.layoutManager = layoutManager
+        binding.bookRecycler.hasFixedSize()
+
+        val itemDecoration =
+            CustomDividerItemDecoration(requireContext(), VERTICAL, false).apply {
+                ResourcesCompat.getDrawable(
+                    resources,
+                    R.drawable.divider_item_decoration,
+                    requireContext().theme
+                )?.let { drawable ->
+                    setDrawable(drawable)
+                }
+            }
+        binding.bookRecycler.addItemDecoration(itemDecoration)
+
         binding.bookRecycler.adapter = adapter
     }
 
     // endregion Lifecycle methods
 
+    // region Implemented methods
+
+    /**
+     * Called when a view is clicked.
+     */
+    override fun onClick(v: View) {
+        val tag = v.getTag(R.id.book)
+        when (tag) {
+            is Book -> {
+                when {
+                    tag.id > 0 -> selectBookViewModel.selectBook(tag.id)
+                    else -> AlertDialogFragment.show(
+                        DUMMY_BOOK_DIALOG_FRAGMENT_TAG,
+                        this,
+                        DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE,
+                        Bundle().apply {
+                            putString(KEY_BOOK_TITLE, tag.title)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Called when a [AlertDialogFragment] is building its alert dialog.
+     */
+    override fun onBuildAlertDialog(fragment: AlertDialogFragment, builder: AlertDialog.Builder) {
+        when (fragment.targetRequestCode) {
+            DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE -> {
+                val title = fragment.arguments?.getString(KEY_BOOK_TITLE)?.let {
+                    "\"$it\""
+                } ?: getString(R.string.select_book_dummy_book_dialog_selected_book)
+                builder
+                    .setPositiveButton(android.R.string.ok, fragment)
+                    .setTitle(R.string.select_book_dummy_book_dialog_title)
+                    .setMessage(getString(R.string.select_book_dummy_book_dialog_message, title))
+            }
+        }
+    }
+
+    // endregion Implemented methods
+
     // region Methods
 
+    /**
+     * Called when a list of available books is retrieved (either from the local db or from
+     * books.json in the raw resource folder).
+     */
     private fun onBooks(update: DataUpdate<List<Book>, List<Book>>) {
         when (update) {
             is ProgressUpdate -> {
@@ -146,16 +216,14 @@ class SelectBookFragment : Fragment() {
             is SuccessUpdate -> {
                 adapter.books = update.result
             }
-            else -> {
-                // TODO
-            }
         }
     }
 
     /**
-     * Processes a book selection.
+     * Processes a book selection change. This is triggered via the bookIdData live data variable
+     * in [SelectBookViewModel].
      */
-    private fun onBookSelected(bookId: Long) {
+    private fun onBookSelectionChange(bookId: Long) {
         activity?.apply {
             setResult(
                 Activity.RESULT_OK,
@@ -169,22 +237,56 @@ class SelectBookFragment : Fragment() {
 
     // endregion Methods
 
+    // region Companion object
+
+    companion object {
+
+        // region Properties
+
+        /**
+         * A fragment tag for the dummy book dialog fragment.
+         */
+        @JvmStatic
+        private val DUMMY_BOOK_DIALOG_FRAGMENT_TAG: String =
+            SelectBookFragment::class.java.name + ".DUMMY_BOOK_DIALOG_FRAGMENT_TAG"
+
+        // endregion Properties
+
+    }
+
+    // endregion Companion object
+
     // region Nested/inner classes
 
+    /**
+     * Implementation of [RecyclerView.ViewHolder] that holds a list item representing a [Book].
+     */
     class BookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         // region Properties
 
+        /**
+         * The book title [AppCompatTextView].
+         */
         private val titleText: AppCompatTextView = itemView.findViewById(R.id.title_txt)
 
+        /**
+         * The book preview [AppCompatImageView].
+         */
         private val previewImage: AppCompatImageView = itemView.findViewById(R.id.preview_image)
 
+        /**
+         * The book description [AppCompatTextView].
+         */
         private val descriptionText: AppCompatTextView = itemView.findViewById(R.id.description_txt)
 
         // endregion Properties
 
         // region Methods
 
+        /**
+         * Binds a [Book] to this view holder.
+         */
         fun bind(book: Book) {
             val context: Context = itemView.context
             val resources: Resources = context.resources
@@ -200,36 +302,69 @@ class SelectBookFragment : Fragment() {
             drawable.isCircular = true
             previewImage.setImageDrawable(drawable)
             descriptionText.text = book.description
+            itemView.setTag(R.id.book, book)
         }
 
         // endregion Methods
 
     }
 
-    class BookAdapter : RecyclerView.Adapter<BookViewHolder>() {
+    /**
+     * Implementation of [RecyclerView.Adapter] that manages a list of [Book]s.
+     */
+    class BookAdapter(
 
+        /**
+         * The [OnClickListener] implementation that should be called when the user clicks a book.
+         */
+        private val onClickListener: OnClickListener
+
+    ) : RecyclerView.Adapter<BookViewHolder>() {
+
+        // region Properties
+
+        /**
+         * The list of books available for selection.
+         */
         var books: List<Book>? = Collections.emptyList()
             set(value) {
                 field = value
                 notifyDataSetChanged()
             }
 
+        // endregion Properties
+
+        // region Inherited methods
+
+        /**
+         * Returns the number of books in the list.
+         */
         override fun getItemCount(): Int = books?.size ?: 0
 
+        /**
+         * Creates the [BookViewHolder] representing a [Book].
+         */
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder =
             BookViewHolder(
                 LayoutInflater.from(parent.context).inflate(
                     R.layout.listitem_book,
                     parent,
                     false
-                )
+                ).apply {
+                    setOnClickListener(onClickListener)
+                }
             )
 
+        /**
+         * Binds the [Book] at the supplied [position] to the supplied [holder].
+         */
         override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
-            books?.get(position)?.run {
+            books?.getOrNull(position)?.run {
                 holder.bind(this)
             }
         }
+
+        // endregion Inherited methods
 
     }
 

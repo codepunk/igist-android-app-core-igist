@@ -86,6 +86,7 @@ android {
                 "API_VERSION",
                 "APP_VERSION",
                 "BOOK_ID",
+                "BOOK_TITLE",
                 "DESCRIPTION"
         )
     }
