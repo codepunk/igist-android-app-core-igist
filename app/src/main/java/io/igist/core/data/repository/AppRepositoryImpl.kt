@@ -43,11 +43,10 @@ class AppRepositoryImpl(
         apiVersion: Int,
         alwaysFetch: Boolean
     ): LiveData<DataUpdate<Api, Api>> =
-        ApiTask(apiDao, appWebservice).executeOnExecutorAsLiveData(
+        ApiTask(apiDao, appWebservice, alwaysFetch).executeOnExecutorAsLiveData(
             AsyncTask.THREAD_POOL_EXECUTOR,
             bookId,
-            apiVersion,
-            alwaysFetch
+            apiVersion
         )
 
     // endregion Implemented methods
