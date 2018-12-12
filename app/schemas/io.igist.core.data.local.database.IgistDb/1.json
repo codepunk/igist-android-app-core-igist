@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "a30a503689033633bf1c7e3c5c2d6b6e",
+    "identityHash": "42f5a12384fc5d77935ffecb5a267407",
     "entities": [
       {
         "tableName": "books",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `preview_image_name` TEXT NOT NULL, `apiVersion` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `preview_image_name` TEXT NOT NULL, `apiVersion` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `locked` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -41,6 +41,12 @@
           {
             "fieldPath": "appVersion",
             "columnName": "app_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "locked",
+            "columnName": "locked",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -96,7 +102,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"a30a503689033633bf1c7e3c5c2d6b6e\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"42f5a12384fc5d77935ffecb5a267407\")"
     ]
   }
 }

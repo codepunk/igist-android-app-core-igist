@@ -27,7 +27,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/title_txt"
-            style="@style/Base.TextAppearance.AppCompat.Large.Inverse"
+            style="@style/Base.TextAppearance.AppCompat.Large"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -37,7 +37,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/description_txt"
-            style="@style/Base.TextAppearance.AppCompat.Medium.Inverse"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/offset_standard"

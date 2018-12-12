@@ -22,16 +22,17 @@ import retrofit2.http.Path
 interface AppWebservice {
 
     /**
-     * Gets the app API-level information.
+     * Gets API information for the given [bookId] and [apiVersion].
+     */
+    fun api(bookId: Long, apiVersion: Int): Call<RemoteApi>
+
+    /**
+     * Gets API information. The app currently does not support multiple books so this is the
+     * default API endpoint.
      */
     @GET("api/{apiVersion}")
     @Headers(HEADER_ACCEPT_APPLICATION_JSON)
     fun api(@Path(value = "apiVersion") apiVersion: Int): Call<RemoteApi>
-
-    /**
-     * Gets the app API-level information using the default API version stored in [BuildConfig].
-     */
-    fun api(): Call<RemoteApi>
 
     /**
      * Checks a beta key against the server.
@@ -54,10 +55,4 @@ interface AppWebservice {
      */
     fun content(bookId: Long, appVersion: Int): Call<List<RemoteContentList>>
 
-    /**
-     * A version of [content] that allows for possible multiple book IDs. Gets the book content
-     * for the given [bookId]. For now, this method's implementation will just
-     * drop the book ID and call the appVersion-only implementation.
-     */
-    fun content(bookId: Long): Call<List<RemoteContentList>>
 }

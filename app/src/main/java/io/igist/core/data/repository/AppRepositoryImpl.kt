@@ -99,7 +99,7 @@ class AppRepositoryImpl @Inject constructor(
             when (update) {
                 is SuccessUpdate -> {
                     contentTask?.cancel(true)
-                    ContentTask(BuildConfig.APP_VERSION /* TODO TEMP */).apply {
+                    ContentTask(4 /* TODO TEMP */).apply {
                         contentTask = this
                         contentData.addSource(liveData) { contentData.value = it }
                         executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
@@ -113,10 +113,14 @@ class AppRepositoryImpl @Inject constructor(
 
     // region Methods
 
+    override fun getApi(bookId: Long, apiVersion: Int): LiveData<DataUpdate<Api, Api>> {
+        TODO("not implemented")
+    }
+
     /**
      * Kicks off the entire loading/onboarding process.
      */
-    override fun load(
+    fun load(
         bookId: Long,
         apiVersion: Int,
         appVersion: Int,

@@ -14,18 +14,19 @@ import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
+import dagger.Lazy
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.BuildConfig.DEBUG
 import io.igist.core.BuildConfig.KEY_DESCRIPTION
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
 import io.igist.core.domain.model.Api
+import io.igist.core.domain.session.AppSessionManager
 import javax.inject.Inject
 
 // region Constants
@@ -56,6 +57,12 @@ class LoadingFragment :
     TextureView.SurfaceTextureListener {
 
     // region Properties
+
+    /**
+     * The [AppSessionManager] holding application-level session data.
+     */
+    @Inject
+    lateinit var lazyAppSessionManager: AppSessionManager
 
     /**
      * The injected [ViewModelProvider.Factory] that we will use to get an instance of
@@ -127,7 +134,7 @@ class LoadingFragment :
         }
 
         // loadingViewModel.liveApi.observe(this, Observer { onApi(it) })
-        loadingViewModel.liveLoading.observe(this, Observer { onLoadingUpdate(it) })
+        // loadingViewModel.liveLoading.observe(this, Observer { onLoadingUpdate(it) })
     }
 
     /**

@@ -152,14 +152,12 @@ class DataModule {
         @ApplicationContext context: Context,
         sharedPreferences: SharedPreferences,
         appDao: ApiDao,
-        appWebservice: AppWebservice,
-        appSessionManager: AppSessionManager
+        appWebservice: AppWebservice
     ): AppRepository = AppRepositoryImpl2(
         context,
         sharedPreferences,
         appDao,
-        appWebservice,
-        appSessionManager
+        appWebservice
     )
 
     /**

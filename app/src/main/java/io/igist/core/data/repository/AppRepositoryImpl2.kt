@@ -11,19 +11,20 @@ import android.os.AsyncTask
 import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import com.codepunk.doofenschmirtz.util.taskinator.DataTaskinator
-import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
-import com.codepunk.doofenschmirtz.util.taskinator.FailureUpdate
-import com.codepunk.doofenschmirtz.util.taskinator.ResultUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig.*
+import io.igist.core.R
 import io.igist.core.data.local.dao.ApiDao
+import io.igist.core.data.mapper.toApi
 import io.igist.core.data.mapper.toApiOrNull
+import io.igist.core.data.mapper.toLocalApi
+import io.igist.core.data.remote.entity.RemoteApi
+import io.igist.core.data.remote.toResultUpdate
 import io.igist.core.data.remote.webservice.AppWebservice
 import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
 import io.igist.core.domain.model.Api
-import io.igist.core.domain.model.Book
-import io.igist.core.domain.session.AppSessionManager
+import retrofit2.Response
 import java.util.concurrent.CancellationException
 
 class AppRepositoryImpl2(
@@ -35,17 +36,23 @@ class AppRepositoryImpl2(
 
     private val apiDao: ApiDao,
 
-    private val appWebservice: AppWebservice,
-
-    private val appSessionManager: AppSessionManager
+    private val appWebservice: AppWebservice
 
 ) : AppRepository {
 
     val loadData: MediatorLiveData<DataUpdate<Int, Boolean>> = MediatorLiveData()
 
-    private var apiTask: ApiTask? = null
+    private var apiTaskOld: ApiTaskOld? = null
 
-    override fun load(
+    override fun getApi(bookId: Long, apiVersion: Int): LiveData<DataUpdate<Api, Api>> =
+        ApiTask(apiDao, appWebservice).executeOnExecutorAsLiveData(
+            AsyncTask.THREAD_POOL_EXECUTOR,
+            bookId,
+            apiVersion
+        )
+
+    /*
+    fun load(
         bookId: Long,
         apiVersion: Int,
         appVersion: Int,
@@ -53,7 +60,7 @@ class AppRepositoryImpl2(
         alwaysValidateBetaKey: Boolean
     ): LiveData<DataUpdate<Int, Boolean>> {
 
-        apiTask?.cancel(true)
+        apiTaskOld?.cancel(true)
 
         val arguments = Bundle().apply {
             putLong(KEY_BOOK_ID, bookId)
@@ -61,18 +68,74 @@ class AppRepositoryImpl2(
             putInt(KEY_APP_VERSION, appVersion)
         }
 
-        ApiTask(loadData, apiDao).apply {
-            apiTask = this
+        ApiTaskOld(loadData, apiDao).apply {
+            apiTaskOld = this
             executeOnExecutorAsLiveData(AsyncTask.THREAD_POOL_EXECUTOR, arguments)
         }
 
         return loadData
 
     }
+    */
 
     // region Nested/inner classes
 
-    class ApiTask(
+    /**
+     * [DataTaskinator] that retrieves API information.
+     */
+    private class ApiTask(
+
+        private val apiDao: ApiDao,
+
+        private val appWebservice: AppWebservice,
+
+        private val alwaysFetch: Boolean = true
+
+    ) : DataTaskinator<Any, Api, Api>() {
+
+        override fun doInBackground(vararg params: Any?): ResultUpdate<Api, Api> {
+            val bookId: Long = params.getOrNull(0) as Long?
+                ?: throw IllegalArgumentException("No book ID passed to ApiTask")
+
+            val apiVersion: Int = params.getOrNull(1) as Int?
+                ?: throw IllegalArgumentException("No API verison passed to ApiTask")
+
+            // Retrieve any cached api
+            val localApi = apiDao.retrieve(bookId, apiVersion)
+            var api: Api? = localApi.toApiOrNull()
+
+            // Fetch the latest API info
+            if (api == null || alwaysFetch) {
+                val remoteApiUpdate: ResultUpdate<Void, Response<RemoteApi>> =
+                    appWebservice.api(bookId, apiVersion).toResultUpdate()
+
+                // Check if cancelled or failure
+                when {
+                    isCancelled -> return FailureUpdate(api, CancellationException(), data)
+                    remoteApiUpdate is FailureUpdate -> {
+                        // TODO addDescription(context.getString(R.string.loading_unknown_error))
+                        return FailureUpdate(api, remoteApiUpdate.e, data)
+                    }
+                }
+
+                remoteApiUpdate.result?.body()?.apply {
+                    // Convert & insert remote Api into the local database
+                    apiDao.insert(this.toLocalApi(bookId))
+
+                    // Re-retrieve the newly-inserted Api from the local database
+                    apiDao.retrieve(bookId, apiVersion)?.let {
+                        api = it.toApi()
+                    }
+                }
+            }
+
+            // TODO addDescription(context.getString(R.string.api_loaded))
+            return SuccessUpdate(api)
+        }
+
+    }
+
+    class ApiTaskOld(
 
         private val loadData: MediatorLiveData<DataUpdate<Int, Boolean>>,
 
@@ -89,25 +152,15 @@ class AppRepositoryImpl2(
         override fun doInBackground(vararg params: Bundle?): ResultUpdate<Api, Api> {
             // Extract arguments
             val arguments: Bundle = params.getOrNull(0)
-                ?: throw IllegalArgumentException("ApiTask requires a Bundle argument")
+                ?: throw IllegalArgumentException("ApiTaskOld requires a Bundle argument")
             val bookId = when {
                 arguments.containsKey(KEY_BOOK_ID) -> arguments.getLong(KEY_BOOK_ID)
                 else -> throw IllegalArgumentException(
-                    "ApiTask requires KEY_BOOK_ID to be set in arguments"
+                    "ApiTaskOld requires KEY_BOOK_ID to be set in arguments"
                 )
             }
-            val apiVersion = when {
-                arguments.containsKey(KEY_API_VERSION) -> arguments.getInt(KEY_API_VERSION)
-                else -> throw IllegalArgumentException(
-                    "ApiTask requires KEY_API_VERSION to be set in arguments"
-                )
-            }
-            val appVersion = when {
-                arguments.containsKey(KEY_APP_VERSION) -> arguments.getInt(KEY_APP_VERSION)
-                else -> throw IllegalArgumentException(
-                    "ApiTask requires KEY_APP_VERSION to be set in arguments"
-                )
-            }
+            val apiVersion = 0
+            val appVersion = 1
 
             // Retrieve any cached Api
             val localApi = apiDao.retrieve(bookId, apiVersion)

@@ -45,6 +45,11 @@ data class RemoteBook(
      * store data, etc.).
      */
     @field:Json(name = "app_version")
-    val appVersion: Int
+    val appVersion: Int,
+
+    /**
+     * Whether this book is currently locked.
+     */
+    val locked: Boolean
 
 )

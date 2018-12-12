@@ -58,11 +58,11 @@ class BookRepositoryImpl(
     /**
      * Returns a [LiveData] containing book list updates.
      */
-    override fun getBooks(): LiveData<DataUpdate<List<Book>, List<Book>>> {
+    override fun getBooks(alwaysFetch: Boolean): LiveData<DataUpdate<List<Book>, List<Book>>> {
 
         booksTask?.cancel(true)
 
-        BooksTask(context, booksData, bookDao, moshi).apply {
+        BooksTask(context, booksData, bookDao, moshi, alwaysFetch).apply {
             booksTask = this
             executeOnExecutorAsLiveData()
         }
@@ -73,8 +73,8 @@ class BookRepositoryImpl(
     /**
      * Returns a [LiveData] containing [Book] updates.
      */
-    override fun getBook(bookId: Long): LiveData<DataUpdate<Book, Book>> =
-        BookTask(context, bookDao, moshi).executeOnExecutorAsLiveData(
+    override fun getBook(bookId: Long, alwaysFetch: Boolean): LiveData<DataUpdate<Book, Book>> =
+        BookTask(context, bookDao, moshi, alwaysFetch).executeOnExecutorAsLiveData(
             AsyncTask.THREAD_POOL_EXECUTOR,
             bookId
         )

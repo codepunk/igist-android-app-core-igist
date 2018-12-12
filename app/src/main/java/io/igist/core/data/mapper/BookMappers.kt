@@ -12,13 +12,22 @@ import io.igist.core.domain.model.Book
 /**
  * Converts a [LocalBook] to a domain [Book].
  */
-fun LocalBook.toBook(): Book = Book(id, title, description, previewImageName, apiVersion, appVersion)
+fun LocalBook.toBook(): Book =
+    Book(id, title, description, previewImageName, apiVersion, appVersion, locked)
 
 /**
  * Converts a nullable [LocalBook] to a nullable domain [Book].
  */
 fun LocalBook?.toBookOrNull(): Book? = this?.let {
-    Book(id, title, description, previewImageName, apiVersion, appVersion)
+    Book(
+        it.id,
+        it.title,
+        it.description,
+        it.previewImageName,
+        it.apiVersion,
+        it.appVersion,
+        it.locked
+    )
 }
 
 /**
@@ -30,17 +39,25 @@ fun List<LocalBook>.toBooks(): List<Book> = map { it.toBook() }
  * Converts a [RemoteBook] to a [LocalBook].
  */
 fun RemoteBook.toLocalBook(): LocalBook =
-    LocalBook(id, title, description, previewImageName, apiVersion, appVersion)
+    LocalBook(id, title, description, previewImageName, apiVersion, appVersion, locked)
 
 /**
  * Converts a nullable [RemoteBook] to a nullable [LocalBook].
  */
 @Suppress("UNUSED")
 fun RemoteBook?.toLocalBookOrNull(): LocalBook? = this?.let {
-    LocalBook(id, title, description, previewImageName, apiVersion, appVersion)
+    LocalBook(
+        it.id,
+        it.title,
+        it.description,
+        it.previewImageName,
+        it.apiVersion,
+        it.appVersion,
+        it.locked
+    )
 }
 
 /**
  * Converts a [List] of [RemoteBook]s to a list of [LocalBook]s.
  */
-fun List<RemoteBook>.toLocalBooks() = map { it.toLocalBook() }
+fun List<RemoteBook>.toLocalBooks(): List<LocalBook> = map { it.toLocalBook() }

@@ -65,8 +65,6 @@ android {
     applicationVariants.all { variant ->
         variant.buildConfigField("boolean", "SET_DEFAULT_BOOK_ID", "false")
 
-        makeConstantValue(variant, ConstantType.INTEGER, "API_VERSION", "0")
-        makeConstantValue(variant, ConstantType.INTEGER, "APP_VERSION", "4")
         makeConstantValue(variant, ConstantType.LONG, "DEFAULT_BOOK_ID", "1")
 
         makePreferenceKeys(
@@ -83,8 +81,6 @@ android {
 
         makeKeys(
                 variant,
-                "API_VERSION",
-                "APP_VERSION",
                 "BOOK_ID",
                 "BOOK_TITLE",
                 "DESCRIPTION"

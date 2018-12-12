@@ -12,4 +12,6 @@
     <color name="colorBackgroundDark">#0D0F1B</color>
 
     <color name="colorAccentPink">#FF00F2</color>
+    
+    <color name="lockedGray">#C0000000</color>
 </resources>

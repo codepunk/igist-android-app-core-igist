@@ -51,6 +51,12 @@ data class LocalBook(
      * store data, etc.).
      */
     @ColumnInfo(name = "app_version")
-    val appVersion: Int
+    val appVersion: Int,
+
+    /**
+     * Whether this book is currently locked.
+     */
+    @ColumnInfo(name = "locked")
+    val locked: Boolean
 
 )

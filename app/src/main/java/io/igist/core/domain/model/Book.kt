@@ -40,6 +40,11 @@ data class Book(
      * The book app version. This specifies the version of the actual content (i.e. images,
      * store data, etc.).
      */
-    val appVersion: Int
+    val appVersion: Int,
+
+    /**
+     * Whether this book is currently locked.
+     */
+    val locked: Boolean
 
 )

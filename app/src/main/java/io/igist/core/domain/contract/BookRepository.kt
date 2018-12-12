@@ -11,8 +11,8 @@ import io.igist.core.domain.model.Book
 
 interface BookRepository {
 
-    fun getBooks(): LiveData<DataUpdate<List<Book>, List<Book>>>
+    fun getBooks(alwaysFetch: Boolean = true): LiveData<DataUpdate<List<Book>, List<Book>>>
 
-    fun getBook(bookId: Long): LiveData<DataUpdate<Book, Book>>
+    fun getBook(bookId: Long, alwaysFetch: Boolean = true): LiveData<DataUpdate<Book, Book>>
 
 }

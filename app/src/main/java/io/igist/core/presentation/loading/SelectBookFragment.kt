@@ -10,8 +10,8 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +19,9 @@ import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.databinding.DataBindingUtil
@@ -46,6 +48,11 @@ import java.util.*
 import javax.inject.Inject
 
 // region Constants
+
+/**
+ * The relative size of the "lock" icon over the thumbnail of locked books.
+ */
+private const val LOCK_ICON_RELATIVE_SIZE: Float = 1.0f / 3.0f
 
 /**
  * A request code for the dummy book dialog fragment.
@@ -167,8 +174,8 @@ class SelectBookFragment :
         when (tag) {
             is Book -> {
                 when {
-                    tag.id > 0 -> selectBookViewModel.selectBook(tag.id)
-                    else -> showDummyBookDialogFragment(tag)
+                    tag.locked -> showDummyBookDialogFragment(tag)
+                    else -> selectBookViewModel.selectBook(tag.id)
                 }
             }
         }
@@ -182,11 +189,11 @@ class SelectBookFragment :
             DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE -> {
                 val title = fragment.arguments?.getString(KEY_BOOK_TITLE)?.let {
                     "\"$it\""
-                } ?: getString(R.string.select_book_dummy_book_dialog_selected_book)
+                } ?: getString(R.string.select_book_locked_dialog_selected_book)
                 builder
                     .setPositiveButton(android.R.string.ok, fragment)
-                    .setTitle(R.string.select_book_dummy_book_dialog_title)
-                    .setMessage(getString(R.string.select_book_dummy_book_dialog_message, title))
+                    .setTitle(R.string.select_book_locked_dialog_title)
+                    .setMessage(getString(R.string.select_book_locked_dialog_message, title))
             }
         }
     }
@@ -304,7 +311,38 @@ class SelectBookFragment :
                 "drawable",
                 context.packageName
             )
-            val bitmap: Bitmap = BitmapFactory.decodeResource(resources, resId)
+            val thumbnail: Bitmap = BitmapFactory.decodeResource(resources, resId)
+            val bitmap = when (book.locked) {
+                true -> {
+                    val mutable: Bitmap = thumbnail.copy(thumbnail.config, true)
+                    val canvas = Canvas(mutable)
+                    val paint = Paint().apply {
+                        color = ResourcesCompat.getColor(
+                            resources,
+                            R.color.lockedGray,
+                            context.theme
+                        )
+                        style = Paint.Style.FILL
+                    }
+                    canvas.drawPaint(paint)
+
+                    ContextCompat.getDrawable(context, R.drawable.ic_lock_white_24dp)?.run {
+                        val lockDrawable: Drawable = DrawableCompat.wrap(this).mutate()
+                        val start = (1.0f - LOCK_ICON_RELATIVE_SIZE) / 2.0f
+                        val end = start + LOCK_ICON_RELATIVE_SIZE
+                        lockDrawable.setBounds(
+                            (canvas.width * start).toInt(),
+                            (canvas.height * start).toInt(),
+                            (canvas.width * end).toInt(),
+                            (canvas.height * end).toInt()
+                        )
+                        lockDrawable.draw(canvas)
+                    }
+
+                    mutable
+                }
+                else -> thumbnail
+            }
             val drawable: RoundedBitmapDrawable =
                 RoundedBitmapDrawableFactory.create(resources, bitmap)
             drawable.isCircular = true
