@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.AsyncTask
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.data.local.dao.ApiDao
 import io.igist.core.data.mapper.toApi
@@ -36,12 +35,6 @@ class AppRepositoryImpl(
     private val appWebservice: AppWebservice
 
 ) : AppRepository {
-
-    // region Properties
-
-    val loadData: MediatorLiveData<DataUpdate<Int, Boolean>> = MediatorLiveData()
-
-    // endregion Properties
 
     // region Implemented methods
 
@@ -117,4 +110,5 @@ class AppRepositoryImpl(
     }
 
     // endregion Nested/inner classes
+
 }
