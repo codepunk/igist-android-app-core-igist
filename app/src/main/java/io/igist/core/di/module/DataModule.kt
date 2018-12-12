@@ -20,12 +20,11 @@ import io.igist.core.data.remote.converter.MoshiEnumConverterFactory
 import io.igist.core.data.remote.interceptor.AuthorizationInterceptor
 import io.igist.core.data.remote.webservice.AppWebservice
 import io.igist.core.data.remote.webservice.AppWebserviceWrapper
-import io.igist.core.data.repository.AppRepositoryImpl2
+import io.igist.core.data.repository.AppRepositoryImpl
 import io.igist.core.data.repository.BookRepositoryImpl
 import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
 import io.igist.core.domain.contract.BookRepository
-import io.igist.core.domain.session.AppSessionManager
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -153,7 +152,7 @@ class DataModule {
         sharedPreferences: SharedPreferences,
         appDao: ApiDao,
         appWebservice: AppWebservice
-    ): AppRepository = AppRepositoryImpl2(
+    ): AppRepository = AppRepositoryImpl(
         context,
         sharedPreferences,
         appDao,
