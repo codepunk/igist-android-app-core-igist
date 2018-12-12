@@ -72,7 +72,7 @@ class AppRepositoryImpl(
                 ?: throw IllegalArgumentException("No book ID passed to ApiTask")
 
             val apiVersion: Int = params.getOrNull(1) as Int?
-                ?: throw IllegalArgumentException("No API verison passed to ApiTask")
+                ?: throw IllegalArgumentException("No API version passed to ApiTask")
 
             // Retrieve any cached api
             val localApi = apiDao.retrieve(bookId, apiVersion)
