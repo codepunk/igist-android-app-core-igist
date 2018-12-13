@@ -14,9 +14,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig
-import io.igist.core.BuildConfig.DEFAULT_BOOK_ID
-import io.igist.core.BuildConfig.KEY_DESCRIPTION
-import io.igist.core.BuildConfig.PREF_KEY_VALIDATED_BETA_KEY
+import io.igist.core.BuildConfig.*
 import io.igist.core.R
 import io.igist.core.data.local.dao.ApiDao
 import io.igist.core.data.mapper.toApi
@@ -29,8 +27,7 @@ import io.igist.core.data.remote.toResultUpdate
 import io.igist.core.data.remote.webservice.AppWebservice
 import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
-import io.igist.core.domain.exception.BadBetaKeyException
-import io.igist.core.domain.exception.BetaKeyRequiredException
+import io.igist.core.domain.exception.IgistException
 import io.igist.core.domain.model.*
 import io.igist.core.domain.session.AppSessionManager
 import retrofit2.Response
@@ -84,12 +81,12 @@ class AppRepositoryImplOld @Inject constructor(
             when (update) {
                 is ProgressUpdate -> {
                     update.progress.getOrNull(0)?.apply {
-                        onIgistMode(igistMode)
+                        onIgistMode(bookMode)
                     }
                 }
                 is SuccessUpdate -> {
                     update.result?.apply {
-                        onIgistMode(igistMode)
+                        onIgistMode(bookMode)
                     }
                 }
             }
@@ -113,7 +110,19 @@ class AppRepositoryImplOld @Inject constructor(
 
     // region Methods
 
-    override fun getApi(bookId: Long, apiVersion: Int, alwaysFetch: Boolean): LiveData<DataUpdate<Api, Api>> {
+    override fun getApi(
+        bookId: Long,
+        apiVersion: Int,
+        alwaysFetch: Boolean
+    ): LiveData<DataUpdate<Api, Api>> {
+        TODO("not implemented")
+    }
+
+    override fun checkBetaKey(
+        bookMode: BookMode,
+        betaKey: String?,
+        alwaysVerify: Boolean
+    ): LiveData<DataUpdate<String, String>> {
         TODO("not implemented")
     }
 
@@ -154,12 +163,12 @@ class AppRepositoryImplOld @Inject constructor(
         return loadData
     }
 
-    private fun onIgistMode(igistMode: IgistMode) {
+    private fun onIgistMode(bookMode: BookMode) {
         when {
-            igistMode != betaKeyTask?.igistMode -> {
+            bookMode != betaKeyTask?.bookMode -> {
                 betaKeyTask?.cancel(true)
                 // TODO Cancel contentTask too?
-                BetaKeyTask(igistMode).apply {
+                BetaKeyTask(bookMode).apply {
                     betaKeyTask = this
                     betaKeyData.addSource(liveData) { betaKeyData.value = it }
                     executeOnExecutor(
@@ -203,7 +212,7 @@ class AppRepositoryImplOld @Inject constructor(
 
         override fun onCancelled(result: ResultUpdate<Progress, Result>?) {
             super.onCancelled(result)
-            addDescription(context.getString(R.string.loading_cancelled))
+            //addDescription(context.getString(R.string.loading_cancelled))
             loadData.value = FailureUpdate(false, CancellationException(), data)
         }
 
@@ -216,9 +225,11 @@ class AppRepositoryImplOld @Inject constructor(
     private inner class ApiTask(val apiVersion: Int, val alwaysFetch: Boolean) :
         AbsTask<Void, Api, Api>() {
 
+        /*
         init {
             addDescription(context.getString(R.string.loading_api))
         }
+        */
 
         override fun doInBackground(vararg params: Void?): ResultUpdate<Api, Api> {
             // Retrieve any cached Api
@@ -240,7 +251,7 @@ class AppRepositoryImplOld @Inject constructor(
                 when {
                     isCancelled -> return FailureUpdate(api, CancellationException(), data)
                     remoteApiUpdate is FailureUpdate -> {
-                        addDescription(context.getString(R.string.loading_unknown_error))
+                        //addDescription(context.getString(R.string.loading_unknown_error))
                         return FailureUpdate(api, remoteApiUpdate.e, data)
                     }
                 }
@@ -259,28 +270,30 @@ class AppRepositoryImplOld @Inject constructor(
             // Save the Api in the app session manager
             appSessionManager.api = api
 
-            addDescription(context.getString(R.string.api_loaded))
+            // addDescription(context.getString(R.string.loading_api_loaded))
             return SuccessUpdate(api, data)
         }
     }
 
     @SuppressLint("StaticFieldLeak")
-    private inner class BetaKeyTask(val igistMode: IgistMode, val alwaysValidate: Boolean = true) :
+    private inner class BetaKeyTask(val bookMode: BookMode, val alwaysValidate: Boolean = true) :
         AbsTask<String?, String, String>() {
 
+        /*
         init {
             addDescription(context.getString(R.string.loading_validating_beta_key))
         }
+        */
 
         override fun doInBackground(vararg params: String?): ResultUpdate<String, String> {
             var betaKey: String? = null
-            when (igistMode) {
-                IgistMode.REQUIRE_BETA_KEY -> {
+            when (bookMode) {
+                BookMode.REQUIRE_BETA_KEY -> {
                     // The app requires a beta key
                     // Get beta key, either from params or cached in shared preferences
                     betaKey = when {
                         params.isEmpty() ->
-                            sharedPreferences.getString(PREF_KEY_VALIDATED_BETA_KEY, null)
+                            sharedPreferences.getString(PREF_KEY_VERIFIED_BETA_KEY, null)
                         else -> params[0]
                     }
 
@@ -290,8 +303,8 @@ class AppRepositoryImplOld @Inject constructor(
                     when {
                         betaKey.isNullOrEmpty() -> {
                             // This is an error
-                            addDescription(context.getString(R.string.loading_beta_key_required))
-                            return FailureUpdate(betaKey, BetaKeyRequiredException(), data)
+                            //addDescription(context.getString(R.string.loading_beta_key_required))
+                            return FailureUpdate(betaKey, IgistException(), data)
                         }
                         alwaysValidate -> {
                             // Validate the beta key
@@ -303,9 +316,11 @@ class AppRepositoryImplOld @Inject constructor(
                                 isCancelled ->
                                     return FailureUpdate(betaKey, CancellationException())
                                 betaKeyUpdate is FailureUpdate -> {
+                                    /*
                                     addDescription(
                                         context.getString(R.string.loading_unknown_error)
                                     )
+                                    */
                                     return FailureUpdate(betaKey, betaKeyUpdate.e, data)
                                 }
                             }
@@ -315,14 +330,16 @@ class AppRepositoryImplOld @Inject constructor(
                                 when (resultMessage) {
                                     ResultMessage.SUCCESS -> {
                                         sharedPreferences.edit()
-                                            .putString(PREF_KEY_VALIDATED_BETA_KEY, betaKey)
+                                            .putString(PREF_KEY_VERIFIED_BETA_KEY, betaKey)
                                             .apply()
                                     }
                                     ResultMessage.BAD_KEY -> {
+                                        /*
                                         addDescription(
                                             context.getString(R.string.loading_beta_key_invalid)
                                         )
-                                        return FailureUpdate(betaKey, BadBetaKeyException(), data)
+                                        */
+                                        return FailureUpdate(betaKey, IgistException(), data)
                                     }
                                 }
                             }
@@ -333,7 +350,7 @@ class AppRepositoryImplOld @Inject constructor(
                     // No beta key is required; clear any previously-validated beta key from
                     // shared preferences
                     sharedPreferences.edit()
-                        .remove(PREF_KEY_VALIDATED_BETA_KEY)
+                        .remove(PREF_KEY_VERIFIED_BETA_KEY)
                         .apply()
 
                     // Check if cancelled
@@ -341,7 +358,7 @@ class AppRepositoryImplOld @Inject constructor(
                 }
             }
 
-            addDescription(context.getString(R.string.loading_beta_key_validated))
+            //addDescription(context.getString(R.string.loading_beta_key_validated))
             return SuccessUpdate(betaKey, data)
         }
     }
@@ -350,9 +367,11 @@ class AppRepositoryImplOld @Inject constructor(
     private inner class ContentTask(val appVersion: Int, val alwaysFetch: Boolean = true) :
         AbsTask<Void, List<ContentList>, List<ContentList>>() {
 
+        /*
         init {
             addDescription(context.getString(R.string.loading_content_metadata))
         }
+        */
 
         override fun doInBackground(vararg params: Void?):
                 ResultUpdate<List<ContentList>, List<ContentList>> {
@@ -373,7 +392,7 @@ class AppRepositoryImplOld @Inject constructor(
                 when {
                     isCancelled -> return FailureUpdate(contentLists, CancellationException(), data)
                     remoteContentListUpdate is FailureUpdate -> {
-                        addDescription(context.getString(R.string.loading_unknown_error))
+                        //addDescription(context.getString(R.string.loading_unknown_error))
                         return FailureUpdate(contentLists, remoteContentListUpdate.e, data)
                     }
                 }
@@ -389,7 +408,7 @@ class AppRepositoryImplOld @Inject constructor(
                 }
             }
 
-            addDescription(context.getString(R.string.content_metadata_loaded))
+            //addDescription(context.getString(R.string.content_metadata_loaded))
             return SuccessUpdate(contentLists, data)
         }
 

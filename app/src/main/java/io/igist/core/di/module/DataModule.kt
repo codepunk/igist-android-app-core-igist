@@ -6,20 +6,21 @@
 package io.igist.core.di.module
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
-import io.igist.core.data.local.database.IgistDb
 import io.igist.core.data.local.dao.ApiDao
 import io.igist.core.data.local.dao.BookDao
+import io.igist.core.data.local.database.IgistDb
 import io.igist.core.data.remote.adapter.BooleanIntAdapter
 import io.igist.core.data.remote.adapter.DateJsonAdapter
 import io.igist.core.data.remote.converter.MoshiEnumConverterFactory
 import io.igist.core.data.remote.interceptor.AuthorizationInterceptor
 import io.igist.core.data.remote.webservice.AppWebservice
 import io.igist.core.data.remote.webservice.AppWebserviceWrapper
+import io.igist.core.data.remote.webservice.BookWebservice
+import io.igist.core.data.remote.webservice.BookWebserviceImpl
 import io.igist.core.data.repository.AppRepositoryImpl
 import io.igist.core.data.repository.BookRepositoryImpl
 import io.igist.core.di.qualifier.ApplicationContext
@@ -110,13 +111,25 @@ class DataModule {
         .build()
 
     /**
-     * Provides an instance of [AppWebservice] for making authorization API calls.
+     * Provides an instance of [AppWebservice] for making app API calls.
      */
     @Provides
     @Singleton
     fun providesAppWebservice(
         retrofit: Retrofit
     ): AppWebservice = AppWebserviceWrapper(retrofit.create(AppWebservice::class.java))
+
+    /**
+     * Provides an instance of [BookWebservice] for making book API calls.
+     * Note that currently there is no endpoint for handling multiple books so we'll
+     * code the logic into a local BookWebserviceImpl implementation for now.
+     */
+    @Provides
+    @Singleton
+    fun providesBookWebservice(
+        @ApplicationContext context: Context,
+        moshi: Moshi
+    ): BookWebservice = BookWebserviceImpl(context, moshi)
 
     /**
      * Provides an [IgistDb] instance.
@@ -148,16 +161,9 @@ class DataModule {
     @Singleton
     @Provides
     fun providesAppRepository(
-        @ApplicationContext context: Context,
-        sharedPreferences: SharedPreferences,
         appDao: ApiDao,
         appWebservice: AppWebservice
-    ): AppRepository = AppRepositoryImpl(
-        context,
-        sharedPreferences,
-        appDao,
-        appWebservice
-    )
+    ): AppRepository = AppRepositoryImpl(appDao, appWebservice)
 
     /**
      * Creates a [BookRepository] instance.
@@ -165,11 +171,10 @@ class DataModule {
     @Singleton
     @Provides
     fun providesBookRepository(
-        @ApplicationContext context: Context,
-        sharedPreferences: SharedPreferences,
         bookDao: BookDao,
-        moshi: Moshi
-    ): BookRepository = BookRepositoryImpl(context, sharedPreferences, bookDao, moshi)
+        bookWebservice: BookWebservice
+    ): BookRepository =
+        BookRepositoryImpl(bookDao, bookWebservice)
 
     // endregion Methods
 

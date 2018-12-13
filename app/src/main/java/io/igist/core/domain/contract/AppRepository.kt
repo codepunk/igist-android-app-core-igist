@@ -8,6 +8,7 @@ package io.igist.core.domain.contract
 import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import io.igist.core.domain.model.Api
+import io.igist.core.domain.model.BookMode
 
 /**
  * An interface that establishes the app repository contract.
@@ -25,6 +26,15 @@ interface AppRepository {
         apiVersion: Int,
         alwaysFetch: Boolean = true
     ): LiveData<DataUpdate<Api, Api>>
+
+    /**
+     * Verifies a beta key.
+     */
+    fun checkBetaKey(
+        bookMode: BookMode,
+        betaKey: String?,
+        alwaysVerify: Boolean = true
+    ): LiveData<DataUpdate<String, String>>
 
     // endregion Methods
 

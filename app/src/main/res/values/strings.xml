@@ -10,49 +10,49 @@
 
     <!-- region Book selection -->
 
-    <string name="select_book_locked_dialog_title">@string/fragment_select_book_title</string>
+    <string name="select_book_dialog_locked_message">%1$s is currently locked. Please select another book.</string>
 
-    <string name="select_book_locked_dialog_selected_book">The book you selected</string>
+    <string name="select_book_dialog_locked_selected_book">The book you selected</string>
 
-    <string name="select_book_locked_dialog_message">%1$s is currently locked. Please select another book.</string>
+    <string name="select_book_dialog_locked_title">@string/fragment_select_book_title</string>
 
     <!-- endregion Book selection -->
 
     <!-- region Loading -->
 
-    <string name="loading_step_indeterminate">Step %1$d: %2$s</string>
+    <string name="loading_dialog_preparing_launch_button_quit">Quit</string>
 
-    <string name="loading_step">Step %1$d of %2$d: %3$s</string>
+    <string name="loading_dialog_preparing_launch_button_retry">Retry</string>
 
-    <string name="loading_api">Loading App defaults…</string>
+    <string name="loading_dialog_preparing_launch_message">IGIST is currently updating, please try again later.</string>
 
-    <string name="api_loaded">App defaults loaded</string>
+    <string name="loading_dialog_preparing_launch_title">Preparing launch…</string>
 
-    <string name="loading_validating_beta_key">Validating beta key…</string>
+    <string name="loading_progress_api_pending">Loading API metadata…</string>
 
-    <string name="loading_beta_key_validated">Beta key validated</string>
+    <string name="loading_progress_api_progress">Cached API metadata loaded…</string>
 
-    <string name="loading_beta_key_required">Beta key required</string>
+    <string name="loading_progress_api_success">API metadata loaded</string>
 
-    <string name="loading_beta_key_invalid">An invalid beta key was entered</string>
+    <string name="loading_progress_book_pending">Loading book metadata…</string>
 
-    <string name="loading_content_metadata">Loading content metadata…</string>
+    <string name="loading_progress_book_progress">Cached book metadata loaded…</string>
 
-    <string name="content_metadata_loaded">Content metadata loaded</string>
+    <string name="loading_progress_book_success">Book metadata loaded</string>
 
-    <string name="loading_unknown_error">An unknown error occurred</string>
-
-    <string name="loading_cancelled">Loading cancelled</string>
-
-    <string name="loading_finished">Loading finished</string>
+    <string name="loading_progress_error">An error occurred</string>
 
     <!-- endregion Loading -->
 
-    <!-- region Result messages -->
+    <!-- region Remote result messages -->
 
     <string name="result_message_already_exists">A user already exists with that username and/or email.</string>
 
     <string name="result_message_bad_key">The beta key you entered is invalid.</string>
+
+    <string name="result_message_beta_key_required">A beta key required.</string>
+
+    <string name="result_message_default">An error occurred.</string>
 
     <string name="result_message_null_message">(Null message)</string>
 
@@ -60,7 +60,9 @@
 
     <string name="result_message_success">Success!</string>
 
-    <string name="result_message_unrecognized">An unrecognized message was returned from the network (%1$s).</string>
+    <string name="result_message_unknown">An unknown error occurred (%1$s).</string>
+
+    <string name="result_message_unknown_no_value">An unknown error occurred.</string>
 
     <!-- endregion Result messages -->
 

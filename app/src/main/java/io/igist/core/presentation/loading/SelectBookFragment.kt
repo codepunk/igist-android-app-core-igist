@@ -33,7 +33,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment
-import com.codepunk.doofenschmirtz.app.AlertDialogFragment.OnAlertDialogBuildListener
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.OnBuildAlertDialogListener
 import com.codepunk.doofenschmirtz.util.CustomDividerItemDecoration
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
@@ -50,11 +50,6 @@ import javax.inject.Inject
 // region Constants
 
 /**
- * The relative size of the "lock" icon over the thumbnail of locked books.
- */
-private const val LOCK_ICON_RELATIVE_SIZE: Float = 1.0f / 3.0f
-
-/**
  * A request code for the dummy book dialog fragment.
  */
 private const val DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE: Int = 1
@@ -67,7 +62,7 @@ private const val DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE: Int = 1
 class SelectBookFragment :
     Fragment(),
     OnClickListener,
-    OnAlertDialogBuildListener {
+    OnBuildAlertDialogListener {
 
     // region Properties
 
@@ -95,6 +90,7 @@ class SelectBookFragment :
      * The recycle view adapter.
      */
     private val adapter: BookAdapter = BookAdapter(this)
+
 
     // endregion Properties
 
@@ -189,11 +185,11 @@ class SelectBookFragment :
             DUMMY_BOOK_DIALOG_FRAGMENT_REQUEST_CODE -> {
                 val title = fragment.arguments?.getString(KEY_BOOK_TITLE)?.let {
                     "\"$it\""
-                } ?: getString(R.string.select_book_locked_dialog_selected_book)
+                } ?: getString(R.string.select_book_dialog_locked_selected_book)
                 builder
                     .setPositiveButton(android.R.string.ok, fragment)
-                    .setTitle(R.string.select_book_locked_dialog_title)
-                    .setMessage(getString(R.string.select_book_locked_dialog_message, title))
+                    .setTitle(R.string.select_book_dialog_locked_title)
+                    .setMessage(getString(R.string.select_book_dialog_locked_message, title))
             }
         }
     }
@@ -263,7 +259,7 @@ class SelectBookFragment :
          */
         @JvmStatic
         private val DUMMY_BOOK_DIALOG_FRAGMENT_TAG: String =
-            SelectBookFragment::class.java.name + ".DUMMY_BOOK_DIALOG_FRAGMENT_TAG"
+            SelectBookFragment::class.java.name + ".DUMMY_BOOK_DIALOG_FRAGMENT"
 
         // endregion Properties
 
@@ -294,6 +290,17 @@ class SelectBookFragment :
          * The book description [AppCompatTextView].
          */
         private val descriptionText: AppCompatTextView = itemView.findViewById(R.id.description_txt)
+
+        /**
+         * The size of the lock icon relative to the book preview image.
+         */
+        private val relativeLockIconSize: Float by lazy {
+            itemView.context.resources.getFraction(
+                R.fraction.select_book_relative_lock_icon_size,
+                1,
+                1
+            )
+        }
 
         // endregion Properties
 
@@ -328,8 +335,8 @@ class SelectBookFragment :
 
                     ContextCompat.getDrawable(context, R.drawable.ic_lock_white_24dp)?.run {
                         val lockDrawable: Drawable = DrawableCompat.wrap(this).mutate()
-                        val start = (1.0f - LOCK_ICON_RELATIVE_SIZE) / 2.0f
-                        val end = start + LOCK_ICON_RELATIVE_SIZE
+                        val start = (1.0f - relativeLockIconSize) / 2.0f
+                        val end = start + relativeLockIconSize
                         lockDrawable.setBounds(
                             (canvas.width * start).toInt(),
                             (canvas.height * start).toInt(),

@@ -23,12 +23,12 @@ open class ResultMessage private constructor(
      * The resource ID associated with the [ResultMessage], for displaying a localized/
      * user-friendly message.
      */
-    @StringRes val resId: Int,
+    @StringRes val resId: Int = R.string.result_message_default,
 
     /**
      * The value that will be returned by the [toString] method.
      */
-    val toString: String = "${ResultMessage::class.java.simpleName}(value=$value, resId=$resId)"
+    val toString: String = "${ResultMessage::class.java.simpleName}(value=$value)"
 
 ) {
 
@@ -60,7 +60,7 @@ open class ResultMessage private constructor(
      * Adds this ResultMessage to [lookupMap] for quick lookup.
      */
     private fun addToLookup(): ResultMessage {
-        lookupMap.put(value, this)
+        lookupMap[value] = this
         return this
     }
 
@@ -104,6 +104,16 @@ open class ResultMessage private constructor(
         ).addToLookup()
 
         /**
+         * A ResultMessage indicating that a beta key is required to read the book.
+         */
+        @JvmStatic
+        val BETA_KEY_REQUIRED: ResultMessage = ResultMessage(
+            "beta key required",
+            R.string.result_message_beta_key_required,
+            "BETA_KEY_REQUIRED"
+        ).addToLookup()
+
+        /**
          * A ResultMessage indicating a null message.
          */
         @JvmStatic
@@ -139,12 +149,12 @@ open class ResultMessage private constructor(
 
         /**
          * Returns a predefined [ResultMessage] if the [value] matches one of the predefined values,
-         * otherwise it creates a new UnrecognizedResultMessage using the supplied value.
+         * otherwise it creates a new UnknownResultMessage using the supplied value.
          */
         fun lookup(value: String?): ResultMessage {
             val predefined = lookupMap[value]
             return when (predefined) {
-                null -> UnrecognizedResultMessage(value)
+                null -> UnknownResultMessage(value)
                 else -> predefined
             }
         }
@@ -160,13 +170,19 @@ open class ResultMessage private constructor(
     /**
      * A specialized implementation of ResultMessage that indicates an unrecognized message.
      */
-    class UnrecognizedResultMessage(
-        value: String?
-    ) : ResultMessage(value, R.string.result_message_unrecognized) {
+    class UnknownResultMessage(
+        value: String? = null
+    ) : ResultMessage(
+        value = value,
+        toString = "${UnknownResultMessage::class.java.simpleName}(value=$value)"
+    ) {
 
         // region Inherited methods
 
-        override fun getString(context: Context): String = context.getString(resId, value)
+        override fun getString(context: Context): String = when (value) {
+            null -> context.getString(R.string.result_message_unknown_no_value)
+            else -> context.getString(R.string.result_message_unknown, value)
+        }
 
         // endregion Inherited methods
 

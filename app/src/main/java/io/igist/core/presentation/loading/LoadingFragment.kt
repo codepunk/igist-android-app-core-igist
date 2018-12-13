@@ -6,7 +6,9 @@
 package io.igist.core.presentation.loading
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -14,19 +16,23 @@ import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import com.codepunk.doofenschmirtz.util.taskinator.*
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.OnBuildAlertDialogListener
+import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.FailureUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
-import dagger.Lazy
 import dagger.android.support.AndroidSupportInjection
 import io.igist.core.BuildConfig.DEBUG
 import io.igist.core.BuildConfig.KEY_DESCRIPTION
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
-import io.igist.core.domain.model.Api
 import io.igist.core.domain.session.AppSessionManager
+import java.io.IOException
 import javax.inject.Inject
 
 // region Constants
@@ -47,6 +53,11 @@ private const val MEDIA_FRAGMENT_TAG = "MEDIA_FRAGMENT"
  */
 private const val SPLASHY_PLAYER = "SPLASHY_PLAYER"
 
+/**
+ * A request code for the preparing launch dialog fragment.
+ */
+private const val PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE: Int = 1
+
 // endregion Constants
 
 /**
@@ -54,15 +65,17 @@ private const val SPLASHY_PLAYER = "SPLASHY_PLAYER"
  */
 class LoadingFragment :
     Fragment(),
-    TextureView.SurfaceTextureListener {
+    TextureView.SurfaceTextureListener,
+    OnBuildAlertDialogListener {
 
     // region Properties
 
     /**
      * The [AppSessionManager] holding application-level session data.
      */
+    @Suppress("UNUSED")
     @Inject
-    lateinit var lazyAppSessionManager: AppSessionManager
+    lateinit var appSessionManager: AppSessionManager
 
     /**
      * The injected [ViewModelProvider.Factory] that we will use to get an instance of
@@ -103,7 +116,7 @@ class LoadingFragment :
      * The default visibility for [FragmentLoadingBinding.progressDescriptionTxt].
      */
     // TODO Set this based on a developer options setting
-    private val defaultProgressDescriptionVisibility: Int = View.VISIBLE
+    private var defaultProgressDescriptionVisibility: Int = View.VISIBLE
 
     // endregion Properties
 
@@ -118,7 +131,8 @@ class LoadingFragment :
     }
 
     /**
-     * Ensures that we have a valid [MediaFragment].
+     * Ensures that we have a valid [MediaFragment] and begins listening to loading progress
+     * updates.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,8 +147,7 @@ class LoadingFragment :
             lifecycle.addObserver(this)
         }
 
-        // loadingViewModel.liveApi.observe(this, Observer { onApi(it) })
-        // loadingViewModel.liveLoading.observe(this, Observer { onLoadingUpdate(it) })
+        loadingViewModel.liveProgress.observe(this, Observer { onLoadingUpdate(it) })
     }
 
     /**
@@ -161,7 +174,7 @@ class LoadingFragment :
         super.onViewCreated(view, savedInstanceState)
         textureViewPanner = TextureViewPanner.Builder(binding.textureView).build()
         binding.textureView.surfaceTextureListener = this
-        binding.progressDescriptionTxt.visibility = when (DEBUG) {
+        defaultProgressDescriptionVisibility = when (DEBUG) {
             true -> View.VISIBLE
             false -> View.INVISIBLE
         }
@@ -189,6 +202,22 @@ class LoadingFragment :
     }
 
     // endregion Lifecycle methods
+
+    // region Inherited methods
+
+    /**
+     * Processes dialog fragment result(s).
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE -> {
+
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    // endregion Inherited methods
 
     // region Implemented methods
 
@@ -250,51 +279,85 @@ class LoadingFragment :
         // No op
     }
 
+    /**
+     * Implementation of [OnBuildAlertDialogListener]. Builds the alert dialog.
+     */
+    override fun onBuildAlertDialog(fragment: AlertDialogFragment, builder: AlertDialog.Builder) {
+        when (fragment.targetRequestCode) {
+            PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE -> {
+                builder
+                    .setTitle(R.string.loading_dialog_preparing_launch_title)
+                    .setMessage(R.string.loading_dialog_preparing_launch_message)
+                    .setPositiveButton(
+                        R.string.loading_dialog_preparing_launch_button_retry,
+                        fragment
+                    )
+                    .setNegativeButton(
+                        R.string.loading_dialog_preparing_launch_button_quit,
+                        fragment
+                    )
+            }
+        }
+    }
+
     // endregion Implemented methods
 
     // region Methods
 
     /**
-     * Reacts to API data updates.
-     */
-    private fun onApi(update: DataUpdate<Api, Api>) {
-        Log.d("LoadingFragment", "onApi: update=$update")
-    }
-
-    /**
-     * Reacts to loading data updates.
+     * Reacts to loading LiveData updates.
      */
     private fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) {
-        Log.d("LoadingFragment", "onLoadingUpdate: update=$update")
+        Log.d("LoadingFragment", "update=$update")
         when (update) {
-            is PendingUpdate -> {
-                binding.progressDescriptionTxt.visibility = View.INVISIBLE
-                binding.loadingProgress.visibility = View.INVISIBLE
-            }
             is ProgressUpdate -> {
                 binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
+                binding.progressDescriptionTxt.text = update.data?.getString(KEY_DESCRIPTION)
+
+                val progress: Int = update.progress.getOrElse(0) { 0 } ?: 0
+                val max: Int = update.progress.getOrElse(1) { 0 } ?: 0
                 binding.loadingProgress.visibility = View.VISIBLE
-                val loadStep: Int = update.progress.getOrElse(0) { 0 } ?: 0
-                val loadTotalSteps: Int = update.progress.getOrElse(1) { 0 } ?: 0
-                val description = update.data?.getString(KEY_DESCRIPTION) ?: ""
-                binding.loadingProgress.progress = loadStep
-                binding.loadingProgress.isIndeterminate = (loadTotalSteps == 0)
-                binding.progressDescriptionTxt.text = when (loadTotalSteps) {
-                    0 -> getString(R.string.loading_step_indeterminate, loadStep, description)
-                    else -> getString(R.string.loading_step, loadStep, loadTotalSteps, description)
-                }
-            }
-            is SuccessUpdate -> {
-                binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
-                binding.loadingProgress.visibility = View.VISIBLE
+                binding.loadingProgress.progress = progress
+                binding.loadingProgress.isIndeterminate = (max == 0)
             }
             is FailureUpdate -> {
-                binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
-                binding.loadingProgress.visibility = View.VISIBLE
+                when (update.e) {
+                    is IOException -> showPreparingLaunchDialogFragment()
+                }
             }
         }
     }
 
+    /**
+     * Shows a dialog informing the user that there was an error loading the book.
+     */
+    private fun showPreparingLaunchDialogFragment() {
+        AlertDialogFragment.show(
+            PREPARING_LAUNCH_DIALOG_FRAGMENT_TAG,
+            this,
+            PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE
+        )
+    }
+
     // endregion Methods
+
+    // region Companion object
+
+    companion object {
+
+        // region Properties
+
+        /**
+         * A fragment tag for the dummy book dialog fragment.
+         */
+        @JvmStatic
+        private val PREPARING_LAUNCH_DIALOG_FRAGMENT_TAG: String =
+            SelectBookFragment::class.java.name + ".PREPARING_LAUNCH_DIALOG_FRAGMENT"
+
+        // endregion Properties
+
+    }
+
+    // endregion Companion object
 
 }

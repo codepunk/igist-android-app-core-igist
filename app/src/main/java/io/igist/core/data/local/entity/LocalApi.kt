@@ -7,7 +7,7 @@ package io.igist.core.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import io.igist.core.domain.model.IgistMode
+import io.igist.core.domain.model.BookMode
 
 /**
  * Locally-cached implementation of a data class representing basic API information.
@@ -34,7 +34,7 @@ data class LocalApi(
      * The "mode" (i.e. behavior) associated with the current API version.
      */
     @ColumnInfo(name = "igist")
-    val igistMode: IgistMode,
+    val bookMode: BookMode,
 
     /**
      * A link used if user agrees to do a survey (prompted when user completes the book).

@@ -23,7 +23,7 @@ data class Api(
     /**
      * The "mode" (i.e. behavior) associated with the current API version.
      */
-    val igistMode: IgistMode,
+    val bookMode: BookMode,
 
     /**
      * A link used if user agrees to do a survey (prompted when user completes the book).

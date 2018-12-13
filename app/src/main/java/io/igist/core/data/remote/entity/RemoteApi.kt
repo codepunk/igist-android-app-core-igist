@@ -6,7 +6,7 @@
 package io.igist.core.data.remote.entity
 
 import com.squareup.moshi.Json
-import io.igist.core.domain.model.IgistMode
+import io.igist.core.domain.model.BookMode
 
 /**
  * Remote implementation of a data class representing basic API information.
@@ -23,7 +23,7 @@ data class RemoteApi(
      * The "mode" (i.e. behavior) associated with the current API version.
      */
     @field:Json(name = "igist")
-    val igistMode: IgistMode,
+    val bookMode: BookMode,
 
     /**
      * A link used if user agrees to do a survey (prompted when user completes the book).

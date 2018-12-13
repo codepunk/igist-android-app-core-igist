@@ -9,7 +9,7 @@ import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import io.igist.core.data.local.converters.IgistModeTypeConverter
+import io.igist.core.data.local.converters.BookModeTypeConverter
 import io.igist.core.data.local.dao.ApiDao
 import io.igist.core.data.local.dao.BookDao
 import io.igist.core.data.local.entity.LocalApi
@@ -24,7 +24,7 @@ import io.igist.core.data.local.entity.LocalBook
     exportSchema = true
 )
 @TypeConverters(
-    IgistModeTypeConverter::class
+    BookModeTypeConverter::class
 )
 abstract class IgistDb : RoomDatabase() {
 

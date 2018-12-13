@@ -5,7 +5,6 @@
 
 package io.igist.core.data.remote.webservice
 
-import io.igist.core.BuildConfig
 import io.igist.core.data.remote.HEADER_ACCEPT_APPLICATION_JSON
 import io.igist.core.data.remote.entity.RemoteApi
 import io.igist.core.data.remote.entity.RemoteContentList
@@ -20,6 +19,8 @@ import retrofit2.http.Path
  */
 @Suppress("UNUSED")
 interface AppWebservice {
+
+    // region Methods
 
     /**
      * Gets API information for the given [bookId] and [apiVersion].
@@ -54,5 +55,7 @@ interface AppWebservice {
      * drop the book ID and call the appVersion-only implementation.
      */
     fun content(bookId: Long, appVersion: Int): Call<List<RemoteContentList>>
+
+    // endregion methods
 
 }

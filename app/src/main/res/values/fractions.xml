@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018 IGIST.io. All rights reserved.
+  ~ Author(s): Scott Slater
+  -->
+
+<resources>
+    <fraction name="select_book_relative_lock_icon_size">33%</fraction>
+</resources>

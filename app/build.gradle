@@ -69,7 +69,7 @@ android {
 
         makePreferenceKeys(
                 variant,
-                "VALIDATED_BETA_KEY",
+                "VERIFIED_BETA_KEY",
                 "CURRENT_BOOK_ID"
         )
 

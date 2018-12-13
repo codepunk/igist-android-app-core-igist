@@ -11,7 +11,7 @@ import io.igist.core.domain.model.ResultMessage
 /**
  * Remote implementation of a data class representing a message returned from the server.
  */
-class RemoteMessage(
+data class RemoteMessage(
 
     /**
      * The message.
