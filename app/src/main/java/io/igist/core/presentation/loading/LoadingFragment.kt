@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.Navigation
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment.OnBuildAlertDialogListener
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
@@ -31,6 +32,8 @@ import io.igist.core.BuildConfig.DEBUG
 import io.igist.core.BuildConfig.KEY_DESCRIPTION
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
+import io.igist.core.domain.exception.IgistException
+import io.igist.core.domain.model.ResultMessage
 import io.igist.core.domain.session.AppSessionManager
 import java.io.IOException
 import javax.inject.Inject
@@ -321,8 +324,21 @@ class LoadingFragment :
                 binding.loadingProgress.isIndeterminate = (max == 0)
             }
             is FailureUpdate -> {
-                when (update.e) {
+                val e: Exception? = update.e
+                when (e) {
                     is IOException -> showPreparingLaunchDialogFragment()
+                    is IgistException -> {
+                        when (e.resultMessage) {
+                            ResultMessage.BETA_KEY_REQUIRED -> {
+                                Navigation.findNavController(
+                                    requireActivity(),
+                                    R.id.loading_nav_fragment
+                                ).navigate(R.id.action_loading_to_beta_key)
+                            }
+                            ResultMessage.BETA_KEY_REQUIRED -> {
+                            }
+                        }
+                    }
                 }
             }
         }

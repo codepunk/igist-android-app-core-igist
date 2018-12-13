@@ -4,9 +4,11 @@
 
     <string name="app_coming_soon">Coming soon</string>
 
-    <string name="fragment_select_book_title">Select book</string>
+    <string name="fragment_beta_key_title">Beta key</string>
 
     <string name="fragment_loading_title">Loading</string>
+
+    <string name="fragment_select_book_title">Select book</string>
 
     <!-- region Book selection -->
 
@@ -34,6 +36,12 @@
 
     <string name="loading_progress_api_success">API metadata loaded</string>
 
+    <string name="loading_progress_beta_key_pending">Checking beta key…</string>
+
+    <string name="loading_progress_beta_key_progress">Validating beta key…</string>
+
+    <string name="loading_progress_beta_key_success">Beta key validated</string>
+
     <string name="loading_progress_book_pending">Loading book metadata…</string>
 
     <string name="loading_progress_book_progress">Cached book metadata loaded…</string>
@@ -43,6 +51,14 @@
     <string name="loading_progress_error">An error occurred</string>
 
     <!-- endregion Loading -->
+
+    <!-- region Beta key -->
+
+    <string name="beta_key_beta_key">Beta key</string>
+
+    <string name="beta_key_enter_code">Enter code</string>
+
+    <string name="beta_key_submit">Submit</string>
 
     <!-- region Remote result messages -->
 

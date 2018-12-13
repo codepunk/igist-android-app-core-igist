@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018 IGIST.io. All rights reserved.
+  ~ Author(s): Scott Slater
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item >
+
+        <shape
+            android:shape="rectangle" >
+
+            <corners
+                android:radius="@dimen/size_standard"/>
+
+            <solid
+                android:color="@color/igistBetaKeyEditBackground" />
+
+            <stroke
+                android:color="@color/igistBetaKeyEditForeground"
+                android:width="2dp" />
+
+        </shape>
+
+    </item>
+
+</selector>

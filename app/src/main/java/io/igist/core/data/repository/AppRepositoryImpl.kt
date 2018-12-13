@@ -116,6 +116,9 @@ class AppRepositoryImpl(
 
             // Fetch the latest API info
             if (api == null || alwaysFetch) {
+                // If we have a cached Api, publish it
+                if (api != null) publishProgress(api)
+
                 val update: ResultUpdate<Void, Response<RemoteApi>> =
                     appWebservice.api(bookId, apiVersion).toResultUpdate()
 
@@ -164,6 +167,9 @@ class AppRepositoryImpl(
 
             // Verify the beta key if the book mode requires it
             if (bookMode == BookMode.REQUIRE_BETA_KEY) {
+                // If we have a beta key (whether user-entered or previously-validated), publish it
+                if (betaKey != null) publishProgress(betaKey)
+
                 when {
                     betaKey.isNullOrBlank() -> return FailureUpdate(
                         betaKey,
@@ -187,7 +193,7 @@ class AppRepositoryImpl(
 
                         update.result?.body()?.apply {
                             if (resultMessage != ResultMessage.SUCCESS) {
-                                return FailureUpdate(betaKey, IgistException(resultMessage), data)
+                                return FailureUpdate(null, IgistException(resultMessage), data)
                             }
                         }
                     }

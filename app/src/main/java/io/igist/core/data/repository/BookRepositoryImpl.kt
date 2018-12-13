@@ -97,12 +97,11 @@ class BookRepositoryImpl(
             // Check if cancelled
             if (isCancelled) return FailureUpdate(books, CancellationException())
 
-            // If we have a cached book list, publish it
-            if (!books.isEmpty()) publishProgress(books)
-
-            // Fetch the latest book list. Currently this is baked into the app in a JSON file
-            // in the "raw" resource folder, but might one day be returned from the server.
+            // Fetch the latest book list
             if (books.isEmpty() || alwaysFetch) {
+                // If we have a cached book list, publish it
+                if (!books.isEmpty()) publishProgress(books)
+
                 val update: ResultUpdate<Void, Response<List<RemoteBook>>> =
                     bookWebservice.books().toResultUpdate()
 
@@ -162,12 +161,11 @@ class BookRepositoryImpl(
             // Check if cancelled
             if (isCancelled) return FailureUpdate(book, CancellationException())
 
-            // If we have a cached book list, publish it
-            if (book != null) publishProgress(book)
-
-            // Fetch the latest book info. Currently this is baked into the app in a JSON file
-            // in the "raw" resource folder, but might one day be returned from the server.
+            // Fetch the latest book metadata
             if (book == null || alwaysFetch) {
+                // If we have a cached book, publish it
+                if (book != null) publishProgress(book)
+
                 val update: ResultUpdate<Void, Response<RemoteBook>> =
                     bookWebservice.book(bookId).toResultUpdate()
 

@@ -14,4 +14,6 @@
     <color name="colorAccentPink">#FF00F2</color>
     
     <color name="lockedGray">#C0000000</color>
+    <color name="igistBetaKeyEditBackground">#AAAAAA</color>
+    <color name="igistBetaKeyEditForeground">#808080</color>
 </resources>

@@ -61,4 +61,13 @@ class IgistException : RuntimeException {
     }
 
     // endregion Constructors
+
+    // region Inherited methods
+
+    override fun toString(): String {
+        return IgistException::class.java.simpleName + "(resultMessage=$resultMessage)"
+    }
+
+    // endregion Inherited methods
+
 }

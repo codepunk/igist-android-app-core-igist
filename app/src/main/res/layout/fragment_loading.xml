@@ -13,16 +13,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@android:id/background"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/space_bg"/>
+        <include
+            layout="@layout/include_square_guide"
+            tools:ignore="MissingConstraints"/>
+
+        <include
+            layout="@layout/include_space_bg"
+            tools:ignore="MissingConstraints"/>
 
         <com.codepunk.punkubator.widget.TextureViewEx
             android:id="@+id/texture_view"
@@ -30,17 +27,6 @@
             android:layout_height="match_parent"
             android:gravity="center_horizontal|bottom"
             android:scaleType="centerCrop"/>
-
-        <Space
-            android:id="@+id/square_guide"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_margin="@dimen/offset_large"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
 
         <androidx.core.widget.ContentLoadingProgressBar
             android:id="@+id/loading_progress"

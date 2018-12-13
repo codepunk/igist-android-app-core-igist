@@ -26,4 +26,26 @@
         <item name="android:textSize">@dimen/igist_text_size_s</item>
     </style>
 
+    <style name="IgistBetaKeyEdit" parent="android:Widget.EditText">
+        <item name="android:background">@drawable/igist_beta_key_edit_bg</item>
+        <item name="android:gravity">center</item>
+        <item name="android:hint">@string/beta_key_beta_key</item>
+        <item name="android:inputType">textCapCharacters|textVisiblePassword|textNoSuggestions</item>
+        <item name="android:minHeight">@dimen/size_big_widget</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/igistBetaKeyEditForeground</item>
+        <item name="android:textColorHint">@color/igistBetaKeyEditForeground</item>
+        <item name="android:textSize">@dimen/igist_text_size</item>
+        <item name="fontFamily">@font/electro</item>
+    </style>
+
+    <style name="IgistPrimaryButton" parent="android:Widget.Button">
+        <item name="android:background">@drawable/igist_primary_button_bg</item>
+        <item name="android:minHeight">@dimen/size_big_widget</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/igist_text_size</item>
+        <item name="fontFamily">@font/electro</item>
+    </style>
+
 </resources>

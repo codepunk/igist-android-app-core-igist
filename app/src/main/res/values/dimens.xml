@@ -17,6 +17,8 @@
     <dimen name="size_large">16dp</dimen>
     <dimen name="size_xlarge">24dp</dimen>
     <dimen name="size_xxlarge">48dp</dimen>
+    <dimen name="size_touch_target">48dp</dimen>
+    <dimen name="size_big_widget">56dp</dimen>
 
     <dimen name="igist_text_size">28dp</dimen>
     <dimen name="igist_text_size_s">18dp</dimen>

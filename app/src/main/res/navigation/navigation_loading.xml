@@ -14,6 +14,22 @@
         android:id="@+id/loading_fragment"
         android:name="io.igist.core.presentation.loading.LoadingFragment"
         android:label="@string/fragment_loading_title"
-        tools:layout="@layout/fragment_loading"/>
+        tools:layout="@layout/fragment_loading">
+
+        <action
+            android:id="@+id/action_loading_to_beta_key"
+            app:destination="@id/beta_key_fragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@null"
+            app:popExitAnim="@anim/slide_down"
+            app:popEnterAnim="@null"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/beta_key_fragment"
+        android:name="io.igist.core.presentation.loading.BetaKeyFragment"
+        android:label="@string/fragment_loading_title"
+        tools:layout="@layout/fragment_beta_key"/>
 
 </navigation>
