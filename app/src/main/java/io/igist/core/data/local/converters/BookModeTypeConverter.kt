@@ -16,7 +16,7 @@ class BookModeTypeConverter {
      * Converts an Int to an [BookMode].
      */
     @TypeConverter
-    fun toIgistMode(value: Int): BookMode = BookMode.fromValue(value, BookMode.NONE)
+    fun toIgistMode(value: Int): BookMode = BookMode.fromValue(value, BookMode.DEFAULT)
 
     /**
      * Converts an [BookMode] to an [Int].

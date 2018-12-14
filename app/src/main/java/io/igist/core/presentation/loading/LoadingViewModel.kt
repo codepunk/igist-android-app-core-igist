@@ -8,12 +8,10 @@ package io.igist.core.presentation.loading
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import io.igist.core.BuildConfig.PREF_KEY_CURRENT_BOOK_ID
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * A [ViewModel] that handles all aspects of onboarding/loading/app configuration etc.
@@ -22,7 +20,7 @@ class LoadingViewModel @Inject constructor(
 
     private val sharedPreferences: SharedPreferences,
 
-    private val bookLoaderProvider: Provider<BookLoader>
+    private val bookLoader: BookLoader
 
 ) :
     ViewModel(),
@@ -30,21 +28,9 @@ class LoadingViewModel @Inject constructor(
 
     // region Properties
 
-    private var bookLoader: BookLoader? = null
+    val liveProgress: LiveData<DataUpdate<Int, Boolean>> = bookLoader.loadingUpdate
 
-    val liveProgress: MediatorLiveData<DataUpdate<Int, Boolean>> =
-        MediatorLiveData()
-
-    private var liveLoadingProgressSource: LiveData<DataUpdate<Int, Boolean>>? = null
-        set(value) {
-            field?.run { liveProgress.removeSource(this) }
-            field = value
-            field?.run {
-                liveProgress.addSource(this) { loadingProgress ->
-                    liveProgress.value = loadingProgress
-                }
-            }
-        }
+    val liveBetaKey: LiveData<DataUpdate<String, String>> = bookLoader.betaKeyUpdate
 
     // endregion Properties
 
@@ -75,11 +61,8 @@ class LoadingViewModel @Inject constructor(
             PREF_KEY_CURRENT_BOOK_ID -> {
                 val bookId = sharedPreferences.getLong(key, 0L)
                 if (bookId > 0) {
-                    bookLoader?.cancel()
-                    bookLoaderProvider.get().apply {
-                        bookLoader = this
-                        liveLoadingProgressSource = load(bookId)
-                    }
+                    bookLoader.cancel()
+                    bookLoader.load(bookId)
                 }
             }
         }
@@ -89,6 +72,10 @@ class LoadingViewModel @Inject constructor(
 
     // region Methods
 
+    fun submitBetaKey(betaKey: String?) {
+        bookLoader.cancel()
+        bookLoader.submitBetaKey(betaKey)
+    }
 
     // endregion Methods
 

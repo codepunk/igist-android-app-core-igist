@@ -4,6 +4,10 @@
 
     <string name="app_coming_soon">Coming soon</string>
 
+    <string name="app_quit">Quit</string>
+
+    <string name="app_retry">Retry</string>
+
     <string name="fragment_beta_key_title">Beta key</string>
 
     <string name="fragment_loading_title">Loading</string>
@@ -22,29 +26,19 @@
 
     <!-- region Loading -->
 
-    <string name="loading_dialog_preparing_launch_button_quit">Quit</string>
-
-    <string name="loading_dialog_preparing_launch_button_retry">Retry</string>
-
     <string name="loading_dialog_preparing_launch_message">IGIST is currently updating, please try again later.</string>
 
     <string name="loading_dialog_preparing_launch_title">Preparing launch…</string>
 
     <string name="loading_progress_api_pending">Loading API metadata…</string>
 
-    <string name="loading_progress_api_progress">Cached API metadata loaded…</string>
-
     <string name="loading_progress_api_success">API metadata loaded</string>
 
     <string name="loading_progress_beta_key_pending">Checking beta key…</string>
 
-    <string name="loading_progress_beta_key_progress">Validating beta key…</string>
-
     <string name="loading_progress_beta_key_success">Beta key validated</string>
 
     <string name="loading_progress_book_pending">Loading book metadata…</string>
-
-    <string name="loading_progress_book_progress">Cached book metadata loaded…</string>
 
     <string name="loading_progress_book_success">Book metadata loaded</string>
 
@@ -55,6 +49,10 @@
     <!-- region Beta key -->
 
     <string name="beta_key_beta_key">Beta key</string>
+
+    <string name="beta_key_dialog_bad_key_title">Beep Boop Beep</string>
+
+    <string name="beta_key_dialog_bad_key_message">Sorry, that key isn\'t activated yet. Try again later.</string>
 
     <string name="beta_key_enter_code">Enter code</string>
 

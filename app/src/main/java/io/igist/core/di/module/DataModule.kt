@@ -6,6 +6,7 @@
 package io.igist.core.di.module
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -162,8 +163,9 @@ class DataModule {
     @Provides
     fun providesAppRepository(
         appDao: ApiDao,
-        appWebservice: AppWebservice
-    ): AppRepository = AppRepositoryImpl(appDao, appWebservice)
+        appWebservice: AppWebservice,
+        sharedPreferences: SharedPreferences
+    ): AppRepository = AppRepositoryImpl(appDao, appWebservice, sharedPreferences)
 
     /**
      * Creates a [BookRepository] instance.

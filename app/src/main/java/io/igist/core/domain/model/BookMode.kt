@@ -24,7 +24,7 @@ enum class BookMode(
      * A mode that indicates no special behavior.
      */
     @field:Json(name = "0")
-    NONE(0),
+    DEFAULT(0),
 
     /**
      * A mode that indicates that a beta key is required to read a book.

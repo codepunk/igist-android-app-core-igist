@@ -5,9 +5,11 @@
 
 package io.igist.core.data.repository
 
+import android.content.SharedPreferences
 import android.os.AsyncTask.THREAD_POOL_EXECUTOR
 import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
+import io.igist.core.BuildConfig.PREF_KEY_VERIFIED_BETA_KEY
 import io.igist.core.data.local.dao.ApiDao
 import io.igist.core.data.mapper.toApi
 import io.igist.core.data.mapper.toApiOrNull
@@ -20,6 +22,8 @@ import io.igist.core.domain.contract.AppRepository
 import io.igist.core.domain.exception.IgistException
 import io.igist.core.domain.model.Api
 import io.igist.core.domain.model.BookMode
+import io.igist.core.domain.model.BookMode.DEFAULT
+import io.igist.core.domain.model.BookMode.REQUIRE_BETA_KEY
 import io.igist.core.domain.model.ResultMessage
 import retrofit2.Response
 import java.util.concurrent.CancellationException
@@ -31,7 +35,9 @@ class AppRepositoryImpl(
 
     private val apiDao: ApiDao,
 
-    private val appWebservice: AppWebservice
+    private val appWebservice: AppWebservice,
+
+    private val sharedPreferences: SharedPreferences
 
 ) : AppRepository {
 
@@ -73,6 +79,7 @@ class AppRepositoryImpl(
         betaKeyTask?.cancel(true)
         return BetaKeyTask(
             appWebservice,
+            sharedPreferences,
             alwaysVerify
         ).apply {
             betaKeyTask = this
@@ -152,6 +159,8 @@ class AppRepositoryImpl(
 
         private val appWebservice: AppWebservice,
 
+        private val sharedPreferences: SharedPreferences,
+
         private val alwaysVerify: Boolean = true
 
     ) : DataTaskinator<Any?, String, String>() {
@@ -160,40 +169,59 @@ class AppRepositoryImpl(
             // Extract arguments from params
             val bookMode: BookMode = params.getOrNull(0) as? BookMode?
                 ?: throw IllegalArgumentException("No BookMode passed to BetaKeyTask")
-            val betaKey: String? = params.getOrNull(1) as? String?
+            var betaKey: String? = params.getOrNull(1) as? String?
 
             // Check if cancelled
             if (isCancelled) return FailureUpdate(betaKey, CancellationException(), data)
 
             // Verify the beta key if the book mode requires it
-            if (bookMode == BookMode.REQUIRE_BETA_KEY) {
-                // If we have a beta key (whether user-entered or previously-validated), publish it
-                if (betaKey != null) publishProgress(betaKey)
+            when (bookMode) {
+                DEFAULT -> {
+                    // No beta key is required. Remove any previously-verified beta key from
+                    // shared preferences and return success with null beta key value
+                    sharedPreferences.edit().remove(PREF_KEY_VERIFIED_BETA_KEY).apply()
+                    betaKey = null
+                }
+                REQUIRE_BETA_KEY -> {
+                    // If we have a beta key (whether user-entered or previously-validated),
+                    // publish it
+                    if (betaKey != null) publishProgress(betaKey)
 
-                when {
-                    betaKey.isNullOrBlank() -> return FailureUpdate(
-                        betaKey,
-                        IgistException(ResultMessage.BETA_KEY_REQUIRED),
-                        data
-                    )
-                    alwaysVerify -> {
-                        val update: ResultUpdate<Void, Response<RemoteMessage>> =
-                            appWebservice.betaKey(betaKey).toResultUpdate()
+                    when {
+                        betaKey == null -> return FailureUpdate(
+                            betaKey,
+                            IgistException(ResultMessage.BETA_KEY_REQUIRED),
+                            data
+                        )
+                        alwaysVerify -> {
+                            val update: ResultUpdate<Void, Response<RemoteMessage>> =
+                                appWebservice.betaKey(
+                                    if (betaKey.isEmpty()) " " else betaKey // Avoid empty string
+                                ).toResultUpdate()
 
-                        // Check if cancelled or failure
-                        when {
-                            isCancelled -> return FailureUpdate(
-                                betaKey,
-                                CancellationException(),
-                                data
-                            )
-                            update is FailureUpdate ->
-                                return FailureUpdate(betaKey, update.e, data)
-                        }
+                            // Check if cancelled or failure
+                            when {
+                                isCancelled -> return FailureUpdate(
+                                    betaKey,
+                                    CancellationException(),
+                                    data
+                                )
+                                update is FailureUpdate ->
+                                    return FailureUpdate(betaKey, update.e, data)
+                            }
 
-                        update.result?.body()?.apply {
-                            if (resultMessage != ResultMessage.SUCCESS) {
-                                return FailureUpdate(null, IgistException(resultMessage), data)
+                            // Check the result message
+                            val message = update.result?.body()?.resultMessage
+                                ?: ResultMessage.UnknownResultMessage()
+                            when (message) {
+                                ResultMessage.SUCCESS -> sharedPreferences.edit()
+                                    .putString(PREF_KEY_VERIFIED_BETA_KEY, betaKey)
+                                    .apply()
+                                else -> return FailureUpdate(
+                                    null,
+                                    IgistException(message),
+                                    data
+                                )
                             }
                         }
                     }

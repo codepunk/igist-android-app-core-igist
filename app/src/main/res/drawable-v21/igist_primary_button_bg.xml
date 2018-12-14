@@ -4,26 +4,53 @@
   ~ Author(s): Scott Slater
   -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:color="@color/colorPrimaryDark">
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item >
+    <item android:state_enabled="false">
 
         <shape
-            android:shape="rectangle" >
+            android:shape="rectangle">
 
             <corners
                 android:radius="@dimen/size_standard"/>
 
             <solid
-                android:color="@color/colorPrimary"/>
+                android:color="@color/colorPrimaryDisabled"/>
 
             <stroke
-                android:color="@color/colorPrimaryDark"
-                android:width="2dp"/>
+                android:width="2dp"
+                android:color="@color/colorPrimaryDarkDisabled"/>
 
         </shape>
 
     </item>
 
-</ripple>
+    <item>
+
+        <ripple
+                android:color="@color/colorPrimaryDark">
+
+            <item>
+
+                <shape
+                    android:shape="rectangle">
+
+                    <corners
+                        android:radius="@dimen/size_standard"/>
+
+                    <solid
+                        android:color="@color/colorPrimary"/>
+
+                    <stroke
+                        android:width="2dp"
+                        android:color="@color/colorPrimaryDark"/>
+
+                </shape>
+
+            </item>
+
+        </ripple>
+
+    </item>
+
+</selector>

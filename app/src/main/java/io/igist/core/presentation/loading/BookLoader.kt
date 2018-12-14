@@ -8,25 +8,29 @@ package io.igist.core.presentation.loading
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
-import io.igist.core.BuildConfig.KEY_DESCRIPTION
-import io.igist.core.BuildConfig.PREF_KEY_VERIFIED_BETA_KEY
+import io.igist.core.BuildConfig.*
 import io.igist.core.R
 import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
 import io.igist.core.domain.contract.BookRepository
+import io.igist.core.domain.exception.IgistException
 import io.igist.core.domain.model.Api
 import io.igist.core.domain.model.Book
+import io.igist.core.domain.model.BookMode
+import io.igist.core.domain.model.ResultMessage
 import io.igist.core.domain.session.AppSessionManager
+import java.lang.Exception
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * A class that loads all data and resources associated with a book.
  */
+@Singleton
 class BookLoader @Inject constructor(
 
     /**
@@ -103,20 +107,13 @@ class BookLoader @Inject constructor(
                                 return@addSource
                             }
                         }
-                        is PendingUpdate -> setDescription(R.string.loading_progress_book_pending)
-                        is ProgressUpdate -> {
-                            book = update.progress.getOrNull(0)
-                            setDescription(R.string.loading_progress_book_progress)
-                        }
-                        is SuccessUpdate -> {
-                            book = update.result
-                            setDescription(R.string.loading_progress_book_success)
-                        }
+                        is PendingUpdate -> loadingUpdate.value = ProgressUpdate(
+                            arrayOf(++progress, max),
+                            setDescription(R.string.loading_progress_book_pending)
+                        )
+                        is ProgressUpdate -> book = update.progress.getOrNull(0)
+                        is SuccessUpdate -> book = update.result
                     }
-                    loadingUpdate.value = ProgressUpdate(
-                        arrayOf(++progress, max),
-                        data
-                    )
                     if (update is ResultUpdate) {
                         loadingUpdate.removeSource(this)
                     }
@@ -124,6 +121,9 @@ class BookLoader @Inject constructor(
             }
         }
 
+    /**
+     * A [LiveData] that tracks updates associated with a loading [Api] metadata.
+     */
     private var liveApiUpdate: LiveData<DataUpdate<Api, Api>>? = null
         set(value) {
             field?.run { loadingUpdate.removeSource(this) }
@@ -143,20 +143,13 @@ class BookLoader @Inject constructor(
                                 return@addSource
                             }
                         }
-                        is PendingUpdate -> setDescription(R.string.loading_progress_api_pending)
-                        is ProgressUpdate -> {
-                            api = update.progress.getOrNull(0)
-                            setDescription(R.string.loading_progress_api_progress)
-                        }
-                        is SuccessUpdate -> {
-                            api = update.result
-                            setDescription(R.string.loading_progress_api_success)
-                        }
+                        is PendingUpdate -> loadingUpdate.value = ProgressUpdate(
+                            arrayOf(++progress, max),
+                            setDescription(R.string.loading_progress_api_pending)
+                        )
+                        is ProgressUpdate -> api = update.progress.getOrNull(0)
+                        is SuccessUpdate -> api = update.result
                     }
-                    loadingUpdate.value = ProgressUpdate(
-                        arrayOf(++progress, max),
-                        data
-                    )
                     if (update is ResultUpdate) {
                         loadingUpdate.removeSource(this)
                     }
@@ -166,15 +159,24 @@ class BookLoader @Inject constructor(
 
     private var liveBetaKeyUpdate: LiveData<DataUpdate<String, String>>? = null
         set(value) {
-            field?.run { loadingUpdate.removeSource(this) }
+            field?.run {
+                loadingUpdate.removeSource(this)
+                betaKeyUpdate.removeSource(this)
+            }
             field = value
             field?.run {
                 loadingUpdate.addSource(this) { update ->
                     when (update) {
                         is FailureUpdate -> {
-                            // If we have a previously-validated beta key, fail silently and
-                            // continue. Otherwise publish a FailureUpdate
-                            if (update.result == null) {
+                            // If we got an IgistException, publish the failure and exit.
+                            // Otherwise, only publish if we don't have a previously-saved
+                            // beta key.
+                            val e: Exception? = update.e
+                            when (e) {
+                                is IgistException ->
+                                    data.putParcelable(KEY_BETA_KEY_MESSAGE, e.resultMessage)
+                            }
+                            if (e is IgistException || update.result == null) {
                                 loadingUpdate.value = FailureUpdate(
                                     false,
                                     update.e,
@@ -183,24 +185,20 @@ class BookLoader @Inject constructor(
                                 return@addSource
                             }
                         }
-                        is PendingUpdate ->
+                        is PendingUpdate -> loadingUpdate.value = ProgressUpdate(
+                            arrayOf(++progress, max),
                             setDescription(R.string.loading_progress_beta_key_pending)
-                        is ProgressUpdate ->
-                            setDescription(R.string.loading_progress_beta_key_progress)
-                        is SuccessUpdate -> {
-                            setDescription(R.string.loading_progress_beta_key_success)
-                            sharedPreferences.edit()
-                                .putString(PREF_KEY_VERIFIED_BETA_KEY, update.result)
-                                .apply()
+                        )
+                        is ProgressUpdate -> { // No op
                         }
+                        is SuccessUpdate -> validatedBetaKey = update.result
                     }
-                    loadingUpdate.value = ProgressUpdate(
-                        arrayOf(++progress, max),
-                        data
-                    )
                     if (update is ResultUpdate) {
                         loadingUpdate.removeSource(this)
                     }
+                }
+                betaKeyUpdate.addSource(this) { update ->
+                    betaKeyUpdate.value = update
                 }
             }
         }
@@ -208,7 +206,9 @@ class BookLoader @Inject constructor(
     /**
      * A [LiveData] containing information about the current loading progress.
      */
-    private val loadingUpdate: MediatorLiveData<DataUpdate<Int, Boolean>> = MediatorLiveData()
+    val loadingUpdate: MediatorLiveData<DataUpdate<Int, Boolean>> = MediatorLiveData()
+
+    val betaKeyUpdate: MediatorLiveData<DataUpdate<String, String>> = MediatorLiveData()
 
     private var book: Book? = null
         set(value) {
@@ -216,6 +216,12 @@ class BookLoader @Inject constructor(
                 field = value
                 appSessionManager.book = field
                 field?.run {
+                    // Publish a loading update
+                    loadingUpdate.value = ProgressUpdate(
+                        arrayOf(++progress, max),
+                        setDescription(R.string.loading_progress_book_success)
+                    )
+
                     // Get the API associated with the selected book
                     liveApiUpdate = appRepository.getApi(id, apiVersion)
                 }
@@ -228,10 +234,32 @@ class BookLoader @Inject constructor(
                 field = value
                 appSessionManager.api = field
                 field?.run {
+                    // Publish a loading update
+                    loadingUpdate.value = ProgressUpdate(
+                        arrayOf(++progress, max),
+                        setDescription(R.string.loading_progress_api_success)
+                    )
+
                     // Check any saved beta key
                     liveBetaKeyUpdate = appRepository.checkBetaKey(
                         this.bookMode,
                         sharedPreferences.getString(PREF_KEY_VERIFIED_BETA_KEY, null)
+                    )
+                }
+            }
+        }
+
+    private var validatedBetaKey: String? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                appSessionManager.validatedBetaKey = field
+                field?.run {
+                    // Publish a loading update
+                    data.putParcelable(KEY_BETA_KEY_MESSAGE, ResultMessage.SUCCESS)
+                    loadingUpdate.value = ProgressUpdate(
+                        arrayOf(++progress, max),
+                        setDescription(R.string.loading_progress_beta_key_success)
                     )
                 }
             }
@@ -246,7 +274,9 @@ class BookLoader @Inject constructor(
      */
     fun cancel() {
         cancelled = true
-        // TODO ???
+        liveBookUpdate = null
+        liveApiUpdate = null
+        liveBookUpdate = null
     }
 
     /**
@@ -258,6 +288,23 @@ class BookLoader @Inject constructor(
         cancelled = false
         liveBookUpdate = bookRepository.getBook(bookId)
         return loadingUpdate
+    }
+
+    /**
+     * Submits the supplied [betaKey] (and continues with the load if successful).
+     */
+    fun submitBetaKey(betaKey: String?): LiveData<DataUpdate<String, String>> {
+        progress = 0
+        max = 0
+        cancelled = false
+
+        // Check any saved beta key
+        liveBetaKeyUpdate = appRepository.checkBetaKey(
+            api?.bookMode ?: BookMode.DEFAULT,
+            betaKey
+        )
+
+        return betaKeyUpdate
     }
 
     /**

@@ -131,6 +131,8 @@ class AppSessionManager @Inject constructor(
             }
         }
 
+    var validatedBetaKey: String? = null
+
     /**
      * A [LiveData] containing updates related to validating the beta key.
      */

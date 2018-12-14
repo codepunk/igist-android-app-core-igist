@@ -16,4 +16,7 @@
     <color name="lockedGray">#C0000000</color>
     <color name="igistBetaKeyEditBackground">#AAAAAA</color>
     <color name="igistBetaKeyEditForeground">#808080</color>
+
+    <color name="colorPrimaryDisabled">#808080</color>
+    <color name="colorPrimaryDarkDisabled">#606060</color>
 </resources>

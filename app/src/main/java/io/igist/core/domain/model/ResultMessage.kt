@@ -6,8 +6,11 @@
 package io.igist.core.domain.model
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.annotation.StringRes
 import io.igist.core.R
+import io.igist.core.domain.model.ResultMessage.Companion.toString
 
 /**
  * Class that enumerates known messages returned from the server.
@@ -30,7 +33,7 @@ open class ResultMessage private constructor(
      */
     val toString: String = "${ResultMessage::class.java.simpleName}(value=$value)"
 
-) {
+) : Parcelable {
 
     // region Inherited methods
 
@@ -53,6 +56,24 @@ open class ResultMessage private constructor(
     override fun toString(): String = toString
 
     // endregion Inherited methods
+
+    // region Implemented methods
+
+    // endregion Nested/inner classes
+
+    /**
+     * Implements [Parcelable].
+     */
+    override fun describeContents(): Int = 0
+
+    /**
+     * Implements [Parcelable].
+     */
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(value)
+    }
+
+    // endregion Implemented methods
 
     // region Methods
 
@@ -77,6 +98,23 @@ open class ResultMessage private constructor(
     companion object {
 
         // region Properties
+
+        /**
+         * A static creator for the [Parcelable] interface.
+         */
+        @JvmField
+        val CREATOR: Parcelable.Creator<ResultMessage> =
+            object : Parcelable.Creator<ResultMessage> {
+                override fun createFromParcel(source: Parcel): ResultMessage =
+                    lookup(source.readString())
+
+                override fun newArray(size: Int): Array<ResultMessage?> = arrayOfNulls(size)
+            }
+
+        /**
+         * A Serial version UID for serialization.
+         */
+        private const val serialVersionUID: Long = 1L
 
         /**
          * A [HashMap] for speedy lookup.
@@ -187,7 +225,5 @@ open class ResultMessage private constructor(
         // endregion Inherited methods
 
     }
-
-    // endregion Nested/inner classes
 
 }
