@@ -8,4 +8,6 @@
 
     <integer name="select_book_span_count">1</integer>
 
+    <integer name="navigation_animation_duration">@android:integer/config_longAnimTime</integer>
+
 </resources>

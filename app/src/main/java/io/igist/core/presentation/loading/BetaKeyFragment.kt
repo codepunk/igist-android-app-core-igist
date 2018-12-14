@@ -7,10 +7,12 @@ package io.igist.core.presentation.loading
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -71,6 +73,14 @@ class BetaKeyFragment :
             false
         )
         return binding.root
+    }
+
+    /**
+     * Workaround to move this fragment's view to the front when it is animating in.
+     */
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        ViewCompat.setTranslationZ(view, 0.1f)
     }
 
     // endregion Lifecycle methods

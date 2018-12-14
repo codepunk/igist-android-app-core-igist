@@ -3,10 +3,8 @@
   ~ Copyright (c) 2018 IGIST.io. All rights reserved.
   -->
 
-<set
+<translate
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@android:integer/config_longAnimTime">
-    <translate
-        android:fromYDelta="100%"
-        android:toYDelta="0" />
-</set>
+    android:duration="@integer/navigation_animation_duration"
+    android:fromYDelta="0"
+    android:toYDelta="100%" />

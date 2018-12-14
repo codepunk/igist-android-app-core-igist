@@ -14,6 +14,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -265,7 +266,8 @@ class LoadingFragment :
      * Implementation of [TextureView.SurfaceTextureListener]. Detaches from the media player.
      */
     override fun onSurfaceTextureDestroyed(texture: SurfaceTexture): Boolean {
-        mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null)
+        /* TODO Causes IllegalStateException
+        mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null) */
         surface?.release()
         surface = null
         return true

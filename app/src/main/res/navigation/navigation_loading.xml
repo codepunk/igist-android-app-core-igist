@@ -19,10 +19,11 @@
         <action
             android:id="@+id/action_loading_to_beta_key"
             app:destination="@id/beta_key_fragment"
-            app:enterAnim="@anim/slide_up"
-            app:exitAnim="@null"
-            app:popExitAnim="@anim/slide_down"
-            app:popEnterAnim="@null"/>
+            app:enterAnim="@anim/slide_in_up"
+            app:exitAnim="@anim/slide_none"
+            app:launchSingleTop="true"
+            app:popEnterAnim="@anim/slide_none"
+            app:popExitAnim="@anim/slide_out_down"/>
 
     </fragment>
 
