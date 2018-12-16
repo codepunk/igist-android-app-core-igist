@@ -144,6 +144,16 @@ class LoadingFragment :
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+
+        // Release the surface. This will be re-created in onSurfaceTextureAvailable when the
+        // fragment starts up again.
+        mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null)
+        surface?.release()
+        surface = null
+    }
+
     /**
      * Cleans up the loading fragment.
      */
@@ -195,9 +205,7 @@ class LoadingFragment :
         width: Int,
         height: Int
     ) {
-        val mediaPlayer: MediaPlayer = mediaFragment.mediaPlayers.obtain(
-            SPLASHY_PLAYER
-        ) {
+        val mediaPlayer: MediaPlayer = mediaFragment.mediaPlayers.obtain(SPLASHY_PLAYER) {
             MediaPlayer.create(requireContext(), R.raw.splashy).apply {
                 isLooping = true
             }
@@ -226,10 +234,12 @@ class LoadingFragment :
      * Implementation of [TextureView.SurfaceTextureListener]. Detaches from the media player.
      */
     override fun onSurfaceTextureDestroyed(texture: SurfaceTexture): Boolean {
-        /* TODO Causes IllegalStateException
-        mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null) */
-        surface?.release()
-        surface = null
+        /* TODO Causes IllegalStateException */
+        if (activity?.isFinishing == false) {
+            mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null)
+            surface?.release()
+            surface = null
+        }
         return true
     }
 
@@ -273,6 +283,7 @@ class LoadingFragment :
                     )
                     is IgistException -> {
                         when (e.resultMessage) {
+                            // TODO Maybe need some sort of FailureUpdate processed method? -OR- We just stop Observing temporarily ... DING DING DING
                             ResultMessage.BETA_KEY_REQUIRED -> {
                                 Navigation.findNavController(
                                     requireActivity(),

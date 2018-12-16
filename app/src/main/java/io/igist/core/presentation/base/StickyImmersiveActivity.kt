@@ -15,7 +15,7 @@ import com.codepunk.doofenschmirtz.util.ActivityCompat.FullScreenMode.STICKY_IMM
  * A base [AppCompatActivity] that keeps the activity in [STICKY_IMMERSIVE] mode.
  */
 abstract class StickyImmersiveActivity :
-    AppCompatActivity(),
+    BaseActivity(),
     OnSystemUiVisibilityChangeListener
 {
 

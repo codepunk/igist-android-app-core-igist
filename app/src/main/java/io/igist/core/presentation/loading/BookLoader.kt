@@ -160,7 +160,9 @@ class BookLoader @Inject constructor(
     private var liveBetaKeyUpdate: LiveData<DataUpdate<String, String>>? = null
         set(value) {
             field?.run {
+                // ??? loadingUpdate.value = PendingUpdate()
                 loadingUpdate.removeSource(this)
+                betaKeyUpdate.value = PendingUpdate()
                 betaKeyUpdate.removeSource(this)
             }
             field = value
@@ -174,7 +176,7 @@ class BookLoader @Inject constructor(
                             val e: Exception? = update.e
                             when (e) {
                                 is IgistException ->
-                                    data.putParcelable(KEY_BETA_KEY_MESSAGE, e.resultMessage)
+                                    data.putParcelable(KEY_RESULT_MESSAGE, e.resultMessage)
                             }
                             if (e is IgistException || update.result == null) {
                                 loadingUpdate.value = FailureUpdate(
@@ -256,7 +258,7 @@ class BookLoader @Inject constructor(
                 appSessionManager.validatedBetaKey = field
                 field?.run {
                     // Publish a loading update
-                    data.putParcelable(KEY_BETA_KEY_MESSAGE, ResultMessage.SUCCESS)
+                    data.putParcelable(KEY_RESULT_MESSAGE, ResultMessage.SUCCESS)
                     loadingUpdate.value = ProgressUpdate(
                         arrayOf(++progress, max),
                         setDescription(R.string.loading_progress_beta_key_success)

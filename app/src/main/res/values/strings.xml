@@ -62,9 +62,9 @@
 
     <string name="result_message_already_exists">A user already exists with that username and/or email.</string>
 
-    <string name="result_message_bad_key">The beta key you entered is invalid.</string>
+    <string name="result_message_bad_key">Sorry, that key isn\'t activated yet. Try again later.</string>
 
-    <string name="result_message_beta_key_required">A beta key required.</string>
+    <string name="result_message_beta_key_required">A beta key is required.</string>
 
     <string name="result_message_default">An error occurred.</string>
 

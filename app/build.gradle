@@ -81,10 +81,10 @@ android {
 
         makeKeys(
                 variant,
-                "BETA_KEY_MESSAGE",
                 "BOOK_ID",
                 "BOOK_TITLE",
-                "DESCRIPTION"
+                "DESCRIPTION",
+                "RESULT_MESSAGE"
         )
     }
 }

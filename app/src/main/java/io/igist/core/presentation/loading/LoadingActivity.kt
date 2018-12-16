@@ -22,6 +22,7 @@ import io.igist.core.BuildConfig.PREF_KEY_CURRENT_BOOK_ID
 import io.igist.core.R
 import io.igist.core.databinding.ActivityLoadingBinding
 import io.igist.core.presentation.base.StickyImmersiveActivity
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 private const val SELECT_BOOK_REQUEST_CODE = 1
