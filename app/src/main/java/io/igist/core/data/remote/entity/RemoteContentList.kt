@@ -12,12 +12,13 @@ import com.squareup.moshi.Json
  */
 data class RemoteContentList(
 
-    val version: Int,
+    @field:Json(name = "version")
+    val appVersion: Int,
 
     val live: Boolean,
 
     @field:Json(name = "newest_version")
-    val newestVersion: Int,
+    val newestAppVersion: Int,
 
     @field:Json(name = "chapter_images")
     val chapterImages: List<RemoteContentFile>?,

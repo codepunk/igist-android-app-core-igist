@@ -18,17 +18,7 @@ fun LocalBook.toBook(): Book =
 /**
  * Converts a nullable [LocalBook] to a nullable domain [Book].
  */
-fun LocalBook?.toBookOrNull(): Book? = this?.let {
-    Book(
-        it.id,
-        it.title,
-        it.description,
-        it.previewImageName,
-        it.apiVersion,
-        it.appVersion,
-        it.locked
-    )
-}
+fun LocalBook?.toBookOrNull(): Book? = this?.toBook()
 
 /**
  * Converts a [List] of [LocalBook]s to a list of domain [Book]s.
@@ -45,17 +35,7 @@ fun RemoteBook.toLocalBook(): LocalBook =
  * Converts a nullable [RemoteBook] to a nullable [LocalBook].
  */
 @Suppress("UNUSED")
-fun RemoteBook?.toLocalBookOrNull(): LocalBook? = this?.let {
-    LocalBook(
-        it.id,
-        it.title,
-        it.description,
-        it.previewImageName,
-        it.apiVersion,
-        it.appVersion,
-        it.locked
-    )
-}
+fun RemoteBook?.toLocalBookOrNull(): LocalBook? = this?.toLocalBook()
 
 /**
  * Converts a [List] of [RemoteBook]s to a list of [LocalBook]s.

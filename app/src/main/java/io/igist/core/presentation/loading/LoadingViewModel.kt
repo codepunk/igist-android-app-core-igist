@@ -30,12 +30,12 @@ class LoadingViewModel @Inject constructor(
     /**
      * A [LiveData] containing updates relating to the loading process.
      */
-    val liveProgress: LiveData<DataUpdate<Int, Boolean>> = bookLoader.loadingUpdate
+    val loadingUpdate: LiveData<DataUpdate<Int, Boolean>> = bookLoader.loadingUpdate
 
     /**
      * A [LiveData] containing updates relating to validating a beta key.
      */
-    val liveBetaKey: LiveData<DataUpdate<String, String>> = bookLoader.betaKeyUpdate
+    val betaKeyUpdate: LiveData<DataUpdate<String, String>> = bookLoader.betaKeyUpdate
 
     // endregion Properties
 

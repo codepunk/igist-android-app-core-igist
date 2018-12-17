@@ -11,6 +11,7 @@ import android.content.Intent
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -20,10 +21,7 @@ import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_CANC
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_NEGATIVE
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_POSITIVE
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment.OnBuildAlertDialogListener
-import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
-import com.codepunk.doofenschmirtz.util.taskinator.FailureUpdate
-import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
-import com.codepunk.doofenschmirtz.util.taskinator.ResultUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.*
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
 import io.igist.core.BuildConfig.*
@@ -111,7 +109,7 @@ class LoadingFragment :
      * A flag that indicates whether we have requested a beta key from the user so we can
      * react to updates accordingly.
      */
-    private var launchedBetaKeyPage: Boolean = false
+    private var betaKeyPageShown: Boolean = false
 
     // endregion Properties
 
@@ -133,7 +131,7 @@ class LoadingFragment :
             lifecycle.addObserver(this)
         }
 
-        launchedBetaKeyPage = savedInstanceState?.getBoolean(KEY_LAUNCHED_BETA_KEY_PAGE) ?: false
+        betaKeyPageShown = savedInstanceState?.getBoolean(KEY_LAUNCHED_BETA_KEY_PAGE) ?: false
     }
 
     /**
@@ -174,8 +172,8 @@ class LoadingFragment :
         super.onStart()
 
         // Test for whether we are awaiting the result of the beta key page
-        if (launchedBetaKeyPage) {
-            loadingViewModel.liveProgress.value?.run {
+        if (betaKeyPageShown) {
+            loadingViewModel.loadingUpdate.value?.run {
                 resultHandled = false
                 onLoadingUpdate(this)
             }
@@ -200,7 +198,7 @@ class LoadingFragment :
      */
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean(KEY_LAUNCHED_BETA_KEY_PAGE, launchedBetaKeyPage)
+        outState.putBoolean(KEY_LAUNCHED_BETA_KEY_PAGE, betaKeyPageShown)
     }
 
     /**
@@ -249,17 +247,20 @@ class LoadingFragment :
                 if (!resultHandled) {
                     resultHandled = true
                     when (update) {
+                        is SuccessUpdate -> {
+                            Log.d("LoadingFragment", "Success")
+                        }
                         is FailureUpdate -> {
                             when (update.e) {
                                 is IgistException -> {
-                                    if (launchedBetaKeyPage) {
-                                        launchedBetaKeyPage = false
+                                    if (betaKeyPageShown) {
+                                        betaKeyPageShown = false
                                         showAlert(
                                             BETA_KEY_REQUIRED_DIALOG_FRAGMENT_TAG,
                                             BETA_KEY_REQUIRED_DIALOG_FRAGMENT_REQUEST_CODE
                                         )
                                     } else {
-                                        launchBetaKeyPage()
+                                        showBetaKeyPage()
                                     }
                                 }
                                 is IOException -> showAlert(
@@ -287,7 +288,7 @@ class LoadingFragment :
             }
             BETA_KEY_REQUIRED_DIALOG_FRAGMENT_REQUEST_CODE -> {
                 when (resultCode) {
-                    RESULT_POSITIVE -> launchBetaKeyPage()
+                    RESULT_POSITIVE -> showBetaKeyPage()
                     RESULT_NEGATIVE, RESULT_CANCELED -> requireActivity().finish()
                 }
             }
@@ -378,9 +379,8 @@ class LoadingFragment :
 
     // region Methods
 
-    private fun launchBetaKeyPage() {
-        // TODO I'm close. I shouldn't launch when showing a dialog.
-        launchedBetaKeyPage = true
+    private fun showBetaKeyPage() {
+        betaKeyPageShown = true
         Navigation.findNavController(
             requireActivity(),
             R.id.loading_nav_fragment

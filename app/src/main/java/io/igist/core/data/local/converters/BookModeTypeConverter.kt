@@ -8,6 +8,10 @@ package io.igist.core.data.local.converters
 import androidx.room.TypeConverter
 import io.igist.core.domain.model.BookMode
 
+/**
+ * A Room type converter that converts between [BookMode] and Int.
+ */
+@Suppress("UNUSED")
 class BookModeTypeConverter {
 
     // region Methods
@@ -16,7 +20,7 @@ class BookModeTypeConverter {
      * Converts an Int to an [BookMode].
      */
     @TypeConverter
-    fun toIgistMode(value: Int): BookMode = BookMode.fromValue(value, BookMode.DEFAULT)
+    fun toBookMode(value: Int): BookMode = BookMode.fromValue(value, BookMode.DEFAULT)
 
     /**
      * Converts an [BookMode] to an [Int].

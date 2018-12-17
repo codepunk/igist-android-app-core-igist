@@ -178,7 +178,7 @@ class BookRepositoryImpl(
 
                 update.result?.body()?.apply {
                     // Convert & insert remote Api into the local database
-                    bookDao.insert(this.toLocalBook())
+                    bookDao.upsert(this.toLocalBook())
 
                     // Re-retrieve the newly-inserted Api from the local database
                     bookDao.retrieve(bookId)?.let {

@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import io.igist.core.domain.model.Api
 import io.igist.core.domain.model.BookMode
+import io.igist.core.domain.model.ContentList
 
 /**
  * An interface that establishes the app repository contract.
@@ -36,6 +37,14 @@ interface AppRepository {
         alwaysVerify: Boolean = true
     ): LiveData<DataUpdate<String, String>>
 
-    // endregion Methods
+    /**
+     * Gets the content list for the given [bookId].
+     */
+    fun getContentList(
+        bookId: Long,
+        appVersion: Int,
+        contentListNum: Int = 1,
+        alwaysFetch: Boolean = true
+    ): LiveData<DataUpdate<ContentList, ContentList>>
 
 }

@@ -20,6 +20,8 @@ enum class BookMode(
 
 ) {
 
+    // region Values
+
     /**
      * A mode that indicates no special behavior.
      */
@@ -32,7 +34,13 @@ enum class BookMode(
     @field:Json(name = "1")
     REQUIRE_BETA_KEY(1);
 
+    // endregion Values
+
+    // region Companion object
+
     companion object {
+
+        // region Properties
 
         /**
          * An array of values for quick searching.
@@ -44,6 +52,10 @@ enum class BookMode(
                 }
             }
         }
+
+        // endregion Properties
+
+        // region Methods
 
         /**
          * Returns the [BookMode] associated with the supplied [value], or `null` if no such
@@ -59,6 +71,10 @@ enum class BookMode(
         fun fromValue(value: Int, defaultValue: BookMode): BookMode =
             lookupArray.get(value, defaultValue)
 
+        // endregion Methods
+
     }
+
+    // endregion Companion object
 
 }

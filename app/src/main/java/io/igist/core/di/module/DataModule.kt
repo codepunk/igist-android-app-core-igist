@@ -13,6 +13,7 @@ import dagger.Module
 import dagger.Provides
 import io.igist.core.data.local.dao.ApiDao
 import io.igist.core.data.local.dao.BookDao
+import io.igist.core.data.local.dao.ContentDao
 import io.igist.core.data.local.database.IgistDb
 import io.igist.core.data.remote.adapter.BooleanIntAdapter
 import io.igist.core.data.remote.adapter.DateJsonAdapter
@@ -157,15 +158,28 @@ class DataModule {
     fun providesBookDao(db: IgistDb): BookDao = db.bookDao()
 
     /**
+     * Creates a [ContentDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesContentDao(db: IgistDb): ContentDao = db.contentDao()
+
+    /**
      * Creates an [AppRepository] instance.
      */
     @Singleton
     @Provides
     fun providesAppRepository(
         appDao: ApiDao,
+        contentDao: ContentDao,
         appWebservice: AppWebservice,
         sharedPreferences: SharedPreferences
-    ): AppRepository = AppRepositoryImpl(appDao, appWebservice, sharedPreferences)
+    ): AppRepository = AppRepositoryImpl(
+        appDao,
+        contentDao,
+        appWebservice,
+        sharedPreferences
+    )
 
     /**
      * Creates a [BookRepository] instance.
@@ -175,8 +189,7 @@ class DataModule {
     fun providesBookRepository(
         bookDao: BookDao,
         bookWebservice: BookWebservice
-    ): BookRepository =
-        BookRepositoryImpl(bookDao, bookWebservice)
+    ): BookRepository = BookRepositoryImpl(bookDao, bookWebservice)
 
     // endregion Methods
 

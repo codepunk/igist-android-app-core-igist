@@ -74,7 +74,7 @@ class BetaKeyFragment :
      */
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        loadingViewModel.liveBetaKey.observe(this, Observer { onBetaKeyUpdate(it) })
+        loadingViewModel.betaKeyUpdate.observe(this, Observer { onBetaKeyUpdate(it) })
     }
 
     /**

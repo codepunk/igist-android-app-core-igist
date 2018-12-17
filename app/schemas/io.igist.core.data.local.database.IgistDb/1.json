@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "42f5a12384fc5d77935ffecb5a267407",
+    "identityHash": "d2e5994a3916a054f86ebef27dbbedf4",
     "entities": [
       {
         "tableName": "books",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `preview_image_name` TEXT NOT NULL, `apiVersion` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `locked` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `preview_image_name` TEXT NOT NULL, `api_version` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `locked` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -34,7 +34,7 @@
           },
           {
             "fieldPath": "apiVersion",
-            "columnName": "apiVersion",
+            "columnName": "api_version",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -77,7 +77,7 @@
             "notNull": true
           },
           {
-            "fieldPath": "igistMode",
+            "fieldPath": "bookMode",
             "columnName": "igist",
             "affinity": "INTEGER",
             "notNull": true
@@ -98,11 +98,135 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "content_lists",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `book_id` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `num` INTEGER NOT NULL, `live` INTEGER NOT NULL, `newest_version` INTEGER NOT NULL, FOREIGN KEY(`book_id`) REFERENCES `books`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookId",
+            "columnName": "book_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appVersion",
+            "columnName": "app_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "num",
+            "columnName": "num",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "live",
+            "columnName": "live",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "newestAppVersion",
+            "columnName": "newest_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "idx_content_lists_book_id_num_index",
+            "unique": true,
+            "columnNames": [
+              "book_id",
+              "num"
+            ],
+            "createSql": "CREATE UNIQUE INDEX `idx_content_lists_book_id_num_index` ON `${TABLE_NAME}` (`book_id`, `num`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "books",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "book_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "content_files",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`content_list_id` INTEGER NOT NULL, `category` INTEGER NOT NULL, `filename` TEXT NOT NULL, `date` TEXT NOT NULL, PRIMARY KEY(`content_list_id`, `category`, `filename`), FOREIGN KEY(`content_list_id`) REFERENCES `content_lists`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "contentListId",
+            "columnName": "content_list_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filename",
+            "columnName": "filename",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "content_list_id",
+            "category",
+            "filename"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "content_lists",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "content_list_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"42f5a12384fc5d77935ffecb5a267407\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"d2e5994a3916a054f86ebef27dbbedf4\")"
     ]
   }
 }

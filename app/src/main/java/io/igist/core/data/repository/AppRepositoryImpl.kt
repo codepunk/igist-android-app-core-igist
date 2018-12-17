@@ -11,20 +11,22 @@ import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig.PREF_KEY_VERIFIED_BETA_KEY
 import io.igist.core.data.local.dao.ApiDao
-import io.igist.core.data.mapper.toApi
-import io.igist.core.data.mapper.toApiOrNull
-import io.igist.core.data.mapper.toLocalApi
+import io.igist.core.data.local.dao.ContentDao
+import io.igist.core.data.mapper.*
 import io.igist.core.data.remote.entity.RemoteApi
+import io.igist.core.data.remote.entity.RemoteContentList
 import io.igist.core.data.remote.entity.RemoteMessage
 import io.igist.core.data.remote.toResultUpdate
 import io.igist.core.data.remote.webservice.AppWebservice
 import io.igist.core.domain.contract.AppRepository
 import io.igist.core.domain.exception.IgistException
-import io.igist.core.domain.model.Api
-import io.igist.core.domain.model.BookMode
+import io.igist.core.domain.model.*
 import io.igist.core.domain.model.BookMode.DEFAULT
 import io.igist.core.domain.model.BookMode.REQUIRE_BETA_KEY
-import io.igist.core.domain.model.ResultMessage
+import io.igist.core.domain.model.FileCategory.CHAPTER_IMAGE
+import io.igist.core.domain.model.FileCategory.SPUTNIK
+import io.igist.core.domain.model.FileCategory.BADGE
+import io.igist.core.domain.model.FileCategory.STOREFRONT
 import retrofit2.Response
 import java.util.concurrent.CancellationException
 
@@ -34,6 +36,8 @@ import java.util.concurrent.CancellationException
 class AppRepositoryImpl(
 
     private val apiDao: ApiDao,
+
+    private val contentDao: ContentDao,
 
     private val appWebservice: AppWebservice,
 
@@ -46,6 +50,8 @@ class AppRepositoryImpl(
     private var apiTask: ApiTask? = null
 
     private var betaKeyTask: BetaKeyTask? = null
+
+    private var contentListTask: ContentListTask? = null
 
     // endregion Properties
 
@@ -87,6 +93,27 @@ class AppRepositoryImpl(
             THREAD_POOL_EXECUTOR,
             bookMode,
             betaKey
+        )
+    }
+
+    override fun getContentList(
+        bookId: Long,
+        appVersion: Int,
+        contentListNum: Int,
+        alwaysFetch: Boolean
+    ): LiveData<DataUpdate<ContentList, ContentList>> {
+        contentListTask?.cancel(true)
+        return ContentListTask(
+            contentDao,
+            appWebservice,
+            alwaysFetch
+        ).apply {
+            contentListTask = this
+        }.executeOnExecutorAsLiveData(
+            THREAD_POOL_EXECUTOR,
+            bookId,
+            appVersion,
+            contentListNum
         )
     }
 
@@ -136,7 +163,7 @@ class AppRepositoryImpl(
                         return FailureUpdate(api, update.e, data)
                 }
 
-                update.result?.body()?.apply {
+                update.result?.body()?.run {
                     // Convert & insert remote Api into the local database
                     apiDao.insert(this.toLocalApi(bookId))
 
@@ -230,6 +257,119 @@ class AppRepositoryImpl(
 
             return SuccessUpdate(betaKey)
         }
+
+    }
+
+    /**
+     * [DataTaskinator] that retrieves book content metadata.
+     */
+    private class ContentListTask(
+
+        private val contentDao: ContentDao,
+
+        private val appWebservice: AppWebservice,
+
+        private val alwaysFetch: Boolean = true
+
+    ) : DataTaskinator<Any, ContentList, ContentList>() {
+
+        override fun doInBackground(vararg params: Any?): ResultUpdate<ContentList, ContentList> {
+            // Extract arguments from params
+            val bookId: Long = params.getOrNull(0) as? Long?
+                ?: throw IllegalArgumentException("No book ID passed to ContentListTask")
+            val appVersion: Int = params.getOrNull(1) as? Int?
+                ?: throw IllegalArgumentException("No app version passed to ContentListTask")
+            val contentListNum: Int = params.getOrNull(2) as? Int?
+                ?: throw IllegalArgumentException("No content list num passed to ContentListTask")
+
+            // Retrieve any cached content
+            var contentList: ContentList? = retrieveContentList(bookId, appVersion, contentListNum)
+
+            if (contentList == null || alwaysFetch) {
+                // If we have a cached content list, publish it
+                if (contentList != null) publishProgress(contentList)
+
+                val update: ResultUpdate<Void, Response<List<RemoteContentList>>> =
+                    appWebservice.content(bookId, appVersion).toResultUpdate()
+
+                // Check if cancelled or failure
+                when {
+                    isCancelled -> return FailureUpdate(contentList, CancellationException(), data)
+                    update is FailureUpdate ->
+                        return FailureUpdate(contentList, update.e, data)
+                }
+
+                val remoteContentLists = update.result?.body()
+                remoteContentLists?.getOrNull(contentListNum - 1)?.let { remoteContentList ->
+                    // Convert & insert remote content list into the local database
+                    val localContentList =
+                        remoteContentList.toLocalContentList(bookId, contentListNum)
+                    val contentListId: Long = contentDao.insertContentList(localContentList)
+
+                    // Convert & insert remote content files into the local database
+                    FileCategory.values().forEach {
+                        val localContentFiles = when (it) {
+                            CHAPTER_IMAGE -> remoteContentList.chapterImages
+                            SPUTNIK -> remoteContentList.sputniks
+                            BADGE -> remoteContentList.badges
+                            STOREFRONT -> remoteContentList.storefront
+                            else -> null
+                        }.toLocalContentFilesOrNull(contentListId, it)
+                        localContentFiles?.run {
+                            contentDao.insertContentFiles(this)
+                        } ?: run {
+                            contentDao.removeContentFiles(contentListId, it.value)
+                        }
+                    }
+
+                    // TODO Convert & insert store data
+
+                    contentList = retrieveContentList(bookId, appVersion, contentListNum)
+                }
+            }
+
+            // Check if cancelled
+            if (isCancelled) return FailureUpdate(contentList, CancellationException(), data)
+
+            //val localContentList = contentDao.retrieve(bookId, appVersion)
+            //var contentList: ContentList? = localContentList.toContentListOrNull()
+
+            return SuccessUpdate(contentList)
+        }
+
+        // region Methods
+
+        private fun retrieveContentList(
+            bookId: Long,
+            appVersion: Int,
+            contentListNum: Int
+        ): ContentList? = contentDao.retrieveContentList(
+            bookId,
+            appVersion,
+            contentListNum
+        )?.let {
+            // We have a (cached) LocalContentList, so let's retrieve the rest that we need
+            // to build a ContentList
+            val localChapterImageContentFiles =
+                contentDao.retrieveContentFiles(it.id, CHAPTER_IMAGE.value)
+            val localSputnikContentFiles =
+                contentDao.retrieveContentFiles(it.id, SPUTNIK.value)
+            val localBadgeContentFiles =
+                contentDao.retrieveContentFiles(it.id, BADGE.value)
+            val localStorefrontContentFiles =
+                contentDao.retrieveContentFiles(it.id, STOREFRONT.value)
+
+            // TODO Store items
+
+            it.toContentList(
+                localChapterImageContentFiles,
+                localSputnikContentFiles,
+                localBadgeContentFiles,
+                localStorefrontContentFiles
+            )
+        }
+
+        // endregion Methods
 
     }
 

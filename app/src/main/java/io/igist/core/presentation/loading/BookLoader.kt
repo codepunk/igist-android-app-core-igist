@@ -18,10 +18,7 @@ import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
 import io.igist.core.domain.contract.BookRepository
 import io.igist.core.domain.exception.IgistException
-import io.igist.core.domain.model.Api
-import io.igist.core.domain.model.Book
-import io.igist.core.domain.model.BookMode
-import io.igist.core.domain.model.ResultMessage
+import io.igist.core.domain.model.*
 import io.igist.core.domain.session.AppSessionManager
 import java.lang.Exception
 import javax.inject.Inject
@@ -160,7 +157,6 @@ class BookLoader @Inject constructor(
     private var liveBetaKeyUpdate: LiveData<DataUpdate<String, String>>? = null
         set(value) {
             field?.run {
-                // ??? loadingUpdate.value = PendingUpdate()
                 loadingUpdate.removeSource(this)
                 betaKeyUpdate.value = PendingUpdate()
                 betaKeyUpdate.removeSource(this)
@@ -201,6 +197,19 @@ class BookLoader @Inject constructor(
                 }
                 betaKeyUpdate.addSource(this) { update ->
                     betaKeyUpdate.value = update
+                }
+            }
+        }
+
+    private var liveContentListUpdate: LiveData<DataUpdate<ContentList, ContentList>>? = null
+        set(value) {
+            field?.run { loadingUpdate.removeSource(this) }
+            field = value
+            field?.run {
+                loadingUpdate.addSource(this) { update ->
+                    when (update) {
+
+                    }
                 }
             }
         }
@@ -274,6 +283,12 @@ class BookLoader @Inject constructor(
                     loadingUpdate.value = ProgressUpdate(
                         arrayOf(++progress, max),
                         setDescription(R.string.loading_progress_beta_key_success)
+                    )
+
+                    // Go ahead with content loading
+                    liveContentListUpdate = appRepository.getContentList(
+                        book?.id ?: 0L,
+                        book?.appVersion ?: 0
                     )
                 }
             }

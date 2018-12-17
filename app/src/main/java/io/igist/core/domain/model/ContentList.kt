@@ -11,11 +11,11 @@ package io.igist.core.domain.model
 // TODO How do I get book ID in here?
 data class ContentList(
 
-    val version: Int,
+    val appVersion: Int,
 
     val live: Boolean,
 
-    val newestVersion: Int,
+    val newestAppVersion: Int,
 
     val chapterImages: List<ContentFile>?,
 

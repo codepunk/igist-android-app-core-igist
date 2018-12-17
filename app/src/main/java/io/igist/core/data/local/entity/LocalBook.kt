@@ -44,6 +44,7 @@ data class LocalBook(
      * The book API version. This specifies the "mode" (i.e. beta key required), survey link
      * presented at the end of the book, etc.
      */
+    @ColumnInfo(name = "api_version")
     val apiVersion: Int,
 
     /**

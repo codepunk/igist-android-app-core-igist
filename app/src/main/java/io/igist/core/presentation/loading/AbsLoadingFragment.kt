@@ -60,7 +60,7 @@ abstract class AbsLoadingFragment :
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
-        loadingViewModel.liveProgress.observe(this, Observer { onLoadingUpdate(it) })
+        loadingViewModel.loadingUpdate.observe(this, Observer { onLoadingUpdate(it) })
     }
 
     // endregion Lifecycle methods
@@ -98,8 +98,7 @@ abstract class AbsLoadingFragment :
     /**
      * Reacts to loading LiveData updates.
      */
-    protected open fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) {
-        // No op
+    protected open fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) { // No op
     }
 
     // endregion Methods
