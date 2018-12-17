@@ -6,6 +6,7 @@
 package io.igist.core.presentation.loading
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
@@ -15,13 +16,20 @@ import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_CANCELED
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_NEGATIVE
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_POSITIVE
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.OnBuildAlertDialogListener
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.FailureUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.ResultUpdate
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
 import io.igist.core.BuildConfig.DEBUG
 import io.igist.core.BuildConfig.KEY_DESCRIPTION
+import io.igist.core.BuildConfig.KEY_LAUNCHED_BETA_KEY_PAGE
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
 import io.igist.core.domain.exception.IgistException
@@ -47,6 +55,11 @@ private const val MEDIA_FRAGMENT_TAG = "MEDIA_FRAGMENT"
  * The tag used to identify the [MediaPlayer] for playing the "splashy" raw mp4 resource.
  */
 private const val SPLASHY_PLAYER = "SPLASHY_PLAYER"
+
+/**
+ * The request code for the "beta key required" dialog fragment.
+ */
+const val BETA_KEY_REQUIRED_DIALOG_FRAGMENT_REQUEST_CODE: Int = 2
 
 // endregion Constants
 
@@ -93,6 +106,13 @@ class LoadingFragment :
     // TODO Set this based on a developer options setting
     private var defaultProgressDescriptionVisibility: Int = View.VISIBLE
 
+    /**
+     * A flag that controls whether ResultUpdate should be handled.
+     */
+    private var resultHandled: Boolean = true
+
+    private var launchedBetaKeyPage: Boolean = false
+
     // endregion Properties
 
     // region Lifecycle methods
@@ -112,6 +132,8 @@ class LoadingFragment :
         }.apply {
             lifecycle.addObserver(this)
         }
+
+        launchedBetaKeyPage = savedInstanceState?.getBoolean(KEY_LAUNCHED_BETA_KEY_PAGE) ?: false
     }
 
     /**
@@ -144,6 +166,19 @@ class LoadingFragment :
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        // Test for whether we are awaiting the result of the beta key page
+        if (launchedBetaKeyPage) {
+            launchedBetaKeyPage = false
+            showAlert(
+                BETA_KEY_REQUIRED_DIALOG_FRAGMENT_TAG,
+                BETA_KEY_REQUIRED_DIALOG_FRAGMENT_REQUEST_CODE
+            )
+        }
+    }
+
     override fun onStop() {
         super.onStop()
 
@@ -152,6 +187,14 @@ class LoadingFragment :
         mediaFragment.mediaPlayers[SPLASHY_PLAYER]?.setSurface(null)
         surface?.release()
         surface = null
+    }
+
+    /**
+     * Saves instance state.
+     */
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(KEY_LAUNCHED_BETA_KEY_PAGE, launchedBetaKeyPage)
     }
 
     /**
@@ -180,14 +223,81 @@ class LoadingFragment :
     // region Inherited methods
 
     /**
+     * Reacts to loading LiveData updates.
+     */
+    override fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) {
+        Log.d("LoadingFragment", "onLoadingUpdate: update=$update")
+        when (update) {
+            is ProgressUpdate -> {
+                binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
+                binding.progressDescriptionTxt.text = update.data?.getString(KEY_DESCRIPTION)
+
+                val progress: Int = update.progress.getOrElse(0) { 0 } ?: 0
+                val max: Int = update.progress.getOrElse(1) { 0 } ?: 0
+                binding.loadingProgress.visibility = View.VISIBLE
+                binding.loadingProgress.progress = progress
+                binding.loadingProgress.isIndeterminate = (max == 0)
+
+                resultHandled = false
+            }
+            is ResultUpdate -> {
+                if (!resultHandled) {
+                    resultHandled = true
+                    when (update) {
+                        is FailureUpdate -> {
+                            when (update.e) {
+                                is IgistException -> {
+                                    val igistException = update.e as IgistException
+                                    when (igistException.resultMessage) {
+                                        ResultMessage.BETA_KEY_REQUIRED -> launchBetaKeyPage()
+                                    }
+                                }
+                                is IOException -> showAlert(
+                                    PREPARING_LAUNCH_DIALOG_FRAGMENT_TAG,
+                                    PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Processes dialog fragment result(s).
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE -> {
-
+                when (resultCode) {
+                    RESULT_POSITIVE -> loadingViewModel.loadBook()
+                    RESULT_NEGATIVE, RESULT_CANCELED -> requireActivity().finish()
+                }
+            }
+            BETA_KEY_REQUIRED_DIALOG_FRAGMENT_REQUEST_CODE -> {
+                when (resultCode) {
+                    RESULT_POSITIVE -> launchBetaKeyPage()
+                    RESULT_NEGATIVE, RESULT_CANCELED -> requireActivity().finish()
+                }
             }
             else -> super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    /**
+     * Implementation of [OnBuildAlertDialogListener]. Builds the alert dialog.
+     */
+    override fun onBuildAlertDialog(fragment: AlertDialogFragment, builder: AlertDialog.Builder) {
+        when (fragment.targetRequestCode) {
+            BETA_KEY_REQUIRED_DIALOG_FRAGMENT_REQUEST_CODE -> {
+                builder
+                    .setTitle(R.string.loading_dialog_beta_key_required_title)
+                    .setMessage(R.string.loading_dialog_beta_key_required_message)
+                    .setPositiveButton(R.string.app_retry, fragment)
+                    .setNegativeButton(R.string.app_quit, fragment)
+            }
+            else -> super.onBuildAlertDialog(fragment, builder)
         }
     }
 
@@ -258,45 +368,32 @@ class LoadingFragment :
 
     // region Methods
 
-    /**
-     * Reacts to loading LiveData updates.
-     */
-    override fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) {
-        Log.d("LoadingFragment", "onLoadingUpdate: update=$update")
-        when (update) {
-            is ProgressUpdate -> {
-                binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
-                binding.progressDescriptionTxt.text = update.data?.getString(KEY_DESCRIPTION)
-
-                val progress: Int = update.progress.getOrElse(0) { 0 } ?: 0
-                val max: Int = update.progress.getOrElse(1) { 0 } ?: 0
-                binding.loadingProgress.visibility = View.VISIBLE
-                binding.loadingProgress.progress = progress
-                binding.loadingProgress.isIndeterminate = (max == 0)
-            }
-            is FailureUpdate -> {
-                val e: Exception? = update.e
-                when (e) {
-                    is IOException -> showAlert(
-                        PREPARING_LAUNCH_DIALOG_FRAGMENT_TAG,
-                        PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE
-                    )
-                    is IgistException -> {
-                        when (e.resultMessage) {
-                            // TODO Maybe need some sort of FailureUpdate processed method? -OR- We just stop Observing temporarily ... DING DING DING
-                            ResultMessage.BETA_KEY_REQUIRED -> {
-                                Navigation.findNavController(
-                                    requireActivity(),
-                                    R.id.loading_nav_fragment
-                                ).navigate(R.id.action_loading_to_beta_key)
-                            }
-                            ResultMessage.BETA_KEY_REQUIRED -> {
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    private fun launchBetaKeyPage() {
+        // TODO I'm close. I shouldn't launch when showing a dialog.
+        launchedBetaKeyPage = true
+        Navigation.findNavController(
+            requireActivity(),
+            R.id.loading_nav_fragment
+        ).navigate(R.id.action_loading_to_beta_key)
     }
+
+    // region Companion object
+
+    companion object {
+
+        // region Properties
+
+        /**
+         * A fragment tag for the dummy book dialog fragment.
+         */
+        @JvmStatic
+        private val BETA_KEY_REQUIRED_DIALOG_FRAGMENT_TAG: String =
+            LoadingFragment::class.java.name + ".BETA_KEY_REQUIRED_DIALOG_FRAGMENT"
+
+        // endregion Properties
+
+    }
+
+    // endregion Companion object
 
 }

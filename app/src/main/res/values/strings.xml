@@ -26,6 +26,10 @@
 
     <!-- region Loading -->
 
+    <string name="loading_dialog_beta_key_required_title">Beep Boop Beep</string>
+
+    <string name="loading_dialog_beta_key_required_message">Please enter a beta key to use this app.</string>
+
     <string name="loading_dialog_preparing_launch_message">IGIST is currently updating, please try again later.</string>
 
     <string name="loading_dialog_preparing_launch_title">Preparing launch…</string>

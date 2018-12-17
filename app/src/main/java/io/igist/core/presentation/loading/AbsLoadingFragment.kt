@@ -115,7 +115,7 @@ abstract class AbsLoadingFragment :
          */
         @JvmStatic
         protected val PREPARING_LAUNCH_DIALOG_FRAGMENT_TAG: String =
-            SelectBookFragment::class.java.name + ".PREPARING_LAUNCH_DIALOG_FRAGMENT"
+            AbsLoadingFragment::class.java.name + ".PREPARING_LAUNCH_DIALOG_FRAGMENT"
 
         // endregion Properties
 

@@ -12,7 +12,6 @@ apply plugin: "kotlin-android-extensions"
 apply plugin: "kotlin-kapt"
 apply plugin: 'org.jetbrains.dokka-android'
 
-import com.android.utils.Pair
 import com.android.build.gradle.api.BaseVariant
 
 android {
@@ -84,6 +83,7 @@ android {
                 "BOOK_ID",
                 "BOOK_TITLE",
                 "DESCRIPTION",
+                "LAUNCHED_BETA_KEY_PAGE",
                 "RESULT_MESSAGE"
         )
     }
@@ -130,6 +130,22 @@ dependencies {
 
 // region Methods
 
+def enum ConstantType {
+    INTEGER("int", "integer", "%s"),
+    LONG("long", "integer", "%sL"),
+    STRING("String", "string", "\"%s\"")
+
+    public final String configFieldType
+    public final String resourceType
+    public final String configFieldFormat
+
+    ConstantType(String configFieldType, String resourceType, String configFieldFormat) {
+        this.configFieldType = configFieldType
+        this.resourceType = resourceType
+        this.configFieldFormat = configFieldFormat
+    }
+}
+
 static def makeConstantValue(
         BaseVariant variant,
         ConstantType type,
@@ -160,22 +176,6 @@ static def makePreferenceKeys(BaseVariant variant, String... keys) {
         def resourceName = fullKey.toLowerCase(Locale.US)
         def resourceValue = "${variant.applicationId}.$fullKey"
         variant.resValue("string", resourceName, resourceValue)
-    }
-}
-
-def enum ConstantType {
-    INTEGER("int", "integer", "%s"),
-    LONG("long", "integer", "%sL"),
-    STRING("String", "string", "\"%s\"")
-
-    public final String configFieldType
-    public final String resourceType
-    public final String configFieldFormat
-
-    ConstantType(String configFieldType, String resourceType, String configFieldFormat) {
-        this.configFieldType = configFieldType
-        this.resourceType = resourceType
-        this.configFieldFormat = configFieldFormat
     }
 }
 

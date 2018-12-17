@@ -58,19 +58,20 @@ class LoadingViewModel @Inject constructor(
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         when (key) {
-            PREF_KEY_CURRENT_BOOK_ID -> {
-                val bookId = sharedPreferences.getLong(key, 0L)
-                if (bookId > 0) {
-                    bookLoader.cancel()
-                    bookLoader.load(bookId)
-                }
-            }
+            PREF_KEY_CURRENT_BOOK_ID -> loadBook()
         }
     }
 
     // endregion Implemented methods
 
     // region Methods
+
+    fun loadBook(bookId: Long = sharedPreferences.getLong(PREF_KEY_CURRENT_BOOK_ID, 0L)) {
+        if (bookId > 0) {
+            bookLoader.cancel()
+            bookLoader.load(bookId)
+        }
+    }
 
     fun submitBetaKey(betaKey: String?) {
         bookLoader.cancel()

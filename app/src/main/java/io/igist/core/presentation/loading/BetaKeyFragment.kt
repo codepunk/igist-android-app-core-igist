@@ -16,14 +16,17 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_CANCELED
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_NEGATIVE
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_POSITIVE
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig.KEY_RESULT_MESSAGE
 import io.igist.core.R
 import io.igist.core.databinding.FragmentBetaKeyBinding
 import io.igist.core.domain.exception.IgistException
 import io.igist.core.domain.model.ResultMessage
-import io.igist.core.presentation.base.BaseActivity
 
 // region Constants
 
@@ -36,7 +39,6 @@ private const val RESULT_MESSAGE_DIALOG_FRAGMENT_REQUEST_CODE: Int = 2
 
 class BetaKeyFragment :
     AbsLoadingFragment(),
-    BaseActivity.OnBackPressedListener,
     View.OnClickListener,
     AlertDialogFragment.OnBuildAlertDialogListener {
 
@@ -47,13 +49,10 @@ class BetaKeyFragment :
      */
     private lateinit var binding: FragmentBetaKeyBinding
 
-    private val baseActivity: BaseActivity?
-        get() = activity as? BaseActivity
-
     /**
      * A flag that controls whether ResultUpdate should be handled.
      */
-    private var handleResultUpdate: Boolean = false
+    private var resultHandled: Boolean = false
 
     /**
      * The most recent Igist remote message.
@@ -110,16 +109,6 @@ class BetaKeyFragment :
         binding.submitBtn.setOnClickListener(this)
     }
 
-    override fun onStart() {
-        super.onStart()
-        (activity as? BaseActivity)?.registerOnBackPressedListener(this)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        (activity as? BaseActivity)?.unregisterOnBackPressedListener(this)
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putParcelable(KEY_RESULT_MESSAGE, resultMessage)
@@ -132,7 +121,11 @@ class BetaKeyFragment :
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE -> {
-
+                when (resultCode) {
+                    RESULT_POSITIVE ->
+                        loadingViewModel.submitBetaKey(binding.betaKeyEdit.text?.toString())
+                    RESULT_NEGATIVE, RESULT_CANCELED -> requireActivity().finish()
+                }
             }
             RESULT_MESSAGE_DIALOG_FRAGMENT_REQUEST_CODE -> {
                 resultMessage = null
@@ -146,30 +139,13 @@ class BetaKeyFragment :
     // region Implemented methods
 
     /**
-     * Responds to the user pressing the back button.
-     */
-    override fun onBackPressed(activity: BaseActivity): Boolean {
-        return when (loadingViewModel.liveBetaKey.value) {
-            is SuccessUpdate -> false
-            else -> {
-                activity.finish()
-                true
-            }
-        }
-    }
-
-    /**
      * Submits the entered beta key.
      */
     override fun onClick(v: View?) {
         when (v) {
             // TODO Validatinators!
-            binding.submitBtn -> {
-                binding.betaKeyEdit.isEnabled = false
-                binding.submitBtn.isEnabled = false
-                binding.betaKeyProgress.show()
+            binding.submitBtn ->
                 loadingViewModel.submitBetaKey(binding.betaKeyEdit.text?.toString())
-            }
         }
     }
 
@@ -194,72 +170,47 @@ class BetaKeyFragment :
 
     // region Methods
 
-    /**
-     * Reacts to loading LiveData updates.
-     */
-    // Also, on "back button"/cancel, should just exit the app
-    override fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) {
-
-    }
-
     // TODO NEXT !!!
     private fun onBetaKeyUpdate(update: DataUpdate<String, String>?) {
-        Log.d("BetaKeyFragment", "onBetaKeyUpdate: update=$update")
         when (update) {
-            is PendingUpdate -> {
-                /* TODO Rethink this Pending/Progress/etc.
-                binding.betaKeyEdit.isEnabled = false
-                binding.submitBtn.isEnabled = false
-                binding.betaKeyProgress.show()
-                */
-            }
             is ProgressUpdate -> {
                 binding.betaKeyEdit.isEnabled = false
                 binding.submitBtn.isEnabled = false
                 binding.betaKeyProgress.show()
-                handleResultUpdate = true
+                resultHandled = false
             }
-            is ResultUpdate -> {
-                if (handleResultUpdate) {
-                    handleResultUpdate = false
+            is SuccessUpdate -> {
+                Navigation.findNavController(
+                    requireActivity(),
+                    R.id.loading_nav_fragment
+                ).popBackStack()
+            }
+            is FailureUpdate -> {
+                if (!resultHandled) {
+                    resultHandled = true
                     binding.betaKeyEdit.isEnabled = true
                     binding.submitBtn.isEnabled = true
                     binding.betaKeyProgress.hide()
-                    when {
-                        update is SuccessUpdate -> {
-
-                        }
-                    }
-
-
-
-                    when (update) {
-                        is SuccessUpdate -> {
-
-                        }
-                        is FailureUpdate -> {
-                            val e = update.e
-                            when (e) {
-                                is IgistException -> {
-                                    when (e.resultMessage) {
-                                        ResultMessage.BETA_KEY_REQUIRED -> {
-                                            // No action
-                                            return
-                                        }
-                                    }
-                                    resultMessage = e.resultMessage
-                                    showAlert(
-                                        RESULT_MESSAGE_DIALOG_FRAGMENT_TAG,
-                                        RESULT_MESSAGE_DIALOG_FRAGMENT_REQUEST_CODE
-                                    )
-                                }
-                                else -> {
-                                    showAlert(
-                                        PREPARING_LAUNCH_DIALOG_FRAGMENT_TAG,
-                                        PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE
-                                    )
+                    when (update.e) {
+                        is IgistException -> {
+                            val igistException = update.e as IgistException
+                            when (igistException.resultMessage) {
+                                ResultMessage.BETA_KEY_REQUIRED -> {
+                                    // No action
+                                    return
                                 }
                             }
+                            resultMessage = igistException.resultMessage
+                            showAlert(
+                                RESULT_MESSAGE_DIALOG_FRAGMENT_TAG,
+                                RESULT_MESSAGE_DIALOG_FRAGMENT_REQUEST_CODE
+                            )
+                        }
+                        else -> {
+                            showAlert(
+                                PREPARING_LAUNCH_DIALOG_FRAGMENT_TAG,
+                                PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE
+                            )
                         }
                     }
                 }
@@ -279,7 +230,7 @@ class BetaKeyFragment :
          * A fragment tag for the dummy book dialog fragment.
          */
         @JvmStatic
-        protected val RESULT_MESSAGE_DIALOG_FRAGMENT_TAG: String =
+        private val RESULT_MESSAGE_DIALOG_FRAGMENT_TAG: String =
             SelectBookFragment::class.java.name + ".RESULT_MESSAGE_DIALOG_FRAGMENT"
 
         // endregion Properties
