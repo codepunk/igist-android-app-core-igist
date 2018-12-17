@@ -210,8 +210,14 @@ class BookLoader @Inject constructor(
      */
     val loadingUpdate: MediatorLiveData<DataUpdate<Int, Boolean>> = MediatorLiveData()
 
+    /**
+     * A [LiveData] containing updates relating to validating a beta key.
+     */
     val betaKeyUpdate: MediatorLiveData<DataUpdate<String, String>> = MediatorLiveData()
 
+    /**
+     * A [LiveData] containing the current [Book].
+     */
     private var book: Book? = null
         set(value) {
             if (field != value) {
@@ -230,6 +236,9 @@ class BookLoader @Inject constructor(
             }
         }
 
+    /**
+     * A [LiveData] containing the [Api] associated with the current [Book].
+     */
     private var api: Api? = null
         set(value) {
             if (field != value) {
@@ -251,6 +260,9 @@ class BookLoader @Inject constructor(
             }
         }
 
+    /**
+     * A [LiveData] containing information related to a validated beta key if one exists.
+     */
     private var validatedBetaKey: String? = null
         set(value) {
             if (field != value) {

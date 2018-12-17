@@ -11,7 +11,6 @@ import android.content.Intent
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -27,13 +26,10 @@ import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
 import com.codepunk.doofenschmirtz.util.taskinator.ResultUpdate
 import com.codepunk.punkubator.ui.media.MediaFragment
 import com.codepunk.punkubator.widget.TextureViewPanner
-import io.igist.core.BuildConfig.DEBUG
-import io.igist.core.BuildConfig.KEY_DESCRIPTION
-import io.igist.core.BuildConfig.KEY_LAUNCHED_BETA_KEY_PAGE
+import io.igist.core.BuildConfig.*
 import io.igist.core.R
 import io.igist.core.databinding.FragmentLoadingBinding
 import io.igist.core.domain.exception.IgistException
-import io.igist.core.domain.model.ResultMessage
 import io.igist.core.domain.session.AppSessionManager
 import java.io.IOException
 import javax.inject.Inject
@@ -111,6 +107,10 @@ class LoadingFragment :
      */
     private var resultHandled: Boolean = true
 
+    /**
+     * A flag that indicates whether we have requested a beta key from the user so we can
+     * react to updates accordingly.
+     */
     private var launchedBetaKeyPage: Boolean = false
 
     // endregion Properties
@@ -166,19 +166,25 @@ class LoadingFragment :
         }
     }
 
+    /**
+     * If we arrive in this method and we've requested a beta key from the user, then we can
+     * assume that we've arrived back with a result, so we can attempt to process that result.
+     */
     override fun onStart() {
         super.onStart()
 
         // Test for whether we are awaiting the result of the beta key page
         if (launchedBetaKeyPage) {
-            launchedBetaKeyPage = false
-            showAlert(
-                BETA_KEY_REQUIRED_DIALOG_FRAGMENT_TAG,
-                BETA_KEY_REQUIRED_DIALOG_FRAGMENT_REQUEST_CODE
-            )
+            loadingViewModel.liveProgress.value?.run {
+                resultHandled = false
+                onLoadingUpdate(this)
+            }
         }
     }
 
+    /**
+     * Releases the media player surface.
+     */
     override fun onStop() {
         super.onStop()
 
@@ -226,7 +232,6 @@ class LoadingFragment :
      * Reacts to loading LiveData updates.
      */
     override fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) {
-        Log.d("LoadingFragment", "onLoadingUpdate: update=$update")
         when (update) {
             is ProgressUpdate -> {
                 binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
@@ -247,9 +252,14 @@ class LoadingFragment :
                         is FailureUpdate -> {
                             when (update.e) {
                                 is IgistException -> {
-                                    val igistException = update.e as IgistException
-                                    when (igistException.resultMessage) {
-                                        ResultMessage.BETA_KEY_REQUIRED -> launchBetaKeyPage()
+                                    if (launchedBetaKeyPage) {
+                                        launchedBetaKeyPage = false
+                                        showAlert(
+                                            BETA_KEY_REQUIRED_DIALOG_FRAGMENT_TAG,
+                                            BETA_KEY_REQUIRED_DIALOG_FRAGMENT_REQUEST_CODE
+                                        )
+                                    } else {
+                                        launchBetaKeyPage()
                                     }
                                 }
                                 is IOException -> showAlert(
@@ -286,7 +296,7 @@ class LoadingFragment :
     }
 
     /**
-     * Implementation of [OnBuildAlertDialogListener]. Builds the alert dialog.
+     * Implementation of [OnBuildAlertDialogListener]. Builds the appropriate alert dialog.
      */
     override fun onBuildAlertDialog(fragment: AlertDialogFragment, builder: AlertDialog.Builder) {
         when (fragment.targetRequestCode) {

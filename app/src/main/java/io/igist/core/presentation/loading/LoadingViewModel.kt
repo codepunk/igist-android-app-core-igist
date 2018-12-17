@@ -22,14 +22,19 @@ class LoadingViewModel @Inject constructor(
 
     private val bookLoader: BookLoader
 
-) :
-    ViewModel(),
+) : ViewModel(),
     OnSharedPreferenceChangeListener {
 
     // region Properties
 
+    /**
+     * A [LiveData] containing updates relating to the loading process.
+     */
     val liveProgress: LiveData<DataUpdate<Int, Boolean>> = bookLoader.loadingUpdate
 
+    /**
+     * A [LiveData] containing updates relating to validating a beta key.
+     */
     val liveBetaKey: LiveData<DataUpdate<String, String>> = bookLoader.betaKeyUpdate
 
     // endregion Properties
@@ -47,6 +52,9 @@ class LoadingViewModel @Inject constructor(
 
     // region Inherited methods
 
+    /**
+     * Unregisters from shared preferences.
+     */
     override fun onCleared() {
         super.onCleared()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
@@ -56,6 +64,9 @@ class LoadingViewModel @Inject constructor(
 
     // region Implemented methods
 
+    /**
+     * Loads the current book when a current book ID is observed.
+     */
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         when (key) {
             PREF_KEY_CURRENT_BOOK_ID -> loadBook()
@@ -66,6 +77,9 @@ class LoadingViewModel @Inject constructor(
 
     // region Methods
 
+    /**
+     * Loads the current book ID as found in shared preferences.
+     */
     fun loadBook(bookId: Long = sharedPreferences.getLong(PREF_KEY_CURRENT_BOOK_ID, 0L)) {
         if (bookId > 0) {
             bookLoader.cancel()
@@ -73,6 +87,9 @@ class LoadingViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Submits a beta key to the server for validation.
+     */
     fun submitBetaKey(betaKey: String?) {
         bookLoader.cancel()
         bookLoader.submitBetaKey(betaKey)

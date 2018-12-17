@@ -9,7 +9,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +20,11 @@ import com.codepunk.doofenschmirtz.app.AlertDialogFragment
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_CANCELED
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_NEGATIVE
 import com.codepunk.doofenschmirtz.app.AlertDialogFragment.Companion.RESULT_POSITIVE
-import com.codepunk.doofenschmirtz.util.taskinator.*
+import com.codepunk.doofenschmirtz.app.AlertDialogFragment.OnBuildAlertDialogListener
+import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.FailureUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.ProgressUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.SuccessUpdate
 import io.igist.core.BuildConfig.KEY_RESULT_MESSAGE
 import io.igist.core.R
 import io.igist.core.databinding.FragmentBetaKeyBinding
@@ -37,6 +40,9 @@ private const val RESULT_MESSAGE_DIALOG_FRAGMENT_REQUEST_CODE: Int = 2
 
 // endregion Constants
 
+/**
+ * A fragment that requests the user to enter a beta when one is required.
+ */
 class BetaKeyFragment :
     AbsLoadingFragment(),
     View.OnClickListener,
@@ -52,7 +58,7 @@ class BetaKeyFragment :
     /**
      * A flag that controls whether ResultUpdate should be handled.
      */
-    private var resultHandled: Boolean = false
+    private var resultHandled: Boolean = true
 
     /**
      * The most recent Igist remote message.
@@ -109,6 +115,9 @@ class BetaKeyFragment :
         binding.submitBtn.setOnClickListener(this)
     }
 
+    /**
+     * Saves the current instance state.
+     */
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putParcelable(KEY_RESULT_MESSAGE, resultMessage)
@@ -118,6 +127,9 @@ class BetaKeyFragment :
 
     // region Inherited methods
 
+    /**
+     * Reacts to the result of various alert dialogs.
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             PREPARING_LAUNCH_DIALOG_FRAGMENT_REQUEST_CODE -> {
@@ -149,6 +161,9 @@ class BetaKeyFragment :
         }
     }
 
+    /**
+     * Implementation of [OnBuildAlertDialogListener]. Builds the appropriate alert dialog.
+     */
     override fun onBuildAlertDialog(fragment: AlertDialogFragment, builder: AlertDialog.Builder) {
         when (fragment.targetRequestCode) {
             RESULT_MESSAGE_DIALOG_FRAGMENT_REQUEST_CODE -> {
@@ -170,7 +185,9 @@ class BetaKeyFragment :
 
     // region Methods
 
-    // TODO NEXT !!!
+    /**
+     * Reacts to updates related to submitting a beta key to the server.
+     */
     private fun onBetaKeyUpdate(update: DataUpdate<String, String>?) {
         when (update) {
             is ProgressUpdate -> {
