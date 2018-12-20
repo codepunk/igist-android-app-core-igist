@@ -88,16 +88,17 @@ fun LocalContentList.toContentList(
     localSputniks: List<LocalContentFile>,
     localBadges: List<LocalContentFile>,
     localStorefront: List<LocalContentFile>
-): ContentList =
-    ContentList(
-        appVersion,
-        live,
-        newestAppVersion,
-        localChapterImages.toContentFiles(),
-        localSputniks.toContentFiles(),
-        localBadges.toContentFiles(),
-        localStorefront.toContentFiles()
-    )
+): ContentList = ContentList(
+    appVersion,
+    live,
+    newestAppVersion,
+    localChapterImages.toContentFiles(),
+    localSputniks.toContentFiles(),
+    localBadges.toContentFiles(),
+    localStorefront.toContentFiles(),
+    null /* TODO */,
+    null /* TODO */
+)
 
 /**
  * Converts a [RemoteContentList] to a [LocalContentList].

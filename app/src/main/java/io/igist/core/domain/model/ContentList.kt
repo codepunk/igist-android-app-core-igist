@@ -23,6 +23,10 @@ data class ContentList(
 
     val badges: List<ContentFile>?,
 
-    val storefront: List<ContentFile>?
+    val storefront: List<ContentFile>?,
+
+    val storeData: Map<String, List<Map<String, List<StoreItem>>>>?,
+
+    val cardData: Map<String, List<Card>>?
 
 )

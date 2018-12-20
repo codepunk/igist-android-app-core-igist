@@ -10,8 +10,7 @@ import android.os.AsyncTask.THREAD_POOL_EXECUTOR
 import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig.PREF_KEY_VERIFIED_BETA_KEY
-import io.igist.core.data.local.dao.ApiDao
-import io.igist.core.data.local.dao.ContentDao
+import io.igist.core.data.local.dao.*
 import io.igist.core.data.mapper.*
 import io.igist.core.data.remote.entity.RemoteApi
 import io.igist.core.data.remote.entity.RemoteContentList
@@ -37,7 +36,19 @@ class AppRepositoryImpl(
 
     private val apiDao: ApiDao,
 
-    private val contentDao: ContentDao,
+    private val cardDao: CardDao,
+
+    private val cardImageDao: CardImageDao,
+
+    private val contentFileDao: ContentFileDao,
+
+    private val contentListDao: ContentListDao,
+
+    private val storeCollectionDao: StoreCollectionDao,
+
+    private val storeDepartmentDao: StoreDepartmentDao,
+
+    private val storeItemDao: StoreItemDao,
 
     private val appWebservice: AppWebservice,
 
@@ -99,12 +110,13 @@ class AppRepositoryImpl(
     override fun getContentList(
         bookId: Long,
         appVersion: Int,
-        contentListNum: Int,
+        index: Int,
         alwaysFetch: Boolean
     ): LiveData<DataUpdate<ContentList, ContentList>> {
         contentListTask?.cancel(true)
         return ContentListTask(
-            contentDao,
+            contentFileDao,
+            contentListDao,
             appWebservice,
             alwaysFetch
         ).apply {
@@ -113,7 +125,7 @@ class AppRepositoryImpl(
             THREAD_POOL_EXECUTOR,
             bookId,
             appVersion,
-            contentListNum
+            index
         )
     }
 
@@ -265,7 +277,9 @@ class AppRepositoryImpl(
      */
     private class ContentListTask(
 
-        private val contentDao: ContentDao,
+        private val contentFileDao: ContentFileDao,
+
+        private val contentListDao: ContentListDao,
 
         private val appWebservice: AppWebservice,
 
@@ -279,11 +293,11 @@ class AppRepositoryImpl(
                 ?: throw IllegalArgumentException("No book ID passed to ContentListTask")
             val appVersion: Int = params.getOrNull(1) as? Int?
                 ?: throw IllegalArgumentException("No app version passed to ContentListTask")
-            val contentListNum: Int = params.getOrNull(2) as? Int?
-                ?: throw IllegalArgumentException("No content list num passed to ContentListTask")
+            val index: Int = params.getOrNull(2) as? Int?
+                ?: throw IllegalArgumentException("No content list index passed to ContentListTask")
 
             // Retrieve any cached content
-            var contentList: ContentList? = retrieveContentList(bookId, appVersion, contentListNum)
+            var contentList: ContentList? = retrieveContentList(bookId, appVersion, index)
 
             if (contentList == null || alwaysFetch) {
                 // If we have a cached content list, publish it
@@ -300,11 +314,11 @@ class AppRepositoryImpl(
                 }
 
                 val remoteContentLists = update.result?.body()
-                remoteContentLists?.getOrNull(contentListNum - 1)?.let { remoteContentList ->
+                remoteContentLists?.getOrNull(index)?.let { remoteContentList ->
                     // Convert & insert remote content list into the local database
                     val localContentList =
-                        remoteContentList.toLocalContentList(bookId, contentListNum)
-                    val contentListId: Long = contentDao.insertContentList(localContentList)
+                        remoteContentList.toLocalContentList(bookId, index)
+                    val contentListId: Long = contentListDao.insert(localContentList)
 
                     // Convert & insert remote content files into the local database
                     FileCategory.values().forEach {
@@ -316,22 +330,22 @@ class AppRepositoryImpl(
                             else -> null
                         }.toLocalContentFilesOrNull(contentListId, it)
                         localContentFiles?.run {
-                            contentDao.insertContentFiles(this)
+                            contentFileDao.insert(this)
                         } ?: run {
-                            contentDao.removeContentFiles(contentListId, it.value)
+                            contentFileDao.removeAll(contentListId, it.value)
                         }
                     }
 
                     // TODO Convert & insert store data
 
-                    contentList = retrieveContentList(bookId, appVersion, contentListNum)
+                    contentList = retrieveContentList(bookId, appVersion, index)
                 }
             }
 
             // Check if cancelled
             if (isCancelled) return FailureUpdate(contentList, CancellationException(), data)
 
-            //val localContentList = contentDao.retrieve(bookId, appVersion)
+            //val localContentList = contentListDao.retrieve(bookId, appVersion)
             //var contentList: ContentList? = localContentList.toContentListOrNull()
 
             return SuccessUpdate(contentList)
@@ -339,11 +353,14 @@ class AppRepositoryImpl(
 
         // region Methods
 
+        /**
+         * Retrieves all the info from the local database necessary to construct a [ContentList].
+         */
         private fun retrieveContentList(
             bookId: Long,
             appVersion: Int,
             contentListNum: Int
-        ): ContentList? = contentDao.retrieveContentList(
+        ): ContentList? = contentListDao.retrieve(
             bookId,
             appVersion,
             contentListNum
@@ -351,13 +368,13 @@ class AppRepositoryImpl(
             // We have a (cached) LocalContentList, so let's retrieve the rest that we need
             // to build a ContentList
             val localChapterImageContentFiles =
-                contentDao.retrieveContentFiles(it.id, CHAPTER_IMAGE.value)
+                contentFileDao.retrieve(it.id, CHAPTER_IMAGE.value)
             val localSputnikContentFiles =
-                contentDao.retrieveContentFiles(it.id, SPUTNIK.value)
+                contentFileDao.retrieve(it.id, SPUTNIK.value)
             val localBadgeContentFiles =
-                contentDao.retrieveContentFiles(it.id, BADGE.value)
+                contentFileDao.retrieve(it.id, BADGE.value)
             val localStorefrontContentFiles =
-                contentDao.retrieveContentFiles(it.id, STOREFRONT.value)
+                contentFileDao.retrieve(it.id, STOREFRONT.value)
 
             // TODO Store items
 

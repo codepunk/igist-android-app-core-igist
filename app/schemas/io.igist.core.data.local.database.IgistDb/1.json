@@ -2,8 +2,47 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d2e5994a3916a054f86ebef27dbbedf4",
+    "identityHash": "097f3a73e4f771bef3083fc873a4c618",
     "entities": [
+      {
+        "tableName": "apis",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`book_id` INTEGER NOT NULL, `api_version` INTEGER NOT NULL, `igist` INTEGER NOT NULL, `survey_link` TEXT NOT NULL, PRIMARY KEY(`book_id`, `api_version`))",
+        "fields": [
+          {
+            "fieldPath": "bookId",
+            "columnName": "book_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apiVersion",
+            "columnName": "api_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookMode",
+            "columnName": "igist",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surveyLink",
+            "columnName": "survey_link",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "book_id",
+            "api_version"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
       {
         "tableName": "books",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `preview_image_name` TEXT NOT NULL, `api_version` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `locked` INTEGER NOT NULL, PRIMARY KEY(`id`))",
@@ -61,47 +100,125 @@
         "foreignKeys": []
       },
       {
-        "tableName": "apis",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`book_id` INTEGER NOT NULL, `api_version` INTEGER NOT NULL, `igist` INTEGER NOT NULL, `survey_link` TEXT NOT NULL, PRIMARY KEY(`book_id`, `api_version`))",
+        "tableName": "cards",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `content_list_id` INTEGER NOT NULL, `item_index` INTEGER NOT NULL, `name` TEXT NOT NULL, `bio` TEXT NOT NULL, `video` TEXT NOT NULL, FOREIGN KEY(`content_list_id`) REFERENCES `content_lists`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
-            "fieldPath": "bookId",
-            "columnName": "book_id",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "apiVersion",
-            "columnName": "api_version",
+            "fieldPath": "contentListId",
+            "columnName": "content_list_id",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "bookMode",
-            "columnName": "igist",
+            "fieldPath": "index",
+            "columnName": "item_index",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "surveyLink",
-            "columnName": "survey_link",
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bio",
+            "columnName": "bio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "video",
+            "columnName": "video",
             "affinity": "TEXT",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "book_id",
-            "api_version"
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "idx_cards_content_list_id_item_index",
+            "unique": true,
+            "columnNames": [
+              "content_list_id",
+              "item_index"
+            ],
+            "createSql": "CREATE UNIQUE INDEX `idx_cards_content_list_id_item_index` ON `${TABLE_NAME}` (`content_list_id`, `item_index`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "content_lists",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "content_list_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "card_images",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`local_card_id` INTEGER NOT NULL, `order` INTEGER NOT NULL, `image_name` TEXT NOT NULL, PRIMARY KEY(`local_card_id`, `order`), FOREIGN KEY(`local_card_id`) REFERENCES `cards`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "localCardId",
+            "columnName": "local_card_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "order",
+            "columnName": "order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageName",
+            "columnName": "image_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "local_card_id",
+            "order"
           ],
           "autoGenerate": false
         },
         "indices": [],
-        "foreignKeys": []
+        "foreignKeys": [
+          {
+            "table": "cards",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "local_card_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       },
       {
         "tableName": "content_lists",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `book_id` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `num` INTEGER NOT NULL, `live` INTEGER NOT NULL, `newest_version` INTEGER NOT NULL, FOREIGN KEY(`book_id`) REFERENCES `books`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `book_id` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `item_index` INTEGER NOT NULL, `live` INTEGER NOT NULL, `newest_version` INTEGER NOT NULL, FOREIGN KEY(`book_id`) REFERENCES `books`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -122,8 +239,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "num",
-            "columnName": "num",
+            "fieldPath": "index",
+            "columnName": "item_index",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -148,13 +265,13 @@
         },
         "indices": [
           {
-            "name": "idx_content_lists_book_id_num_index",
+            "name": "idx_content_lists_book_id_item_index",
             "unique": true,
             "columnNames": [
               "book_id",
-              "num"
+              "item_index"
             ],
-            "createSql": "CREATE UNIQUE INDEX `idx_content_lists_book_id_num_index` ON `${TABLE_NAME}` (`book_id`, `num`)"
+            "createSql": "CREATE UNIQUE INDEX `idx_content_lists_book_id_item_index` ON `${TABLE_NAME}` (`book_id`, `item_index`)"
           }
         ],
         "foreignKeys": [
@@ -222,11 +339,239 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "store_collections",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `content_list_id` INTEGER NOT NULL, `store_department_id` INTEGER NOT NULL, `item_index` INTEGER NOT NULL, `name` TEXT NOT NULL, FOREIGN KEY(`store_department_id`) REFERENCES `store_departments`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentListId",
+            "columnName": "content_list_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeDepartmentId",
+            "columnName": "store_department_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "index",
+            "columnName": "item_index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "idx_store_collections_store_department_id_item_index",
+            "unique": true,
+            "columnNames": [
+              "content_list_id",
+              "item_index"
+            ],
+            "createSql": "CREATE UNIQUE INDEX `idx_store_collections_store_department_id_item_index` ON `${TABLE_NAME}` (`content_list_id`, `item_index`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "store_departments",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "store_department_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "store_departments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `content_list_id` INTEGER NOT NULL, `item_index` INTEGER NOT NULL, `name` TEXT NOT NULL, FOREIGN KEY(`content_list_id`) REFERENCES `content_lists`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentListId",
+            "columnName": "content_list_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "index",
+            "columnName": "item_index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "idx_store_departments_content_list_id_item_index",
+            "unique": true,
+            "columnNames": [
+              "content_list_id",
+              "item_index"
+            ],
+            "createSql": "CREATE UNIQUE INDEX `idx_store_departments_content_list_id_item_index` ON `${TABLE_NAME}` (`content_list_id`, `item_index`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "content_lists",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "content_list_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "store_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `store_collection_id` INTEGER NOT NULL, `content_id` TEXT NOT NULL, `content_link` TEXT NOT NULL, `store_icon` TEXT NOT NULL, `isSoft` INTEGER NOT NULL, `price` REAL NOT NULL, `title` TEXT NOT NULL, `type` TEXT NOT NULL, `rowOrder` INTEGER NOT NULL, `store_desc` TEXT NOT NULL, FOREIGN KEY(`store_collection_id`) REFERENCES `store_collections`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeCollectionId",
+            "columnName": "store_collection_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentId",
+            "columnName": "content_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentLink",
+            "columnName": "content_link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storeIcon",
+            "columnName": "store_icon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "isSoft",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "order",
+            "columnName": "rowOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "store_desc",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "idx_store_items_store_collection_id_row_order",
+            "unique": true,
+            "columnNames": [
+              "store_collection_id",
+              "rowOrder"
+            ],
+            "createSql": "CREATE UNIQUE INDEX `idx_store_items_store_collection_id_row_order` ON `${TABLE_NAME}` (`store_collection_id`, `rowOrder`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "store_collections",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "store_collection_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"d2e5994a3916a054f86ebef27dbbedf4\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"097f3a73e4f771bef3083fc873a4c618\")"
     ]
   }
 }

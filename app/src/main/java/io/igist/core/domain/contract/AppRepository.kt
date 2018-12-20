@@ -43,7 +43,7 @@ interface AppRepository {
     fun getContentList(
         bookId: Long,
         appVersion: Int,
-        contentListNum: Int = 1,
+        index: Int = 0,
         alwaysFetch: Boolean = true
     ): LiveData<DataUpdate<ContentList, ContentList>>
 

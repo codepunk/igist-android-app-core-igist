@@ -11,9 +11,7 @@ import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
-import io.igist.core.data.local.dao.ApiDao
-import io.igist.core.data.local.dao.BookDao
-import io.igist.core.data.local.dao.ContentDao
+import io.igist.core.data.local.dao.*
 import io.igist.core.data.local.database.IgistDb
 import io.igist.core.data.remote.adapter.BooleanIntAdapter
 import io.igist.core.data.remote.adapter.DateJsonAdapter
@@ -158,11 +156,53 @@ class DataModule {
     fun providesBookDao(db: IgistDb): BookDao = db.bookDao()
 
     /**
-     * Creates a [ContentDao] instance.
+     * Creates a [CardDao] instance.
      */
     @Singleton
     @Provides
-    fun providesContentDao(db: IgistDb): ContentDao = db.contentDao()
+    fun providesCardDao(db: IgistDb): CardDao = db.cardDao()
+
+    /**
+     * Creates a [CardImageDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesCardImageDao(db: IgistDb): CardImageDao = db.cardImageDao()
+
+    /**
+     * Creates a [ContentFileDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesContentFileDao(db: IgistDb): ContentFileDao = db.contentFileDao()
+
+    /**
+     * Creates a [ContentListDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesContentListDao(db: IgistDb): ContentListDao = db.contentListDao()
+
+    /**
+     * Creates a [StoreCollectionDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesStoreCollectionDao(db: IgistDb): StoreCollectionDao = db.storeCollectionDao()
+
+    /**
+     * Creates a [StoreDepartmentDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesStoreDepartmentDao(db: IgistDb): StoreDepartmentDao = db.storeDepartmentDao()
+
+    /**
+     * Creates a [StoreItemDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesStoreItemDao(db: IgistDb): StoreItemDao = db.storeItemDao()
 
     /**
      * Creates an [AppRepository] instance.
@@ -171,12 +211,24 @@ class DataModule {
     @Provides
     fun providesAppRepository(
         appDao: ApiDao,
-        contentDao: ContentDao,
+        cardDao: CardDao,
+        cardImageDao: CardImageDao,
+        contentFileDao: ContentFileDao,
+        contentListDao: ContentListDao,
+        storeCollectionDao: StoreCollectionDao,
+        storeDepartmentDao: StoreDepartmentDao,
+        storeItemDao: StoreItemDao,
         appWebservice: AppWebservice,
         sharedPreferences: SharedPreferences
     ): AppRepository = AppRepositoryImpl(
         appDao,
-        contentDao,
+        cardDao,
+        cardImageDao,
+        contentFileDao,
+        contentListDao,
+        storeCollectionDao,
+        storeDepartmentDao,
+        storeItemDao,
         appWebservice,
         sharedPreferences
     )

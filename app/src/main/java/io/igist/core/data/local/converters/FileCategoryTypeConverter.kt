@@ -17,14 +17,14 @@ class FileCategoryTypeConverter {
     // region Methods
 
     /**
-     * Converts an Int to an [FileCategory].
+     * Converts an Int to a [FileCategory].
      */
     @TypeConverter
     fun toFileCategory(value: Int): FileCategory =
         FileCategory.fromValue(value, FileCategory.UNKNOWN)
 
     /**
-     * Converts an [FileCategory] to an [Int].
+     * Converts a [FileCategory] to an [Int].
      */
     @TypeConverter
     fun toInt(mode: FileCategory): Int = mode.value

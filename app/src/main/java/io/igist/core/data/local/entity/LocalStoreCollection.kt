@@ -8,38 +8,35 @@ package io.igist.core.data.local.entity
 import androidx.room.*
 
 @Entity(
-    tableName = "content_lists",
+    tableName = "store_collections",
     foreignKeys = [
         ForeignKey(
-            entity = LocalBook::class,
+            entity = LocalStoreDepartment::class,
             parentColumns = ["id"],
-            childColumns = ["book_id"],
+            childColumns = ["store_department_id"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
         Index(
-            name = "idx_content_lists_book_id_item_index",
-            value = ["book_id", "item_index"],
+            name = "idx_store_collections_store_department_id_item_index",
+            value = ["content_list_id", "item_index"],
             unique = true
         )
     ]
 )
-class LocalContentList(
+data class LocalStoreCollection(
 
-    @ColumnInfo(name = "book_id")
-    val bookId: Long,
+    @ColumnInfo(name = "content_list_id")
+    val contentListId: Long,
 
-    @ColumnInfo(name = "app_version")
-    val appVersion: Int,
+    @ColumnInfo(name = "store_department_id")
+    val storeDepartmentId: Long,
 
     @ColumnInfo(name = "item_index")
     val index: Int,
 
-    val live: Boolean,
-
-    @ColumnInfo(name = "newest_version")
-    val newestAppVersion: Int
+    val name: String
 
 ) {
 
