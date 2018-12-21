@@ -5,8 +5,22 @@
 
 package io.igist.core.data.local.dao
 
-import androidx.room.Dao
+import androidx.room.*
+import io.igist.core.data.local.entity.LocalStoreDepartment
 
 @Dao
-abstract class StoreDepartmentDao {
+interface StoreDepartmentDao {
+
+    @Query("SELECT * FROM store_departments WHERE content_list_id = :contentListId")
+    fun retrieve(contentListId: Long): List<LocalStoreDepartment>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(storeDepartment: LocalStoreDepartment): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(storeDepartments: List<LocalStoreDepartment>): LongArray
+
+    @Query("DELETE FROM store_departments WHERE content_list_id = :contentListId")
+    fun removeAll(contentListId: Long)
+
 }

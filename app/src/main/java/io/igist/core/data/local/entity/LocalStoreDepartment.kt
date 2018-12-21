@@ -19,8 +19,8 @@ import androidx.room.*
     ],
     indices = [
         Index(
-            name = "idx_store_departments_content_list_id_item_index",
-            value = ["content_list_id", "item_index"],
+            name = "idx_store_departments_content_list_id_department_index",
+            value = ["content_list_id", "department_index"],
             unique = true
         )
     ]
@@ -30,8 +30,8 @@ data class LocalStoreDepartment(
     @ColumnInfo(name = "content_list_id")
     val contentListId: Long,
 
-    @ColumnInfo(name = "item_index")
-    val index: Int,
+    @ColumnInfo(name = "department_index")
+    val departmentIndex: Int,
 
     val name: String
 

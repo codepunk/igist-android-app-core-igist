@@ -13,28 +13,28 @@ import androidx.room.*
         ForeignKey(
             entity = LocalStoreDepartment::class,
             parentColumns = ["id"],
-            childColumns = ["store_department_id"],
+            childColumns = ["department_id"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
         Index(
-            name = "idx_store_collections_store_department_id_item_index",
-            value = ["content_list_id", "item_index"],
+            name = "idx_store_collections_department_id_collection_index",
+            value = ["department_id", "category_index", "collection_index"],
             unique = true
         )
     ]
 )
 data class LocalStoreCollection(
 
-    @ColumnInfo(name = "content_list_id")
-    val contentListId: Long,
+    @ColumnInfo(name = "department_id")
+    val departmentId: Long,
 
-    @ColumnInfo(name = "store_department_id")
-    val storeDepartmentId: Long,
+    @ColumnInfo(name = "category_index")
+    val categoryIndex: Int,
 
-    @ColumnInfo(name = "item_index")
-    val index: Int,
+    @ColumnInfo(name = "collection_index")
+    val collectionIndex: Int,
 
     val name: String
 

@@ -11,6 +11,9 @@ import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig.PREF_KEY_VERIFIED_BETA_KEY
 import io.igist.core.data.local.dao.*
+import io.igist.core.data.local.entity.LocalStoreCollection
+import io.igist.core.data.local.entity.LocalStoreDepartment
+import io.igist.core.data.local.entity.LocalStoreItem
 import io.igist.core.data.mapper.*
 import io.igist.core.data.remote.entity.RemoteApi
 import io.igist.core.data.remote.entity.RemoteContentList
@@ -117,6 +120,9 @@ class AppRepositoryImpl(
         return ContentListTask(
             contentFileDao,
             contentListDao,
+            storeDepartmentDao,
+            storeCollectionDao,
+            storeItemDao,
             appWebservice,
             alwaysFetch
         ).apply {
@@ -281,6 +287,12 @@ class AppRepositoryImpl(
 
         private val contentListDao: ContentListDao,
 
+        private val storeDepartmentDao: StoreDepartmentDao,
+
+        private val storeCollectionDao: StoreCollectionDao,
+
+        private val storeItemDao: StoreItemDao,
+
         private val appWebservice: AppWebservice,
 
         private val alwaysFetch: Boolean = true
@@ -336,7 +348,31 @@ class AppRepositoryImpl(
                         }
                     }
 
-                    // TODO Convert & insert store data
+                    storeDepartmentDao.removeAll(contentListId)
+                    remoteContentList.storeData?.entries?.forEachIndexed { departmentIndex, entry ->
+                        // Store each key as a LocalStoreDepartment
+                        val departmentId: Long = storeDepartmentDao.insert(
+                            LocalStoreDepartment(contentListId, departmentIndex, entry.key)
+                        )
+
+                        // Each value is a list of (remote) store collections
+                        entry.value.forEachIndexed { categoryIndex, map ->
+                            map.entries.forEachIndexed { collectionIndex, entry ->
+                                val collectionId = storeCollectionDao.insert(
+                                    LocalStoreCollection(
+                                        departmentId,
+                                        categoryIndex,
+                                        collectionIndex,
+                                        entry.key
+                                    )
+                                )
+
+                                val localStoreItems: List<LocalStoreItem> =
+                                    entry.value.toLocalStoreItems(collectionId)
+                                storeItemDao.insert(localStoreItems)
+                            }
+                        }
+                    }
 
                     contentList = retrieveContentList(bookId, appVersion, index)
                 }
@@ -375,6 +411,8 @@ class AppRepositoryImpl(
                 contentFileDao.retrieve(it.id, BADGE.value)
             val localStorefrontContentFiles =
                 contentFileDao.retrieve(it.id, STOREFRONT.value)
+            val localStoreCategories =
+                storeDepartmentDao.retrieve(it.id)
 
             // TODO Store items
 
@@ -382,7 +420,8 @@ class AppRepositoryImpl(
                 localChapterImageContentFiles,
                 localSputnikContentFiles,
                 localBadgeContentFiles,
-                localStorefrontContentFiles
+                localStorefrontContentFiles,
+                localStoreCategories
             )
         }
 

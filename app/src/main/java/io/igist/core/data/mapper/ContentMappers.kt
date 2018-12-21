@@ -7,11 +7,15 @@ package io.igist.core.data.mapper
 
 import io.igist.core.data.local.entity.LocalContentFile
 import io.igist.core.data.local.entity.LocalContentList
+import io.igist.core.data.local.entity.LocalStoreDepartment
+import io.igist.core.data.local.entity.LocalStoreItem
 import io.igist.core.data.remote.entity.RemoteContentFile
 import io.igist.core.data.remote.entity.RemoteContentList
+import io.igist.core.data.remote.entity.RemoteStoreItem
 import io.igist.core.domain.model.ContentFile
 import io.igist.core.domain.model.ContentList
 import io.igist.core.domain.model.FileCategory
+import io.igist.core.domain.model.StoreItem
 
 // region Methods
 
@@ -39,6 +43,40 @@ fun List<LocalContentFile>.toContentFiles(): List<ContentFile> = map { it.toCont
 fun List<LocalContentFile>?.toContentFilesOrNull(): List<ContentFile>? = this?.toContentFiles()
 
 // endregion LocalContentFile mappers
+
+// region LocalStore mappers
+
+/**
+ * Converts a list of [LocalStoreDepartment]s to a domain store data collection.
+ */
+fun List<LocalStoreDepartment>.toStoreData(): Map<String, List<Map<String, List<StoreItem>>>> {
+    val map = HashMap<String, List<Map<String, List<StoreItem>>>>()
+    return map
+}
+
+fun RemoteStoreItem.toLocalStoreItem(collectionId: Long): LocalStoreItem = LocalStoreItem(
+    collectionId,
+    contentId,
+    contentLink,
+    storeIcon,
+    currency,
+    price,
+    title,
+    type,
+    order,
+    description
+)
+
+fun RemoteStoreItem?.toLocalStoreItemOrNull(collectionId: Long): LocalStoreItem? =
+    this?.toLocalStoreItem(collectionId)
+
+fun List<RemoteStoreItem>.toLocalStoreItems(collectionId: Long): List<LocalStoreItem> =
+    map { it.toLocalStoreItem(collectionId) }
+
+fun List<RemoteStoreItem>?.toLocalStoreItemsOrNull(collectionId: Long): List<LocalStoreItem>? =
+    this?.toLocalStoreItems(collectionId)
+
+// endregion LocalStore mappers
 
 // region RemoteContentFile mappers
 
@@ -87,7 +125,8 @@ fun LocalContentList.toContentList(
     localChapterImages: List<LocalContentFile>,
     localSputniks: List<LocalContentFile>,
     localBadges: List<LocalContentFile>,
-    localStorefront: List<LocalContentFile>
+    localStorefront: List<LocalContentFile>,
+    localStoreDepartments: List<LocalStoreDepartment>
 ): ContentList = ContentList(
     appVersion,
     live,
@@ -96,7 +135,7 @@ fun LocalContentList.toContentList(
     localSputniks.toContentFiles(),
     localBadges.toContentFiles(),
     localStorefront.toContentFiles(),
-    null /* TODO */,
+    localStoreDepartments.toStoreData(),
     null /* TODO */
 )
 

@@ -29,17 +29,4 @@ data class ContentFile(
      */
     val fileType: FileType = FileType.fromFilename(filename)
 
-    /*
-    /**
-     * A nullable backing property for [fileType] that ensures one-time lookup.
-     */
-    private var _fileType: FileType? = null
-
-    /**
-     * A public, non-nullable wrapper for [_fileType] that ensures one-time lookup.
-     */
-    val fileType: FileType
-        get() = _fileType ?: FileType.fromFilename(filename).apply { _fileType = this }
-    */
-
 }

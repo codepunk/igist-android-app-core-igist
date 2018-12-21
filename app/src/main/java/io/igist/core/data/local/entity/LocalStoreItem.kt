@@ -15,22 +15,22 @@ import io.igist.core.domain.model.StoreItemType
         ForeignKey(
             entity = LocalStoreCollection::class,
             parentColumns = ["id"],
-            childColumns = ["store_collection_id"],
+            childColumns = ["collection_id"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
         Index(
-            name = "idx_store_items_store_collection_id_row_order",
-            value = ["store_collection_id", "rowOrder"],
+            name = "idx_store_items_collection_id_row_order",
+            value = ["collection_id", "rowOrder"],
             unique = true
         )
     ]
 )
 data class LocalStoreItem(
 
-    @ColumnInfo(name = "store_collection_id")
-    val storeCollectionId: Long,
+    @ColumnInfo(name = "collection_id")
+    val collectionId: Long,
 
     @ColumnInfo(name = "content_id")
     val contentId: String,

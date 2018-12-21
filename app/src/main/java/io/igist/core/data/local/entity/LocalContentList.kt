@@ -19,8 +19,8 @@ import androidx.room.*
     ],
     indices = [
         Index(
-            name = "idx_content_lists_book_id_item_index",
-            value = ["book_id", "item_index"],
+            name = "idx_content_lists_book_id_content_list_index",
+            value = ["book_id", "content_list_index"],
             unique = true
         )
     ]
@@ -33,8 +33,8 @@ class LocalContentList(
     @ColumnInfo(name = "app_version")
     val appVersion: Int,
 
-    @ColumnInfo(name = "item_index")
-    val index: Int,
+    @ColumnInfo(name = "content_list_index")
+    val contentListIndex: Int,
 
     val live: Boolean,
 
