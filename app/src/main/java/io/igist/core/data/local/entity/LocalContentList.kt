@@ -25,7 +25,7 @@ import androidx.room.*
         )
     ]
 )
-class LocalContentList(
+data class LocalContentList(
 
     @ColumnInfo(name = "book_id")
     val bookId: Long,

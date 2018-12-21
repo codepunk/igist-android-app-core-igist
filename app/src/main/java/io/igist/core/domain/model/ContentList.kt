@@ -27,6 +27,6 @@ data class ContentList(
 
     val storeData: Map<String, List<Map<String, List<StoreItem>>>>?,
 
-    val cardData: Map<String, List<Card>>?
+    val cardData: Map<String, Card>?
 
 )

@@ -7,10 +7,12 @@ package io.igist.core.data.repository
 
 import android.content.SharedPreferences
 import android.os.AsyncTask.THREAD_POOL_EXECUTOR
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig.PREF_KEY_VERIFIED_BETA_KEY
 import io.igist.core.data.local.dao.*
+import io.igist.core.data.local.entity.LocalCardImage
 import io.igist.core.data.local.entity.LocalStoreCollection
 import io.igist.core.data.local.entity.LocalStoreDepartment
 import io.igist.core.data.local.entity.LocalStoreItem
@@ -30,6 +32,7 @@ import io.igist.core.domain.model.FileCategory.SPUTNIK
 import io.igist.core.domain.model.FileCategory.BADGE
 import io.igist.core.domain.model.FileCategory.STOREFRONT
 import retrofit2.Response
+import java.lang.Exception
 import java.util.concurrent.CancellationException
 
 /**
@@ -118,6 +121,8 @@ class AppRepositoryImpl(
     ): LiveData<DataUpdate<ContentList, ContentList>> {
         contentListTask?.cancel(true)
         return ContentListTask(
+            cardDao,
+            cardImageDao,
             contentFileDao,
             contentListDao,
             storeDepartmentDao,
@@ -283,6 +288,10 @@ class AppRepositoryImpl(
      */
     private class ContentListTask(
 
+        private val cardDao: CardDao,
+
+        private val cardImageDao: CardImageDao,
+
         private val contentFileDao: ContentFileDao,
 
         private val contentListDao: ContentListDao,
@@ -327,6 +336,9 @@ class AppRepositoryImpl(
 
                 val remoteContentLists = update.result?.body()
                 remoteContentLists?.getOrNull(index)?.let { remoteContentList ->
+                    // Remove old content list
+                    contentListDao.remove(bookId, index)
+
                     // Convert & insert remote content list into the local database
                     val localContentList =
                         remoteContentList.toLocalContentList(bookId, index)
@@ -348,6 +360,7 @@ class AppRepositoryImpl(
                         }
                     }
 
+                    // Convert & insert store data into the local database
                     storeDepartmentDao.removeAll(contentListId)
                     remoteContentList.storeData?.entries?.forEachIndexed { departmentIndex, entry ->
                         // Store each key as a LocalStoreDepartment
@@ -374,15 +387,26 @@ class AppRepositoryImpl(
                         }
                     }
 
+                    // Convert & insert card data into the local database
+                    cardDao.removeAll(contentListId)
+                    remoteContentList.cardData?.entries?.forEachIndexed { cardIndex, entry ->
+                        // In our remote card structure, each card name is repeated as the
+                        // attribute name itself and also as the "name" field of each card
+                        val localCard = entry.value.toLocalCard(contentListId, cardIndex)
+                        val cardId: Long = cardDao.insert(localCard)
+
+                        entry.value.images.forEachIndexed { imageIndex, imageName ->
+                            val localCardImage = LocalCardImage(cardId, imageIndex, imageName)
+                            cardImageDao.insert(localCardImage)
+                        }
+                    }
+
                     contentList = retrieveContentList(bookId, appVersion, index)
                 }
             }
 
             // Check if cancelled
             if (isCancelled) return FailureUpdate(contentList, CancellationException(), data)
-
-            //val localContentList = contentListDao.retrieve(bookId, appVersion)
-            //var contentList: ContentList? = localContentList.toContentListOrNull()
 
             return SuccessUpdate(contentList)
         }
@@ -395,11 +419,11 @@ class AppRepositoryImpl(
         private fun retrieveContentList(
             bookId: Long,
             appVersion: Int,
-            contentListNum: Int
+            index: Int
         ): ContentList? = contentListDao.retrieve(
             bookId,
             appVersion,
-            contentListNum
+            index
         )?.let {
             // We have a (cached) LocalContentList, so let's retrieve the rest that we need
             // to build a ContentList
@@ -411,17 +435,28 @@ class AppRepositoryImpl(
                 contentFileDao.retrieve(it.id, BADGE.value)
             val localStorefrontContentFiles =
                 contentFileDao.retrieve(it.id, STOREFRONT.value)
-            val localStoreCategories =
+            val localStoreDepartments =
                 storeDepartmentDao.retrieve(it.id)
-
-            // TODO Store items
-
+            val localStoreCollections = storeCollectionDao.retrieve(
+                localStoreDepartments.map { it.id }
+            )
+            val localStoreItems = storeItemDao.retrieve(
+                localStoreCollections.map { it.id }
+            )
+            val localCards = cardDao.retrieve(it.id)
+            val localCardImages = cardImageDao.retrieve(
+                localCards.map { it.id }
+            )
             it.toContentList(
                 localChapterImageContentFiles,
                 localSputnikContentFiles,
                 localBadgeContentFiles,
                 localStorefrontContentFiles,
-                localStoreCategories
+                localStoreDepartments,
+                localStoreCollections,
+                localStoreItems,
+                localCards,
+                localCardImages
             )
         }
 

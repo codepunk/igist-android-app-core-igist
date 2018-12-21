@@ -17,6 +17,9 @@ interface StoreCollectionDao {
     @Query("SELECT * FROM store_collections WHERE department_id = :departmentId ORDER BY category_index, collection_index")
     fun retrieve(departmentId: Long): List<LocalStoreCollection>
 
+    @Query("SELECT * FROM store_collections WHERE department_id IN (:departmentIds) ORDER BY department_id, category_index, collection_index")
+    fun retrieve(departmentIds: List<Long>): List<LocalStoreCollection>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(storeCollection: LocalStoreCollection): Long
 

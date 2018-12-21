@@ -5,19 +5,42 @@
 
 package io.igist.core.data.mapper
 
-import io.igist.core.data.local.entity.LocalContentFile
-import io.igist.core.data.local.entity.LocalContentList
-import io.igist.core.data.local.entity.LocalStoreDepartment
-import io.igist.core.data.local.entity.LocalStoreItem
+import io.igist.core.data.local.entity.*
 import io.igist.core.data.remote.entity.RemoteContentFile
 import io.igist.core.data.remote.entity.RemoteContentList
 import io.igist.core.data.remote.entity.RemoteStoreItem
-import io.igist.core.domain.model.ContentFile
-import io.igist.core.domain.model.ContentList
-import io.igist.core.domain.model.FileCategory
-import io.igist.core.domain.model.StoreItem
+import io.igist.core.domain.model.*
 
 // region Methods
+
+// region LocalContentList mappers
+
+/**
+ * Converts a [LocalContentList] to a domain [ContentList].
+ */
+fun LocalContentList.toContentList(
+    localChapterImages: List<LocalContentFile>,
+    localSputniks: List<LocalContentFile>,
+    localBadges: List<LocalContentFile>,
+    localStorefront: List<LocalContentFile>,
+    localStoreDepartments: List<LocalStoreDepartment>,
+    localStoreCollections: List<LocalStoreCollection>,
+    localStoreItems: List<LocalStoreItem>,
+    localCards: List<LocalCard>,
+    localCardImages: List<LocalCardImage>
+): ContentList = ContentList(
+    appVersion,
+    live,
+    newestAppVersion,
+    localChapterImages.toContentFiles(),
+    localSputniks.toContentFiles(),
+    localBadges.toContentFiles(),
+    localStorefront.toContentFiles(),
+    localStoreDepartments.toStoreData(localStoreCollections, localStoreItems),
+    localCards.toCardData(localCardImages)
+)
+
+// endregion LocalContentList mappers
 
 // region LocalContentFile mappers
 
@@ -47,13 +70,76 @@ fun List<LocalContentFile>?.toContentFilesOrNull(): List<ContentFile>? = this?.t
 // region LocalStore mappers
 
 /**
- * Converts a list of [LocalStoreDepartment]s to a domain store data collection.
+ * Converts a list of [LocalStoreDepartment]s to a domain store data construct, converting
+ * [localStoreCollections] and [localStoreItems] along the way as appropriate.
  */
-fun List<LocalStoreDepartment>.toStoreData(): Map<String, List<Map<String, List<StoreItem>>>> {
-    val map = HashMap<String, List<Map<String, List<StoreItem>>>>()
-    return map
+fun List<LocalStoreDepartment>.toStoreData(
+    localStoreCollections: List<LocalStoreCollection>,
+    localStoreItems: List<LocalStoreItem>
+): Map<String, List<Map<String, List<StoreItem>>>> {
+    // Create the main store data map
+    val storeDataMap = HashMap<String, List<Map<String, List<StoreItem>>>>()
+
+    // Populate the main store data map; each item in "this" is a local store department
+    this.forEach { localStoreDepartment ->
+        // Create a new array list called "categoryList" and add it to the main data store map
+        val categoryList = ArrayList<Map<String, List<StoreItem>>>()
+        storeDataMap[localStoreDepartment.name] = categoryList
+
+        // Filter out all local store collections associated with each department
+        localStoreCollections.filter { it.departmentId == localStoreDepartment.id }.forEach {
+            val collectionMap = HashMap<String, List<StoreItem>>()
+            categoryList.add(collectionMap)
+
+            // Filter out all local store items associated with this collection and convert/add
+            // them to the domain collection map
+            collectionMap[it.name] = localStoreItems.filter { localStoreItem ->
+                localStoreItem.collectionId == it.id
+            }.toStoreItems()
+        }
+    }
+
+    // Return the populated map
+    return storeDataMap
 }
 
+/**
+ * Converts a [LocalStoreItem] to a domain [StoreItem].
+ */
+fun LocalStoreItem.toStoreItem(): StoreItem = StoreItem(
+    contentId,
+    contentLink,
+    storeIcon,
+    currency,
+    price,
+    title,
+    type,
+    order,
+    description
+)
+
+/**
+ * Converts a nullable [LocalStoreItem] to a nullable domain [StoreItem].
+ */
+fun LocalStoreItem?.toStoreItemOrNull(): StoreItem? = this?.toStoreItem()
+
+/**
+ * Converts a list of [LocalStoreItem]s to a list of domain [StoreItem]s.
+ */
+fun List<LocalStoreItem>.toStoreItems(): List<StoreItem> = map { it.toStoreItem() }
+
+/**
+ * Converts a nullable list of [LocalStoreItem]s to a nullable list of domain [StoreItem]s.
+ */
+fun List<LocalStoreItem>?.toStoreItemsOrNull(): List<StoreItem>? = this?.toStoreItems()
+
+// endregion LocalStore mappers
+
+// region RemoteStore mappers
+
+/**
+ * Converts a [RemoteStoreItem] to a [LocalStoreItem].
+ */
 fun RemoteStoreItem.toLocalStoreItem(collectionId: Long): LocalStoreItem = LocalStoreItem(
     collectionId,
     contentId,
@@ -67,16 +153,25 @@ fun RemoteStoreItem.toLocalStoreItem(collectionId: Long): LocalStoreItem = Local
     description
 )
 
+/**
+ * Converts a nullable [RemoteStoreItem] to a nullable [LocalStoreItem].
+ */
 fun RemoteStoreItem?.toLocalStoreItemOrNull(collectionId: Long): LocalStoreItem? =
     this?.toLocalStoreItem(collectionId)
 
+/**
+ * Converts a list of [RemoteStoreItem]s to a list of [LocalStoreItem]s.
+ */
 fun List<RemoteStoreItem>.toLocalStoreItems(collectionId: Long): List<LocalStoreItem> =
     map { it.toLocalStoreItem(collectionId) }
 
+/**
+ * Converts a nullable list of [RemoteStoreItem]s to a nullable list of [LocalStoreItem]s.
+ */
 fun List<RemoteStoreItem>?.toLocalStoreItemsOrNull(collectionId: Long): List<LocalStoreItem>? =
     this?.toLocalStoreItems(collectionId)
 
-// endregion LocalStore mappers
+// endregion RemoteStore mappers
 
 // region RemoteContentFile mappers
 
@@ -119,27 +214,6 @@ fun List<RemoteContentFile>?.toLocalContentFilesOrNull(
 // region RemoteContentList mappers
 
 /**
- * Converts a [LocalContentList] to a domain [ContentList].
- */
-fun LocalContentList.toContentList(
-    localChapterImages: List<LocalContentFile>,
-    localSputniks: List<LocalContentFile>,
-    localBadges: List<LocalContentFile>,
-    localStorefront: List<LocalContentFile>,
-    localStoreDepartments: List<LocalStoreDepartment>
-): ContentList = ContentList(
-    appVersion,
-    live,
-    newestAppVersion,
-    localChapterImages.toContentFiles(),
-    localSputniks.toContentFiles(),
-    localBadges.toContentFiles(),
-    localStorefront.toContentFiles(),
-    localStoreDepartments.toStoreData(),
-    null /* TODO */
-)
-
-/**
  * Converts a [RemoteContentList] to a [LocalContentList].
  */
 fun RemoteContentList.toLocalContentList(bookId: Long, num: Int) = LocalContentList(
@@ -159,5 +233,65 @@ fun List<RemoteContentList>.toLocalContentLists(bookId: Long): List<LocalContent
     }
 
 // endregion RemoteContentList mappers
+
+// region LocalCard mappers
+
+fun LocalCard.toCard(images: List<String>) = Card(name, bio, images, video)
+
+/**
+ * Converts a list of [LocalStoreDepartment]s to a domain store data construct, converting
+ * [localStoreCollections] and [localStoreItems] along the way as appropriate.
+ */
+fun List<LocalCard>.toCardData(
+    localCardImages: List<LocalCardImage>
+): Map<String, Card> {
+    // Create the main store data map
+    val cardDataMap = HashMap<String, Card>()
+
+    // Populate the main store data map; each item in "this" is a local card
+    this.forEach { localCard ->
+        val filteredImages = localCardImages.filter { it.localCardId == localCard.id }
+        val images: List<String> = filteredImages.map { it.imageName }
+        cardDataMap[localCard.name] = localCard.toCard(images)
+    }
+
+    /*
+    // Populate the main store data map; each item in "this" is a local store department
+    this.forEach { localStoreDepartment ->
+        // Create a new array list called "categoryList" and add it to the main data store map
+        val categoryList = ArrayList<Map<String, List<StoreItem>>>()
+        storeDataMap[localStoreDepartment.name] = categoryList
+
+        // Filter out all local store collections associated with each department
+        localStoreCollections.filter { it.departmentId == localStoreDepartment.id }.forEach {
+            val collectionMap = HashMap<String, List<StoreItem>>()
+            categoryList.add(collectionMap)
+
+            // Filter out all local store items associated with this collection and convert/add
+            // them to the domain collection map
+            collectionMap[it.name] = localStoreItems.filter { localStoreItem ->
+                localStoreItem.collectionId == it.id
+            }.toStoreItems()
+        }
+    }
+    */
+
+    // Return the populated map
+    return cardDataMap
+}
+
+// endregion LocalCard mappers
+
+// region RemoteCard mappers
+
+fun RemoteCard.toLocalCard(contentListId: Long, cardIndex: Int): LocalCard = LocalCard(
+    contentListId,
+    cardIndex,
+    name,
+    bio,
+    video
+)
+
+// endregion RemoteCard mappers
 
 // endregion Methods

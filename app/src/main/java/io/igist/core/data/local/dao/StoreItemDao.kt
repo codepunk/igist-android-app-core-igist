@@ -14,8 +14,11 @@ import io.igist.core.data.local.entity.LocalStoreItem
 @Dao
 interface StoreItemDao {
 
-    @Query("SELECT * FROM store_items WHERE collection_id = :collectionId")
+    @Query("SELECT * FROM store_items WHERE collection_id = :collectionId ORDER BY rowOrder")
     fun retrieve(collectionId: Long): List<LocalStoreItem>
+
+    @Query("SELECT * FROM store_items WHERE collection_id IN (:collectionIds) ORDER BY collection_id, rowOrder")
+    fun retrieve(collectionIds: List<Long>): List<LocalStoreItem>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(storeItem: LocalStoreItem): Long

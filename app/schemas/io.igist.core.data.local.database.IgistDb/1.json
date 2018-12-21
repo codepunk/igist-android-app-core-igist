@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "672589598cd470d7da787867c82059ee",
+    "identityHash": "7cb963b22864a29c91062ad9db888e1c",
     "entities": [
       {
         "tableName": "apis",
@@ -173,7 +173,7 @@
       },
       {
         "tableName": "card_images",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`local_card_id` INTEGER NOT NULL, `order` INTEGER NOT NULL, `image_name` TEXT NOT NULL, PRIMARY KEY(`local_card_id`, `order`), FOREIGN KEY(`local_card_id`) REFERENCES `cards`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`local_card_id` INTEGER NOT NULL, `image_index` INTEGER NOT NULL, `image_name` TEXT NOT NULL, PRIMARY KEY(`local_card_id`, `image_index`), FOREIGN KEY(`local_card_id`) REFERENCES `cards`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "localCardId",
@@ -182,8 +182,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "order",
-            "columnName": "order",
+            "fieldPath": "imageIndex",
+            "columnName": "image_index",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -197,7 +197,7 @@
         "primaryKey": {
           "columnNames": [
             "local_card_id",
-            "order"
+            "image_index"
           ],
           "autoGenerate": false
         },
@@ -205,7 +205,7 @@
         "foreignKeys": [
           {
             "table": "cards",
-            "onDelete": "NO ACTION",
+            "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
               "local_card_id"
@@ -572,7 +572,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"672589598cd470d7da787867c82059ee\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"7cb963b22864a29c91062ad9db888e1c\")"
     ]
   }
 }

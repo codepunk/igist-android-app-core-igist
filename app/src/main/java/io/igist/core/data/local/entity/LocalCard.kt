@@ -37,10 +37,6 @@ data class LocalCard(
 
     val bio: String,
 
-    /* TODO Make card_images table
-    val images: List<String>,
-    */
-
     val video: String
 
 ) {
