@@ -64,6 +64,8 @@ android {
     applicationVariants.all { variant ->
         variant.buildConfigField("boolean", "SET_DEFAULT_BOOK_ID", "false")
 
+        makeConstantValue(variant, ConstantType.STRING, "APP_FILES_DIRECTORY", "app-files")
+        makeConstantValue(variant, ConstantType.STRING, "BASE_URL", "https://igist.io")
         makeConstantValue(variant, ConstantType.LONG, "DEFAULT_BOOK_ID", "1")
 
         makePreferenceKeys(

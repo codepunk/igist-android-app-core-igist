@@ -46,7 +46,17 @@
 
     <string name="loading_progress_book_success">Book metadata loaded</string>
 
+    <string name="loading_progress_content_pending">Loading book content…</string>
+
+    <string name="loading_progress_content_success">Book content loaded</string>
+
     <string name="loading_progress_error">An error occurred</string>
+
+    <string name="loading_progress_file_download_pending">Syncing files…</string>
+
+    <string name="loading_progress_file_download_progress">Syncing file %1$d of %2$d (%3$s)…</string>
+
+    <string name="loading_progress_file_download_success">Files synced</string>
 
     <!-- endregion Loading -->
 

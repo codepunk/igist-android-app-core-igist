@@ -7,7 +7,6 @@ package io.igist.core.data.repository
 
 import android.content.SharedPreferences
 import android.os.AsyncTask.THREAD_POOL_EXECUTOR
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
 import io.igist.core.BuildConfig.PREF_KEY_VERIFIED_BETA_KEY
@@ -27,12 +26,8 @@ import io.igist.core.domain.exception.IgistException
 import io.igist.core.domain.model.*
 import io.igist.core.domain.model.BookMode.DEFAULT
 import io.igist.core.domain.model.BookMode.REQUIRE_BETA_KEY
-import io.igist.core.domain.model.FileCategory.CHAPTER_IMAGE
-import io.igist.core.domain.model.FileCategory.SPUTNIK
-import io.igist.core.domain.model.FileCategory.BADGE
-import io.igist.core.domain.model.FileCategory.STOREFRONT
+import io.igist.core.domain.model.FileCategory.*
 import retrofit2.Response
-import java.lang.Exception
 import java.util.concurrent.CancellationException
 
 /**
