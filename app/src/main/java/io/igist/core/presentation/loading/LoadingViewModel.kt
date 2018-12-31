@@ -30,7 +30,7 @@ class LoadingViewModel @Inject constructor(
     /**
      * A [LiveData] containing updates relating to the loading process.
      */
-    val loadingUpdate: LiveData<DataUpdate<Int, Boolean>> = bookLoader.loadingUpdate
+    val loadingUpdate: LiveData<DataUpdate<Int, Int>> = bookLoader.loadingUpdate
 
     /**
      * A [LiveData] containing updates relating to validating a beta key.

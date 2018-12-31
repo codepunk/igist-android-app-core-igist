@@ -19,6 +19,7 @@ import io.igist.core.domain.model.*
  * Converts a [LocalContentList] to a domain [ContentList].
  */
 fun LocalContentList.toContentList(
+    bookId: Long,
     localChapterImages: List<LocalContentFile>,
     localSputniks: List<LocalContentFile>,
     localBadges: List<LocalContentFile>,
@@ -29,13 +30,14 @@ fun LocalContentList.toContentList(
     localCards: List<LocalCard>,
     localCardImages: List<LocalCardImage>
 ): ContentList = ContentList(
+    bookId,
     appVersion,
     live,
     newestAppVersion,
-    localChapterImages.toContentFiles(),
-    localSputniks.toContentFiles(),
-    localBadges.toContentFiles(),
-    localStorefront.toContentFiles(),
+    localChapterImages.toContentFiles(FileCategory.CHAPTER_IMAGE),
+    localSputniks.toContentFiles(FileCategory.SPUTNIK),
+    localBadges.toContentFiles(FileCategory.BADGE),
+    localStorefront.toContentFiles(FileCategory.STOREFRONT),
     localStoreDepartments.toStoreData(localStoreCollections, localStoreItems),
     localCards.toCardData(localCardImages)
 )
@@ -47,23 +49,26 @@ fun LocalContentList.toContentList(
 /**
  * Converts a [LocalContentFile] to a domain [ContentFile].
  */
-fun LocalContentFile.toContentFile(): ContentFile =
-    ContentFile(filename, date)
+fun LocalContentFile.toContentFile(fileCategory: FileCategory): ContentFile =
+    ContentFile(fileCategory, filename, date)
 
 /**
  * Converts a nullable [LocalContentFile] to a nullable domain [ContentFile].
  */
-fun LocalContentFile?.toContentFileOrNull(): ContentFile? = this?.toContentFile()
+fun LocalContentFile?.toContentFileOrNull(fileCategory: FileCategory): ContentFile? =
+    this?.toContentFile(fileCategory)
 
 /**
  * Converts a list of [LocalContentFile]s to a list of domain [ContentFile]s.
  */
-fun List<LocalContentFile>.toContentFiles(): List<ContentFile> = map { it.toContentFile() }
+fun List<LocalContentFile>.toContentFiles(fileCategory: FileCategory): List<ContentFile> =
+    map { it.toContentFile(fileCategory) }
 
 /**
  * Converts a nullable list of [LocalContentFile]s to a nullable list of domain [ContentFile]s.
  */
-fun List<LocalContentFile>?.toContentFilesOrNull(): List<ContentFile>? = this?.toContentFiles()
+fun List<LocalContentFile>?.toContentFilesOrNull(fileCategory: FileCategory): List<ContentFile>? =
+    this?.toContentFiles(fileCategory)
 
 // endregion LocalContentFile mappers
 
@@ -239,8 +244,7 @@ fun List<RemoteContentList>.toLocalContentLists(bookId: Long): List<LocalContent
 fun LocalCard.toCard(images: List<String>) = Card(name, bio, images, video)
 
 /**
- * Converts a list of [LocalStoreDepartment]s to a domain store data construct, converting
- * [localStoreCollections] and [localStoreItems] along the way as appropriate.
+ * Converts a list of [LocalCard]s to a map of card names to doman [Card].
  */
 fun List<LocalCard>.toCardData(
     localCardImages: List<LocalCardImage>
@@ -254,27 +258,6 @@ fun List<LocalCard>.toCardData(
         val images: List<String> = filteredImages.map { it.imageName }
         cardDataMap[localCard.name] = localCard.toCard(images)
     }
-
-    /*
-    // Populate the main store data map; each item in "this" is a local store department
-    this.forEach { localStoreDepartment ->
-        // Create a new array list called "categoryList" and add it to the main data store map
-        val categoryList = ArrayList<Map<String, List<StoreItem>>>()
-        storeDataMap[localStoreDepartment.name] = categoryList
-
-        // Filter out all local store collections associated with each department
-        localStoreCollections.filter { it.departmentId == localStoreDepartment.id }.forEach {
-            val collectionMap = HashMap<String, List<StoreItem>>()
-            categoryList.add(collectionMap)
-
-            // Filter out all local store items associated with this collection and convert/add
-            // them to the domain collection map
-            collectionMap[it.name] = localStoreItems.filter { localStoreItem ->
-                localStoreItem.collectionId == it.id
-            }.toStoreItems()
-        }
-    }
-    */
 
     // Return the populated map
     return cardDataMap

@@ -54,3 +54,15 @@ fun <Progress, Result> Call<Result>.toResultUpdate(data: Bundle? = null):
         }
     }
 }
+
+fun <Result> Call<Result>.toResult(): Result? {
+    return try {
+        val response: Response<Result> = execute()
+        when {
+            response.isSuccessful -> response.body()
+            else -> throw HttpStatusException(response.code())
+        }
+    } catch (e: IOException) {
+        throw e
+    }
+}

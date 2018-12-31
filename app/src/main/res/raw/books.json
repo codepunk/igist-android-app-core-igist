@@ -6,7 +6,8 @@
     "preview_image_name": "thumb_igist",
     "api_version": 0,
     "app_version": 4,
-    "locked": 0
+    "locked": 0,
+    "plist_file": "thebook.plist"
   },
   {
     "id": -1,
@@ -15,6 +16,7 @@
     "preview_image_name": "thumb_dummy",
     "api_version": 0,
     "app_version": 4,
-    "locked": 1
+    "locked": 1,
+    "plist_file": ""
   }
 ]

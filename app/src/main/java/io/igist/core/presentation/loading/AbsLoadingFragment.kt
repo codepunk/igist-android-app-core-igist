@@ -98,7 +98,7 @@ abstract class AbsLoadingFragment :
     /**
      * Reacts to loading LiveData updates.
      */
-    protected open fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) { // No op
+    protected open fun onLoadingUpdate(update: DataUpdate<Int, Int>) { // No op
     }
 
     // endregion Methods

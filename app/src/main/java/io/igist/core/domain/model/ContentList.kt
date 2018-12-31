@@ -8,8 +8,9 @@ package io.igist.core.domain.model
 /**
  * A data class representing all content required by a book.
  */
-// TODO How do I get book ID in here?
 data class ContentList(
+
+    val bookId: Long,
 
     val appVersion: Int,
 
@@ -29,4 +30,16 @@ data class ContentList(
 
     val cardData: Map<String, Card>?
 
-)
+) {
+
+    /**
+     * Returns the [ContentFile] list associated with the supplied [fileCategory].
+     */
+    fun getContentFiles(fileCategory: FileCategory): List<ContentFile>? = when (fileCategory) {
+        FileCategory.CHAPTER_IMAGE -> chapterImages
+        FileCategory.SPUTNIK -> sputniks
+        FileCategory.BADGE -> badges
+        FileCategory.STOREFRONT -> storefront
+        else -> null
+    }
+}

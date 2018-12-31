@@ -50,6 +50,12 @@ data class RemoteBook(
     /**
      * Whether this book is currently locked.
      */
-    val locked: Boolean
+    val locked: Boolean,
+
+    /**
+     * The name of the remote PLIST file containing the book's chapter data.
+     */
+    @field:Json(name = "plist_file")
+    val plistFile: String
 
 )

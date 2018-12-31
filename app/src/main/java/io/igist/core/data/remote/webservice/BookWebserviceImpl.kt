@@ -13,9 +13,7 @@ import com.squareup.moshi.Types
 import io.igist.core.R
 import io.igist.core.data.remote.entity.RemoteBook
 import io.igist.core.di.qualifier.ApplicationContext
-import okhttp3.Request
 import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
 import java.io.InputStream
@@ -108,29 +106,5 @@ class BookWebserviceImpl(
     }
 
     // endregion Methods
-
-    // region Nested/inner classes
-
-    /**
-     * An implementation of [Call] that throws a [NotImplementedError] for all methods
-     * except for [execute].
-     */
-    private abstract class CallImpl<T> : Call<T> {
-
-        override fun enqueue(callback: Callback<T>) = throw NotImplementedError()
-
-        override fun isExecuted(): Boolean = throw NotImplementedError()
-
-        override fun clone(): Call<T> = throw NotImplementedError()
-
-        override fun isCanceled(): Boolean = throw NotImplementedError()
-
-        override fun cancel() = throw NotImplementedError()
-
-        override fun request(): Request = throw NotImplementedError()
-
-    }
-
-    // endregion Nested/inner classes
 
 }

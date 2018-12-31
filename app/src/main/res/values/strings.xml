@@ -52,11 +52,11 @@
 
     <string name="loading_progress_error">An error occurred</string>
 
-    <string name="loading_progress_file_download_pending">Syncing files…</string>
+    <string name="loading_progress_file_download_pending">Downloading files…</string>
 
-    <string name="loading_progress_file_download_progress">Syncing file %1$d of %2$d (%3$s)…</string>
+    <string name="loading_progress_file_download_progress">Downloading file %1$d of %2$d (%3$s)…</string>
 
-    <string name="loading_progress_file_download_success">Files synced</string>
+    <string name="loading_progress_file_download_success">Files downloaded</string>
 
     <!-- endregion Loading -->
 

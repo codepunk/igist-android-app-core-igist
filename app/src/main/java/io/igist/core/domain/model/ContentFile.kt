@@ -13,6 +13,11 @@ import java.util.Date
 data class ContentFile(
 
     /**
+     * The FileCategory of the file.
+     */
+    val fileCategory: FileCategory,
+
+    /**
      * The name of the file.
      */
     val filename: String,

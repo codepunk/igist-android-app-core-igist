@@ -5,8 +5,11 @@
 
 package io.igist.core.domain.contract
 
+import android.os.AsyncTask
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.DataUpdate
+import com.codepunk.doofenschmirtz.util.taskinator.ResultUpdate
 import io.igist.core.domain.model.Book
 
 /**
@@ -25,5 +28,15 @@ interface BookRepository {
      * fetched regardless of whether a cached version exists.
      */
     fun getBook(bookId: Long, alwaysFetch: Boolean = true): LiveData<DataUpdate<Book, Book>>
+
+    /**
+     * A method that synchronously fetches a book. This is almost exactly the same logic as in
+     * BookRepositoryImpl.BookTask but independent of any [AsyncTask], [LiveData], etc.
+     */
+    @WorkerThread
+    fun getBookOnWorkerThread(
+        bookId: Long,
+        alwaysFetch: Boolean = true
+    ): ResultUpdate<Void, Book>
 
 }

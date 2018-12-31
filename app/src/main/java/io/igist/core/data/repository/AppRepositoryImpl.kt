@@ -9,14 +9,13 @@ import android.content.SharedPreferences
 import android.os.AsyncTask.THREAD_POOL_EXECUTOR
 import androidx.lifecycle.LiveData
 import com.codepunk.doofenschmirtz.util.taskinator.*
+import io.igist.core.BuildConfig
 import io.igist.core.BuildConfig.PREF_KEY_VERIFIED_BETA_KEY
 import io.igist.core.data.local.dao.*
-import io.igist.core.data.local.entity.LocalCardImage
-import io.igist.core.data.local.entity.LocalStoreCollection
-import io.igist.core.data.local.entity.LocalStoreDepartment
-import io.igist.core.data.local.entity.LocalStoreItem
+import io.igist.core.data.local.entity.*
 import io.igist.core.data.mapper.*
 import io.igist.core.data.remote.entity.RemoteApi
+import io.igist.core.data.remote.entity.RemoteChapter
 import io.igist.core.data.remote.entity.RemoteContentList
 import io.igist.core.data.remote.entity.RemoteMessage
 import io.igist.core.data.remote.toResultUpdate
@@ -28,6 +27,13 @@ import io.igist.core.domain.model.BookMode.DEFAULT
 import io.igist.core.domain.model.BookMode.REQUIRE_BETA_KEY
 import io.igist.core.domain.model.FileCategory.*
 import retrofit2.Response
+import xmlwise.Plist
+import java.io.BufferedInputStream
+import java.io.IOException
+import java.io.InputStream
+import java.lang.IllegalStateException
+import java.net.URL
+import java.util.*
 import java.util.concurrent.CancellationException
 
 /**
@@ -152,6 +158,8 @@ class AppRepositoryImpl(
 
     ) : DataTaskinator<Any, Api, Api>() {
 
+        // region Inherited methods
+
         override fun doInBackground(vararg params: Any?): ResultUpdate<Api, Api> {
             // Extract arguments from params
             val bookId: Long = params.getOrNull(0) as? Long?
@@ -195,6 +203,8 @@ class AppRepositoryImpl(
             return SuccessUpdate(api)
         }
 
+        // endregion Inherited methods
+
     }
 
     /**
@@ -209,6 +219,8 @@ class AppRepositoryImpl(
         private val alwaysVerify: Boolean = true
 
     ) : DataTaskinator<Any?, String, String>() {
+
+        // region Inherited methods
 
         override fun doInBackground(vararg params: Any?): ResultUpdate<String, String> {
             // Extract arguments from params
@@ -276,6 +288,8 @@ class AppRepositoryImpl(
             return SuccessUpdate(betaKey)
         }
 
+        // endregion Inherited methods
+
     }
 
     /**
@@ -302,6 +316,8 @@ class AppRepositoryImpl(
         private val alwaysFetch: Boolean = true
 
     ) : DataTaskinator<Any, ContentList, ContentList>() {
+
+        // region Inherited methods
 
         override fun doInBackground(vararg params: Any?): ResultUpdate<ContentList, ContentList> {
             // Extract arguments from params
@@ -406,6 +422,8 @@ class AppRepositoryImpl(
             return SuccessUpdate(contentList)
         }
 
+        // endregion Inherited methods
+
         // region Methods
 
         /**
@@ -443,6 +461,7 @@ class AppRepositoryImpl(
                 localCards.map { it.id }
             )
             it.toContentList(
+                bookId,
                 localChapterImageContentFiles,
                 localSputnikContentFiles,
                 localBadgeContentFiles,
@@ -456,6 +475,112 @@ class AppRepositoryImpl(
         }
 
         // endregion Methods
+
+    }
+
+    /**
+     * [DataTaskinator] that retrieves book chapter(s).
+     */
+    private class BookContentTask(
+
+        private val bookDao: BookDao,
+
+        private val chapterDao: ChapterDao,
+
+        private val alwaysFetch: Boolean
+
+    ) : DataTaskinator<Any?, List<Chapter>?, List<Chapter>?>() {
+
+        override fun doInBackground(vararg params: Any?):
+                ResultUpdate<List<Chapter>?, List<Chapter>?> {
+            // Extract arguments from params
+            val bookId: Long = params.getOrNull(0) as? Long?
+                ?: throw IllegalArgumentException("No book ID passed to ApiTask")
+            val chapterNumber: Int = params.getOrElse(1) {
+                0
+            } as Int
+
+            // Retrieve the book to get plist file
+            val plistFile: String = bookDao.retrieve(bookId)?.plistFile ?: return FailureUpdate(
+                null,
+                IllegalStateException("No book with bookID $bookId exists in local database")
+            )
+
+            // Retrieve any cached chapter(s)
+            val localChapters: List<LocalChapter>? = when (chapterNumber) {
+                0 -> chapterDao.retrieveAll(bookId)
+                else -> ArrayList<LocalChapter>().apply {
+                    chapterDao.retrieve(bookId, chapterNumber)?.also { add(it) }
+                }
+            }
+            var chapters: List<Chapter>? = localChapters.toChaptersOrNull()
+
+            // Check if cancelled
+            if (isCancelled) return FailureUpdate(chapters, CancellationException(), data)
+
+            // Fetch the latest chapters
+            if (chapters.isNullOrEmpty() || alwaysFetch) {
+                // If we have cached chapters, publish them
+                if (chapters != null) publishProgress(chapters)
+
+                //val update: ResultUpdate<Void, Response<RemoteApi>> =
+                //    appWebservice.api(bookId, apiVersion).toResultUpdate()
+
+
+
+            }
+
+            return SuccessUpdate(chapters)
+        }
+
+        @Throws(IOException::class)
+        private fun retrieveChapters(
+            plistFile: String,
+            chapterNumber: Int
+        ): List<RemoteChapter> {
+            val url =
+                URL("${BuildConfig.BASE_URL}/${BuildConfig.APP_FILES_DIRECTORY}/$plistFile")
+            var chapterInputStream: InputStream? = null
+            try {
+                chapterInputStream = url.openStream().apply {
+                    val byteArray = BufferedInputStream(this).readBytes()
+                    /*
+                    val byteArray = BufferedInputStream(this).run {
+                        readBytes().also {
+                            close()
+                        }
+                    }
+                    */
+
+                    // Resulting object should be a single-item array, so we will strip off
+                    // the first element in order to create bookJson below since that's all
+                    // we are interested in.
+                    val resultObject = Plist.objectFromXml(String(byteArray))
+                    /*
+                    val resultJson = gson.toJsonTree(resultObject).asJsonArray[0]
+                    val bookJson = JsonObject().apply {
+                        addProperty(ID, BuildConfig.DEFAULT_BOOK_ID)
+                        addProperty(TITLE, BuildConfig.BOOK_TITLE)
+                        add(CHAPTERS, resultJson)
+                    }
+                    */
+
+
+                }
+            } catch (e: IOException) {
+                throw e
+            } finally {
+                try {
+                    chapterInputStream?.close()
+                } catch (e: IOException) {
+                    // No op
+                }
+            }
+
+
+
+            TODO("Not yet implemented")
+        }
 
     }
 

@@ -229,7 +229,7 @@ class LoadingFragment :
     /**
      * Reacts to loading LiveData updates.
      */
-    override fun onLoadingUpdate(update: DataUpdate<Int, Boolean>) {
+    override fun onLoadingUpdate(update: DataUpdate<Int, Int>) {
         when (update) {
             is ProgressUpdate -> {
                 binding.progressDescriptionTxt.visibility = defaultProgressDescriptionVisibility
@@ -239,6 +239,7 @@ class LoadingFragment :
                 val max: Int = update.progress.getOrElse(1) { 0 } ?: 0
                 binding.loadingProgress.visibility = View.VISIBLE
                 binding.loadingProgress.progress = progress
+                binding.loadingProgress.max = max
                 binding.loadingProgress.isIndeterminate = (max == 0)
 
                 resultHandled = false

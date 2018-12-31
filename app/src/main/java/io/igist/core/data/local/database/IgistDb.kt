@@ -19,6 +19,7 @@ import io.igist.core.data.local.entity.*
         LocalBook::class,
         LocalCard::class,
         LocalCardImage::class,
+        LocalChapter::class,
         LocalContentList::class,
         LocalContentFile::class,
         LocalStoreCollection::class,
@@ -58,6 +59,11 @@ abstract class IgistDb : RoomDatabase() {
      * A [Dao] for the [LocalCardImage] class.
      */
     abstract fun cardImageDao(): CardImageDao
+
+    /**
+     * A [Dao] for the [LocalChapter] class.
+     */
+    abstract fun chapterDao(): ChapterDao
 
     /**
      * A [Dao] for the [LocalContentList] class.

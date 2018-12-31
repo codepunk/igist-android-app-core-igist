@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7cb963b22864a29c91062ad9db888e1c",
+    "identityHash": "758027fc7f39dcad8a78b193c003f09a",
     "entities": [
       {
         "tableName": "apis",
@@ -45,7 +45,7 @@
       },
       {
         "tableName": "books",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `preview_image_name` TEXT NOT NULL, `api_version` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `locked` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `preview_image_name` TEXT NOT NULL, `api_version` INTEGER NOT NULL, `app_version` INTEGER NOT NULL, `locked` INTEGER NOT NULL, `plist_file` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -87,6 +87,12 @@
             "fieldPath": "locked",
             "columnName": "locked",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plistFile",
+            "columnName": "plist_file",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -209,6 +215,99 @@
             "onUpdate": "NO ACTION",
             "columns": [
               "local_card_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "chapters",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`book_id` INTEGER NOT NULL, `number` INTEGER NOT NULL, `title` TEXT, `image` TEXT, `coins` INTEGER NOT NULL, `badge` TEXT, `badge_name` TEXT, `badge_description` TEXT, `egg` TEXT, `egg_frames` REAL NOT NULL, `egg_word` TEXT, PRIMARY KEY(`book_id`, `number`), FOREIGN KEY(`book_id`) REFERENCES `books`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "bookId",
+            "columnName": "book_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "coins",
+            "columnName": "coins",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "badge",
+            "columnName": "badge",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "badgeName",
+            "columnName": "badge_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "badgeDescription",
+            "columnName": "badge_description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "egg",
+            "columnName": "egg",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "eggFrames",
+            "columnName": "egg_frames",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eggWord",
+            "columnName": "egg_word",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "book_id",
+            "number"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "books",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "book_id"
             ],
             "referencedColumns": [
               "id"
@@ -572,7 +671,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"7cb963b22864a29c91062ad9db888e1c\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"758027fc7f39dcad8a78b193c003f09a\")"
     ]
   }
 }

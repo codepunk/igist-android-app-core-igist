@@ -26,7 +26,7 @@ abstract class BookDao {
 
     /**
      * Attempts to insert the supplied [book] and, if the book already exists in the database,
-     * updates the book instead. Returns the book id.
+     * updates the book instead. Returns the book ID.
      */
     @Transaction
     open fun upsert(book: LocalBook): Long {
@@ -41,11 +41,48 @@ abstract class BookDao {
     }
 
     /**
+     * Attempts to insert each book in the supplied [books] list and, if the book already exists
+     * in the database, updates the book instead. Returns a list of book IDs.
+     */
+    @Transaction
+    open fun upsertAll(books: List<LocalBook>): List<Long> {
+        val ids: ArrayList<Long> = ArrayList(insertAll(books))
+        val updateList = ArrayList<LocalBook>()
+
+        ids.forEachIndexed { index, result ->
+            if (result == -1L) {
+                val book = books[index]
+                updateList.add(book)
+                ids[index] = book.id
+            }
+        }
+
+        if (updateList.isNotEmpty()) {
+            updateAll(updateList)
+        }
+
+        return ids
+    }
+
+    /**
      * Inserts a list of books (minus the chapter info) into the local database and returns
      * a list of the inserted book IDs.
      */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract fun insertAll(books: List<LocalBook>): List<Long>
+
+    /**
+     * Updates a list of books (minus the chapter info) into the local database and returns
+     * the number of rows updated.
+     */
+    @Update(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun updateAll(books: List<LocalBook>): Int
+
+    /**
+     * Deletes the book with the given [bookId] from the local database.
+     */
+    @Query("DELETE FROM books WHERE id = :bookId")
+    abstract fun delete(bookId: Long)
 
     /**
      * Deletes all books from the local database.

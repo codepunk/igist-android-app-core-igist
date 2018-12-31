@@ -45,6 +45,11 @@ data class Book(
     /**
      * Whether this book is currently locked.
      */
-    val locked: Boolean
+    val locked: Boolean,
+
+    /**
+     * The name of the remote PLIST file containing the book's chapter data.
+     */
+    val plistFile: String
 
 )

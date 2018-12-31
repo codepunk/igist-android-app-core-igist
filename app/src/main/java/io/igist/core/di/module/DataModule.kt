@@ -11,21 +11,22 @@ import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
+import io.igist.core.BuildConfig
 import io.igist.core.data.local.dao.*
 import io.igist.core.data.local.database.IgistDb
 import io.igist.core.data.remote.adapter.BooleanIntAdapter
 import io.igist.core.data.remote.adapter.DateJsonAdapter
 import io.igist.core.data.remote.converter.MoshiEnumConverterFactory
 import io.igist.core.data.remote.interceptor.AuthorizationInterceptor
-import io.igist.core.data.remote.webservice.AppWebservice
-import io.igist.core.data.remote.webservice.AppWebserviceWrapper
-import io.igist.core.data.remote.webservice.BookWebservice
-import io.igist.core.data.remote.webservice.BookWebserviceImpl
+import io.igist.core.data.remote.webservice.*
 import io.igist.core.data.repository.AppRepositoryImpl
 import io.igist.core.data.repository.BookRepositoryImpl
+import io.igist.core.data.repository.ChapterRepositoryImpl
+import io.igist.core.data.resolver.BookResolver
 import io.igist.core.di.qualifier.ApplicationContext
 import io.igist.core.domain.contract.AppRepository
 import io.igist.core.domain.contract.BookRepository
+import io.igist.core.domain.contract.ChapterRepository
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -105,7 +106,7 @@ class DataModule {
         moshiEnumConverterFactory: MoshiEnumConverterFactory
     ): Retrofit = Retrofit.Builder()
         .client(okHttpClient)
-        .baseUrl("https://igist.io")
+        .baseUrl(BuildConfig.BASE_URL)
         .addConverterFactory(moshiConverterFactory)
         .addConverterFactory(moshiEnumConverterFactory)
         .build()
@@ -130,6 +131,19 @@ class DataModule {
         @ApplicationContext context: Context,
         moshi: Moshi
     ): BookWebservice = BookWebserviceImpl(context, moshi)
+
+    /**
+     * Provides an instance of [ChapterWebservice] for making chapter API calls.
+     * Note that chapter data is stored on the network as a PLIST file so we'll
+     * code the logic into a ChapterServiceImpl class to mimic a traditional Retrofit
+     * webservice call.
+     */
+    @Provides
+    @Singleton
+    fun providesChapterWebservice(
+        bookResolver: BookResolver,
+        moshi: Moshi
+    ): ChapterWebservice = ChapterWebserviceImpl(bookResolver, moshi)
 
     /**
      * Provides an [IgistDb] instance.
@@ -168,6 +182,13 @@ class DataModule {
     @Singleton
     @Provides
     fun providesCardImageDao(db: IgistDb): CardImageDao = db.cardImageDao()
+
+    /**
+     * Creates a [ChapterDao] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesChapterDao(db: IgistDb): ChapterDao = db.chapterDao()
 
     /**
      * Creates a [ContentFileDao] instance.
@@ -242,6 +263,16 @@ class DataModule {
         bookDao: BookDao,
         bookWebservice: BookWebservice
     ): BookRepository = BookRepositoryImpl(bookDao, bookWebservice)
+
+    /**
+     * Creates a [ChapterRepository] instance.
+     */
+    @Singleton
+    @Provides
+    fun providesChapterRepository(
+        chapterDao: ChapterDao,
+        chapterWebservice: ChapterWebservice
+    ): ChapterRepository = ChapterRepositoryImpl(chapterDao, chapterWebservice)
 
     // endregion Methods
 
